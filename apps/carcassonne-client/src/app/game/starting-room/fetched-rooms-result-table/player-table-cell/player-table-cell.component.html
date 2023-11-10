@@ -1,0 +1,6 @@
+<div class="player-wrapper" *ngFor="let player of players">
+    <span>{{player.username}}</span>
+    <mat-icon [style.fill]="player.color" svgIcon='meeple' aria-hidden="false">
+    </mat-icon>
+    <br>
+</div>

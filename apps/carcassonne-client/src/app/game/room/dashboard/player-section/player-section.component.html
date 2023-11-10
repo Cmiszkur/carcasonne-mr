@@ -1,0 +1,15 @@
+<ng-container *ngIf='player'>
+  <div class="player-section">
+    <div class="username-area">
+      <span>{{player.username}}</span>
+      <span>Points: {{player.points}}</span>
+    </div>
+    <div class="followers-area">
+      <mat-icon *ngFor='let x of arrayToIterate'
+                [style.fill]="player.color"
+                svgIcon='follower'
+                aria-hidden="false">
+      </mat-icon>
+    </div>
+  </div>
+</ng-container>

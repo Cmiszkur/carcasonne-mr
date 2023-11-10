@@ -1,0 +1,44 @@
+<div *ngIf="tiles" class="tiles" id="tiles-area">
+
+  <app-tile *ngFor="let tile of tiles"
+            [extendedTile]="tile"
+            [rotation]="tile.rotation"
+            [translate]="makeTranslateStringForBackendTiles(tile)">
+  </app-tile>
+
+  <app-tile *ngIf="currentTile"
+            [extendedTile]="currentTile"  
+            [translate]="translateValueCurrentTile"
+            [rotation]="currentTile.rotation"
+            [isCurrentTile]="true"
+            [isTilePlacementConfirmed]="tilePlacementConfirmed"
+            [istileAndPawnPlacementConfirmed]="tileAndPawnPlacementConfirmed"
+            [tileEnvironments]="currentTileEnvironments" 
+            (placedPawn)="placedPawn = $event">
+  </app-tile>
+
+  <app-empty-tiles *ngFor="let emptyTile of emptyTiles | keyvalue"
+                   [id]="emptyTile.key"
+                   [translate]="emptyTile.value.position"
+                   [emptyTileCoordinates]="emptyTile.key"
+                   emptyTileClick
+                   (click)="emptyTileSelected(emptyTile)">
+  </app-empty-tiles>
+
+
+</div>
+
+<div class="button-area">
+  <button *ngIf="tilePlacementConfirmed" 
+          mat-icon-button 
+          (click)="cancelChoice()">
+    <mat-icon>close</mat-icon>
+  </button>
+  <app-tile-and-pawn-confirmation-button  [isTilePlacedCorrectly]="isTilePlacedCorrectly" 
+                                          [pawnPlaced]="!!placedPawn"
+                                          [tilePlacementConfirmed]="tilePlacementConfirmed" 
+                                          (confirmation)="confirmChoice($event)">
+  </app-tile-and-pawn-confirmation-button>
+</div>
+
+

@@ -1,0 +1,27 @@
+\:host
+  display: block
+
+  .room-buttons
+    display: flex
+    flex-direction: row
+
+    app-player-options-dialog-button:first-child
+      margin-right: 0.5em
+
+  app-fetched-rooms-result-table
+    width: 60%
+    padding-bottom: 1em
+
+  .table-wrapper
+    display: flex
+    flex-direction: column
+    height: calc(100% - 10rem)
+    padding-top: 10rem
+    align-items: center
+    justify-content: flex-start
+
+    .no-rooms-notification
+      font-size: 1.7em
+      color: grey
+      margin-bottom: 1em
+      letter-spacing: 0.15em

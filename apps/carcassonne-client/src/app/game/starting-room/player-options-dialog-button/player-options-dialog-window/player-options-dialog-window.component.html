@@ -1,0 +1,12 @@
+<div mat-dialog-content>
+  <p>Choose color of your meeples</p>
+  <mat-radio-group class="player-options-radio-group" aria-label="Choose color of your meeples" [(ngModel)]="data.playerOptions.color">
+    <mat-radio-button class="player-options-radio-button" *ngFor="let color of availableColors" [value]="color">
+      {{color}}
+    </mat-radio-button>
+  </mat-radio-group>
+</div>
+<div mat-dialog-actions class="player-options-actions">
+  <button mat-button color="primary" (click)="onNoClick()">No Thanks</button>
+  <button mat-button color="accent" [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+</div>

@@ -1,0 +1,19 @@
+<div class="table-wrapper">
+  <app-fetched-rooms-result-table *ngIf="availableRooms.length; else roomNotFound"
+                                  [availableRooms]="availableRooms"
+                                  (selectedRoom)="saveSelectedRoom($event)">
+  </app-fetched-rooms-result-table>
+  <ng-template #roomNotFound>
+    <span class="no-rooms-notification">No rooms available? Create one yourself</span>
+  </ng-template>
+  <div class="room-buttons">
+    <app-player-options-dialog-button [text]="'Join room'"
+                                      (playerOptions)="joinRoom($event)">
+    </app-player-options-dialog-button>
+    <app-player-options-dialog-button [text]="'Create room'"
+                                      (playerOptions)="createRoom($event)">
+    </app-player-options-dialog-button>
+  </div>
+</div>
+
+

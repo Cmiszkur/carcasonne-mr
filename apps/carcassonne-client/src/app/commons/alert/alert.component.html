@@ -1,0 +1,12 @@
+<div class="error-messages">
+    <div class="error-abstract">
+        <mat-icon>error</mat-icon>
+        <span>{{data.error}}</span>
+    </div>
+    <span *ngIf="data.errorMessage">{{data.errorMessage}}</span>
+</div>
+<button mat-icon-button (click)="closeDialog()">
+    <mat-icon>close</mat-icon>
+</button>
+
+
