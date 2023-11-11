@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { RoomError } from 'src/app/game/models/socket';
+import { RoomError } from '@carcassonne-client/src/app/game/models/socket';
 import { AlertComponent } from '../alert/alert.component';
 
 @Injectable({

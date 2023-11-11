@@ -1,11 +1,11 @@
-import { ExtendedTile } from 'src/app/game/models/Room';
+import { ExtendedTile } from '@carcassonne-client/src/app/game/models/Room';
 import { Component, OnInit } from '@angular/core';
 import { Room } from '../../models/Room';
 import { RoomService } from '../../services/room.service';
 import { AuthService } from '../../../user/auth.service';
 import { Tile } from '../../models/Tile';
-import { BaseComponent } from 'src/app/commons/components/base/base.component';
 import { takeUntil } from 'rxjs/operators';
+import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 
 @Component({
   selector: 'app-waiting-room',
@@ -18,7 +18,10 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit {
   public currentTile: ExtendedTile | null;
   private newRoom: Room | null;
 
-  constructor(private roomService: RoomService, private authService: AuthService) {
+  constructor(
+    private roomService: RoomService,
+    private authService: AuthService
+  ) {
     super();
     this.newRoom = this.roomService.currentRoomValue;
     this.currentTile = this.setCurrentTile(this.newRoom?.lastChosenTile.tile);
@@ -49,19 +52,29 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit {
    * @param tile
    * @private
    */
-  private setCurrentTile(tile: Tile | null | undefined, activePlayer?: string): ExtendedTile | null {
+  private setCurrentTile(
+    tile: Tile | null | undefined,
+    activePlayer?: string
+  ): ExtendedTile | null {
     console.log(this.username, this.newRoom?.lastChosenTile.player);
     const isUsersTurn: boolean = this.username === activePlayer;
-    return tile && isUsersTurn ? PlayingRoomComponent.generateCurrentTile(tile) : null;
+    return tile && isUsersTurn
+      ? PlayingRoomComponent.generateCurrentTile(tile)
+      : null;
   }
 
   /**
    * Listens for changes in the current room. Updating tiles and current tile.
    */
   private listenForNewTiles(): void {
-    this.roomService.currentRoom.pipe(takeUntil(this.destroyed)).subscribe(room => {
-      this.tiles = room?.board || null;
-      this.currentTile = this.setCurrentTile(room?.lastChosenTile.tile, room?.lastChosenTile.player);
-    });
+    this.roomService.currentRoom
+      .pipe(takeUntil(this.destroyed))
+      .subscribe((room) => {
+        this.tiles = room?.board || null;
+        this.currentTile = this.setCurrentTile(
+          room?.lastChosenTile.tile,
+          room?.lastChosenTile.player
+        );
+      });
   }
 }

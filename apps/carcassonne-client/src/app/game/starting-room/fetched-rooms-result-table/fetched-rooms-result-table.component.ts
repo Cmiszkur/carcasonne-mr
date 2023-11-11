@@ -1,5 +1,12 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ShortenedRoom } from '../../models/Room';
 
@@ -16,7 +23,13 @@ export class FetchedRoomsResultTableComponent implements OnChanges {
   @Output() public selectedRoom: EventEmitter<ShortenedRoom>;
 
   constructor() {
-    this.displayedColumns = ['select', 'roomId', 'players', 'roomHost', 'numberOfPlayers'];
+    this.displayedColumns = [
+      'select',
+      'roomId',
+      'players',
+      'roomHost',
+      'numberOfPlayers',
+    ];
     this.dataSource = new MatTableDataSource<ShortenedRoom>([]);
     this.selection = new SelectionModel<ShortenedRoom>(false, []);
     this.availableRooms = null;
@@ -24,9 +37,11 @@ export class FetchedRoomsResultTableComponent implements OnChanges {
   }
 
   public ngOnChanges(changes: SimpleChanges) {
-    if (changes.availableRooms.currentValue) {
+    if (changes['availableRooms']?.currentValue) {
       if (this.availableRooms) {
-        this.dataSource = new MatTableDataSource<ShortenedRoom>(this.availableRooms);
+        this.dataSource = new MatTableDataSource<ShortenedRoom>(
+          this.availableRooms
+        );
       }
     }
   }

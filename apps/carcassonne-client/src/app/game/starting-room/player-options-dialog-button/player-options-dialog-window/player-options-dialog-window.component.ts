@@ -1,6 +1,9 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { PlayersColors, ShortenedRoom } from 'src/app/game/models/Room';
+import {
+  PlayersColors,
+  ShortenedRoom,
+} from '@carcassonne-client/src/app/game/models/Room';
 import { PlayerOptionsData } from '../../../models/dialogWindowData';
 
 @Component({
@@ -10,7 +13,10 @@ import { PlayerOptionsData } from '../../../models/dialogWindowData';
 })
 export class PlayerOptionsDialogWindowComponent implements OnInit {
   constructor(
-    public dialogRef: MatDialogRef<PlayerOptionsDialogWindowComponent, PlayerOptionsData>,
+    public dialogRef: MatDialogRef<
+      PlayerOptionsDialogWindowComponent,
+      PlayerOptionsData
+    >,
     @Inject(MAT_DIALOG_DATA) public data: PlayerOptionsData
   ) {}
 
@@ -31,7 +37,9 @@ export class PlayerOptionsDialogWindowComponent implements OnInit {
   public get availableColors(): string[] {
     const shortenedRoom: ShortenedRoom | null = this.data.shortenedRoom;
     if (shortenedRoom === null) return this.colors;
-    const takenColors: string[] = shortenedRoom.players.map(player => player.color);
-    return this.colors.filter(color => takenColors.indexOf(color) === -1);
+    const takenColors: string[] = shortenedRoom.players.map(
+      (player) => player.color
+    );
+    return this.colors.filter((color) => takenColors.indexOf(color) === -1);
   }
 }

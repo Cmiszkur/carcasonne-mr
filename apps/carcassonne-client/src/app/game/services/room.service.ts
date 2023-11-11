@@ -1,13 +1,25 @@
-import { ExtendedTile, Player, PlayersColors, Room, ShortenedRoom } from '../models/Room';
+import {
+  ExtendedTile,
+  Player,
+  PlayersColors,
+  Room,
+  ShortenedRoom,
+} from '../models/Room';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
 import { tap } from 'rxjs/operators';
-import { CreateRoomPayload, JoinRoomPayload, RoomError, SocketAnswer, StartGamePayload } from '../models/socket';
-import { CustomError } from 'src/app/commons/customErrorHandler';
+import {
+  CreateRoomPayload,
+  JoinRoomPayload,
+  RoomError,
+  SocketAnswer,
+  StartGamePayload,
+} from '../models/socket';
+import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHandler';
 import { SocketService } from '../../commons/services/socket.service';
-import { AuthService } from 'src/app/user/auth.service';
+import { AuthService } from '@carcassonne-client/src/app/user/auth.service';
 import { Players } from '../models/Players';
 
 @Injectable({
@@ -102,13 +114,16 @@ export class RoomService extends SocketService {
 
   public set setCurrentRoom(room: Room) {
     const players: Player[] = room.players;
-    this.setPlayers({ loggedPlayer: this.findPlayer(players), otherPlayers: this.getRestOfThePlayers(players) });
+    this.setPlayers({
+      loggedPlayer: this.findPlayer(players),
+      otherPlayers: this.getRestOfThePlayers(players),
+    });
     this.currentRoom$.next(room);
   }
 
   public getRoom(): Observable<Room> {
     this.connect();
-    return new Observable(subscriber => {
+    return new Observable((subscriber) => {
       this.socket.on('created_room_response', (newRoom: Room) => {
         subscriber.next(newRoom);
         subscriber.complete();
@@ -118,7 +133,9 @@ export class RoomService extends SocketService {
 
   public getRooms(): Observable<ShortenedRoom[]> {
     const getRoomsUrl = `${Constants.baseUrl}room/get-rooms`;
-    return this.http.get<ShortenedRoom[]>(getRoomsUrl, Constants.httpOptions).pipe(tap(rooms => this.availableRooms$.next(rooms)));
+    return this.http
+      .get<ShortenedRoom[]>(getRoomsUrl, Constants.httpOptions)
+      .pipe(tap((rooms) => this.availableRooms$.next(rooms)));
   }
 
   /**
@@ -129,7 +146,10 @@ export class RoomService extends SocketService {
   public joinRoom(color?: string, roomID?: string): Observable<SocketAnswer> {
     const _roomID: string | undefined = this.selectedRoomId || roomID;
     if (!_roomID) {
-      throw new CustomError(RoomError.ROOM_ID_NOT_SPECIFIED, 'Choose room which you want to join');
+      throw new CustomError(
+        RoomError.ROOM_ID_NOT_SPECIFIED,
+        'Choose room which you want to join'
+      );
     }
     //TODO: Zastanowić się nad obłsugą tego błedu lub rezygnacją ze sprawdzania tego na froncie.
     // if (!color && !this.currentRoomValue?.gameStarted) {
@@ -148,7 +168,10 @@ export class RoomService extends SocketService {
    */
   public createRoom(color?: PlayersColors | null): Observable<SocketAnswer> {
     if (!color) {
-      throw new CustomError(RoomError.MEEPLE_COLOR_NOT_SPECIFIED, 'Choose your meeple color');
+      throw new CustomError(
+        RoomError.MEEPLE_COLOR_NOT_SPECIFIED,
+        'Choose your meeple color'
+      );
     }
     const createRoomPayload: CreateRoomPayload = { color };
     this.connect();
@@ -169,7 +192,10 @@ export class RoomService extends SocketService {
   }
 
   public placeTile(tile: ExtendedTile): void {
-    this.socket.emit('tile_placed', { roomID: this.currentRoomValue?.roomId, extendedTile: tile });
+    this.socket.emit('tile_placed', {
+      roomID: this.currentRoomValue?.roomId,
+      extendedTile: tile,
+    });
   }
 
   /**
@@ -177,7 +203,9 @@ export class RoomService extends SocketService {
    * If room is returned it's being set as current room.
    */
   public receiveJoinRoomResponse(): Observable<SocketAnswer> {
-    return this.fromEventOnce<SocketAnswer>('joined_room').pipe(tap(socketAnswer => this.updateRoom(socketAnswer)));
+    return this.fromEventOnce<SocketAnswer>('joined_room').pipe(
+      tap((socketAnswer) => this.updateRoom(socketAnswer))
+    );
   }
 
   /**
@@ -186,7 +214,9 @@ export class RoomService extends SocketService {
    */
   public receiveGameStartedResponse(): Observable<SocketAnswer> {
     this.connect();
-    return this.fromEventOnce<SocketAnswer>('game_started').pipe(tap(socketAnswer => this.updateRoom(socketAnswer)));
+    return this.fromEventOnce<SocketAnswer>('game_started').pipe(
+      tap((socketAnswer) => this.updateRoom(socketAnswer))
+    );
   }
 
   /**
@@ -195,7 +225,9 @@ export class RoomService extends SocketService {
    */
   public receiveNewPlayerJoinedResponse(): Observable<Player[]> {
     this.connect();
-    return this.fromEvent<Player[]>('new_player_joined').pipe(tap(players => this.updatePlayers(players)));
+    return this.fromEvent<Player[]>('new_player_joined').pipe(
+      tap((players) => this.updatePlayers(players))
+    );
   }
 
   /**
@@ -204,7 +236,9 @@ export class RoomService extends SocketService {
    */
   public receivePlayerLeftResponse(): Observable<Player[]> {
     this.connect();
-    return this.fromEvent<Player[]>('player_left').pipe(tap(players => this.updatePlayers(players)));
+    return this.fromEvent<Player[]>('player_left').pipe(
+      tap((players) => this.updatePlayers(players))
+    );
   }
 
   /**
@@ -214,7 +248,9 @@ export class RoomService extends SocketService {
    */
   public receiveTilePlacedResponse(): Observable<SocketAnswer> {
     this.connect();
-    return this.fromEvent<SocketAnswer>('tile_placed_new_tile_distributed').pipe(tap(socketAnswer => this.updateRoom(socketAnswer)));
+    return this.fromEvent<SocketAnswer>(
+      'tile_placed_new_tile_distributed'
+    ).pipe(tap((socketAnswer) => this.updateRoom(socketAnswer)));
   }
 
   /**
@@ -223,7 +259,9 @@ export class RoomService extends SocketService {
    */
   private receiveCreateRoomResponse(): Observable<SocketAnswer> {
     this.connect();
-    return this.fromEventOnce<SocketAnswer>('created_room_response').pipe(tap(socketAnswer => this.updateRoom(socketAnswer)));
+    return this.fromEventOnce<SocketAnswer>('created_room_response').pipe(
+      tap((socketAnswer) => this.updateRoom(socketAnswer))
+    );
   }
 
   /**
@@ -253,7 +291,11 @@ export class RoomService extends SocketService {
    * @private
    */
   private findPlayer(players: Player[]): Player | null {
-    return players.find(player => player.username === this.authService.user?.username) || null;
+    return (
+      players.find(
+        (player) => player.username === this.authService.user?.username
+      ) || null
+    );
   }
 
   /**
@@ -264,7 +306,8 @@ export class RoomService extends SocketService {
   private getRestOfThePlayers(_players: Player[]): Player[] {
     const players: Player[] = Constants.copy<Player[]>(_players);
     players.forEach((player, index, array) => {
-      if (player.username === this.authService.user?.username) delete array[index];
+      if (player.username === this.authService.user?.username)
+        delete array[index];
     });
     return players;
   }

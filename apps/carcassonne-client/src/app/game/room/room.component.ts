@@ -30,14 +30,27 @@ export class RoomComponent extends BaseComponent implements OnDestroy {
 
   constructor(private roomService: RoomService) {
     super();
-    this.gameStartedSubscription = this.roomService.receiveGameStartedResponse().pipe(takeUntil(this.destroyed)).subscribe();
-    this.newPlayerJoinedSubscription = this.roomService.receiveNewPlayerJoinedResponse().pipe(takeUntil(this.destroyed)).subscribe();
-    this.playerLeftSubscription = this.roomService.receivePlayerLeftResponse().pipe(takeUntil(this.destroyed)).subscribe();
+    this.gameStartedSubscription = this.roomService
+      .receiveGameStartedResponse()
+      .pipe(takeUntil(this.destroyed))
+      .subscribe();
+    this.newPlayerJoinedSubscription = this.roomService
+      .receiveNewPlayerJoinedResponse()
+      .pipe(takeUntil(this.destroyed))
+      .subscribe();
+    this.playerLeftSubscription = this.roomService
+      .receivePlayerLeftResponse()
+      .pipe(takeUntil(this.destroyed))
+      .subscribe();
   }
 
-  public ngOnDestroy() {
+  public override ngOnDestroy() {
     super.ngOnDestroy();
-    this.roomService.removeManyListeners('new_player_joined', 'player_left', 'game_started');
+    this.roomService.removeManyListeners(
+      'new_player_joined',
+      'player_left',
+      'game_started'
+    );
     this.roomService.disconnect();
   }
 }

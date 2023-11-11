@@ -1,4 +1,4 @@
-import { PlayerOptions } from 'src/app/game/models/Room';
+import { PlayerOptions } from '@carcassonne-client/src/app/game/models/Room';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PlayerOptionsDialogWindowComponent } from './player-options-dialog-window/player-options-dialog-window.component';
@@ -23,16 +23,26 @@ export class PlayerOptionsDialogButtonComponent {
   }
 
   public openDialog(): void {
-    const dialogRef: MatDialogRef<PlayerOptionsDialogWindowComponent, PlayerOptionsData> = this.dialog.open(
+    const dialogRef: MatDialogRef<
       PlayerOptionsDialogWindowComponent,
-      {
-        data: { playerOptions: { color: null }, shortenedRoom: this.roomService.selectedRoom },
-      }
-    );
+      PlayerOptionsData
+    > = this.dialog.open(PlayerOptionsDialogWindowComponent, {
+      data: {
+        playerOptions: { color: null },
+        shortenedRoom: this.roomService.selectedRoom,
+      },
+    });
     this.listenForDialogClosing(dialogRef);
   }
 
-  private listenForDialogClosing(dialogRef: MatDialogRef<PlayerOptionsDialogWindowComponent, PlayerOptionsData>): void {
-    dialogRef.afterClosed().subscribe(result => this.playerOptions.emit(result?.playerOptions));
+  private listenForDialogClosing(
+    dialogRef: MatDialogRef<
+      PlayerOptionsDialogWindowComponent,
+      PlayerOptionsData
+    >
+  ): void {
+    dialogRef
+      .afterClosed()
+      .subscribe((result) => this.playerOptions.emit(result?.playerOptions));
   }
 }

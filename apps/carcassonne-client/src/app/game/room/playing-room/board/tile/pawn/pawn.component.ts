@@ -1,14 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Pawn } from 'src/app/game/models/pawn';
-import { ExtendedTile } from 'src/app/game/models/Room';
-import { Position, Tile } from 'src/app/game/models/Tile';
+import { Component, Input } from '@angular/core';
+import { ExtendedTile } from '@carcassonne-client/src/app/game/models/Room';
 
 @Component({
   selector: 'app-pawn',
   templateUrl: './pawn.component.html',
   styleUrls: ['./pawn.component.sass'],
 })
-export class PawnComponent implements OnInit {
+export class PawnComponent {
   @Input() extendedTile: ExtendedTile | null;
   @Input() rotation: number;
 
@@ -16,8 +14,6 @@ export class PawnComponent implements OnInit {
     this.extendedTile = null;
     this.rotation = 0;
   }
-
-  ngOnInit(): void {}
 
   // private fillPossiblePawnPlacements(): Pawn[] {
   //   const possiblePawnPlacements: Pawn[] = [];

@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { ConfirmationButtonData } from 'src/app/game/models/confirmationButtonData';
+import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
 import { NoPawnConfirmationDialogWindowComponent } from './no-pawn-confirmation-dialog-window/no-pawn-confirmation-dialog-window.component';
 
 @Component({
@@ -15,7 +15,8 @@ export class TileAndPawnConfirmationButtonComponent {
    */
   @Input() public tilePlacementConfirmed: boolean;
   @Input() public pawnPlaced: boolean;
-  @Output() public confirmation: EventEmitter<ConfirmationButtonData> = new EventEmitter();
+  @Output() public confirmation: EventEmitter<ConfirmationButtonData> =
+    new EventEmitter();
 
   constructor(public dialog: MatDialog) {
     this.confirmation = new EventEmitter<ConfirmationButtonData>();
@@ -26,7 +27,11 @@ export class TileAndPawnConfirmationButtonComponent {
 
   public confirmChoice(): void {
     if (this.isTilePlacedCorrectly) {
-      console.log('this.tilePlacementConfirmed', this.tilePlacementConfirmed, this.pawnPlaced);
+      console.log(
+        'this.tilePlacementConfirmed',
+        this.tilePlacementConfirmed,
+        this.pawnPlaced
+      );
       if (this.tilePlacementConfirmed) {
         if (this.pawnPlaced) {
           this.confirmation.emit({ tilePlaced: true, pawnPlaced: true });
@@ -40,9 +45,10 @@ export class TileAndPawnConfirmationButtonComponent {
   }
 
   private openDialog(): void {
-    const dialogRef: MatDialogRef<NoPawnConfirmationDialogWindowComponent, boolean> = this.dialog.open(
-      NoPawnConfirmationDialogWindowComponent
-    );
+    const dialogRef: MatDialogRef<
+      NoPawnConfirmationDialogWindowComponent,
+      boolean
+    > = this.dialog.open(NoPawnConfirmationDialogWindowComponent);
     this.listenForDialogClosing(dialogRef);
   }
 
@@ -52,8 +58,10 @@ export class TileAndPawnConfirmationButtonComponent {
    * * false - nothing will happen
    * @param dialogRef
    */
-  private listenForDialogClosing(dialogRef: MatDialogRef<NoPawnConfirmationDialogWindowComponent, boolean>): void {
-    dialogRef.afterClosed().subscribe(sendTileWithoutPawn => {
+  private listenForDialogClosing(
+    dialogRef: MatDialogRef<NoPawnConfirmationDialogWindowComponent, boolean>
+  ): void {
+    dialogRef.afterClosed().subscribe((sendTileWithoutPawn) => {
       if (sendTileWithoutPawn) {
         this.confirmation.emit({ tilePlaced: true, pawnPlaced: false });
       }

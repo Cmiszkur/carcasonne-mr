@@ -1,4 +1,4 @@
-import { RoomError } from 'src/app/game/models/socket';
+import { RoomError } from '@carcassonne-client/src/app/game/models/socket';
 import { ErrorHandler, Injectable } from '@angular/core';
 import { AlertService } from './services/alert.service';
 
@@ -17,10 +17,13 @@ export class CustomErrorHandler extends ErrorHandler {
   constructor(private alertService: AlertService) {
     super();
   }
-  handleError(err: UncaughtPromiseError) {
+  override handleError(err: UncaughtPromiseError) {
     const error = err.rejection ? err.rejection : err;
     if (error instanceof CustomError) {
-      this.alertService.openNewAlert(error.message as RoomError, error.additionalErrorMessage);
+      this.alertService.openNewAlert(
+        error.message as RoomError,
+        error.additionalErrorMessage
+      );
     }
     super.handleError(error);
   }

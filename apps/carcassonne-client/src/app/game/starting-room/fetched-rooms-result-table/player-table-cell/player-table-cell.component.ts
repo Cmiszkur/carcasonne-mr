@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Player } from 'src/app/game/models/Room';
+import { Player } from '@carcassonne-client/src/app/game/models/Room';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 

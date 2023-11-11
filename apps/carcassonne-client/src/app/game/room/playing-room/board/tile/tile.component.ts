@@ -15,10 +15,10 @@ import {
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Pawn } from '../../../../models/pawn';
-import { ExtendedTile } from 'src/app/game/models/Room';
-import { BaseComponent } from 'src/app/commons/components/base/base.component';
-import { RoomService } from 'src/app/game/services/room.service';
-import { Environment } from 'src/app/game/models/emptytile';
+import { ExtendedTile } from '@carcassonne-client/src/app/game/models/Room';
+import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
+import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
+import { Environment } from '@carcassonne-client/src/app/game/models/emptytile';
 
 @Component({
   selector: 'app-tile',
@@ -91,7 +91,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.isTilePlacementConfirmed) {
+    if (changes['isTilePlacementConfirmed']) {
       if (this.isCurrentTile) this.pawns = this.fillPossiblePawnPlacements();
     }
   }
