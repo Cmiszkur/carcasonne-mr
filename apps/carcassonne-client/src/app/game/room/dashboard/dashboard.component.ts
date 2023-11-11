@@ -28,7 +28,7 @@ export class DashboardComponent implements OnInit {
     this.player = null;
     iconRegistry.addSvgIcon(
       'follower',
-      sanitizer.bypassSecurityTrustResourceUrl('src/assets/SVG/follower.svg')
+      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/follower.svg')
     );
   }
 

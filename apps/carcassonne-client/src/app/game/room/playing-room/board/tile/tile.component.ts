@@ -85,7 +85,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
       this.roomService.playersValue?.loggedPlayer?.color || null;
     iconRegistry.addSvgIcon(
       'follower',
-      sanitizer.bypassSecurityTrustResourceUrl('src/assets/SVG/follower.svg')
+      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/follower.svg')
     );
     this.placedPawn = new EventEmitter();
   }

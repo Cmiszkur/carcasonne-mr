@@ -16,15 +16,15 @@ export class ToolbarComponent {
   ) {
     iconRegistry.addSvgIcon(
       'github',
-      sanitizer.bypassSecurityTrustResourceUrl('src/assets/SVG/github-icon.svg')
+      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/github-icon.svg')
     );
     iconRegistry.addSvgIcon(
       'moon',
-      sanitizer.bypassSecurityTrustResourceUrl('src/assets/SVG/Moon.svg')
+      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/Moon.svg')
     );
     iconRegistry.addSvgIcon(
       'sun',
-      sanitizer.bypassSecurityTrustResourceUrl('src/assets/SVG/Sun.svg')
+      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/Sun.svg')
     );
   }
 

@@ -15,7 +15,7 @@ export class PlayerTableCellComponent {
     this.players = [];
     iconRegistry.addSvgIcon(
       'meeple',
-      sanitizer.bypassSecurityTrustResourceUrl('src/assets/SVG/meeple.svg')
+      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/meeple.svg')
     );
   }
 }
