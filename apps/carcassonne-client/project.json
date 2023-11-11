@@ -12,12 +12,24 @@
         "main": "apps/carcassonne-client/src/main.ts",
         "polyfills": "apps/carcassonne-client/src/polyfills.ts",
         "tsConfig": "apps/carcassonne-client/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
+        "inlineStyleLanguage": "sass",
         "assets": [
           "apps/carcassonne-client/src/favicon.ico",
           "apps/carcassonne-client/src/assets"
         ],
-        "styles": ["apps/carcassonne-client/src/styles.scss"],
+        "styles": [
+          {
+            "input": "apps/carcassonne-client/src/dark-theme.sass",
+            "bundleName": "dark-theme",
+            "inject": false
+          },
+          {
+            "input": "apps/carcassonne-client/src/light-theme.sass",
+            "bundleName": "light-theme",
+            "inject": false
+          },
+          "apps/carcassonne-client/src/styles.sass"
+        ],
         "scripts": []
       },
       "configurations": {
