@@ -16,9 +16,7 @@ import { RoomController } from '../room/room.controller';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI || '', {
-      useFindAndModify: false,
-    }),
+    MongooseModule.forRoot(process.env.MONGO_URI || ''),
     EventsModule,
     RoomModule,
   ],

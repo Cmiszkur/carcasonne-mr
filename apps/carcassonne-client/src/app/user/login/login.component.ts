@@ -1,6 +1,6 @@
 import { AuthService } from '../auth.service';
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoginAuthResponse } from '../../interfaces/responseInterfaces';
 
@@ -10,9 +10,9 @@ import { LoginAuthResponse } from '../../interfaces/responseInterfaces';
   styleUrls: ['./login.component.sass'],
 })
 export class LoginComponent {
-  usernameFormControl = new FormControl('', [Validators.required]);
-  passwordFormControl = new FormControl('', [Validators.required]);
-  LoginForm = new FormGroup({
+  usernameFormControl = new UntypedFormControl('', [Validators.required]);
+  passwordFormControl = new UntypedFormControl('', [Validators.required]);
+  LoginForm = new UntypedFormGroup({
     username: this.usernameFormControl,
     password: this.passwordFormControl,
   });

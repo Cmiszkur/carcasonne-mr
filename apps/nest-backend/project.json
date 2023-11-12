@@ -1,16 +1,19 @@
 {
+  "name": "nest-backend",
   "$schema": "..\\..\\node_modules\\nx\\schemas\\project-schema.json",
   "sourceRoot": "apps/nest-backend/src",
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/node:webpack",
+      "executor": "@nrwl/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/nest-backend",
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
-        "assets": ["apps/nest-backend/src/assets"]
+        "assets": ["apps/nest-backend/src/assets"],
+        "target": "node",
+        "compiler": "tsc"
       },
       "configurations": {
         "production": {
@@ -41,7 +44,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/nest-backend"],
+      "outputs": ["{workspaceRoot}/coverage/apps/nest-backend"],
       "options": {
         "jestConfig": "apps/nest-backend/jest.config.ts",
         "passWithNoTests": true

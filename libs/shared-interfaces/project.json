@@ -1,4 +1,5 @@
 {
+  "name": "shared-interfaces",
   "$schema": "..\\..\\node_modules\\nx\\schemas\\project-schema.json",
   "sourceRoot": "libs/shared-interfaces/src",
   "projectType": "library",
@@ -22,7 +23,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/shared-interfaces"],
+      "outputs": ["{workspaceRoot}/coverage/libs/shared-interfaces"],
       "options": {
         "jestConfig": "libs/shared-interfaces/jest.config.ts",
         "passWithNoTests": true

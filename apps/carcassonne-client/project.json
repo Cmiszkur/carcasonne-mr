@@ -1,4 +1,6 @@
 {
+  "name": "carcassonne-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/carcassonne-client/src",
   "prefix": "carcasonne-mr",
@@ -94,7 +96,7 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/apps/carcassonne-client"],
+      "outputs": ["{workspaceRoot}/coverage/apps/carcassonne-client"],
       "options": {
         "jestConfig": "apps/carcassonne-client/jest.config.ts",
         "passWithNoTests": true
