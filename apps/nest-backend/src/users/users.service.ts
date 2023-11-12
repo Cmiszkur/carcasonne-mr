@@ -60,11 +60,8 @@ export class UsersService {
     return this.userModel.findOne({ username: username }).select('-__v').lean();
   }
 
-  async findById(
-    id: string,
-    cb: (Error, User) => void
-  ): Promise<LeanDocument<UserDocument> | null> {
-    return this.userModel.findById(id, cb).lean();
+  async findById(id: string): Promise<LeanDocument<UserDocument> | null> {
+    return this.userModel.findById(id).lean();
   }
 
   async checkIfRoomCreatedByUser(username: string): Promise<string | null> {

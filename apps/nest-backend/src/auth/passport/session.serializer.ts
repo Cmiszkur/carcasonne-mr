@@ -21,16 +21,21 @@ export class SessionSerializer extends PassportSerializer {
   }
   deserializeUser(
     id: string,
-    done: (err: Error, payload: RequestUser) => void
+    done: (err: Error | null, payload?: RequestUser) => void
   ): void {
-    void this.userService.findById(id, (err, user: User) => {
-      console.log('desarializing user...');
-      const returnedUser: RequestUser = {
-        username: user.username,
-        email: user.email,
-        name: user.name,
-      };
-      done(err, returnedUser);
-    });
+    void this.userService
+      .findById(id)
+      .catch((err) => done(err))
+      .then((user) => {
+        console.log('desarializing user...');
+        const returnedUser: RequestUser = user
+          ? {
+              username: user.username,
+              email: user.email,
+              name: user.name,
+            }
+          : undefined;
+        done(null, returnedUser);
+      });
   }
 }
