@@ -15,12 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@carcassonne-client/*": [
-        "apps/carcassonne-client/*"
+      "@carcasonne-mr/shared-interfaces": [
+        "libs/shared-interfaces/src/index.ts"
       ],
-      "@nest-backend/*": [
-        "apps/nest-backend/*"
-      ]
+      "@carcassonne-client/*": ["apps/carcassonne-client/*"],
+      "@nest-backend/*": ["apps/nest-backend/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "carcasonne-mr",
+            "prefix": "app",
             "style": "kebab-case"
           }
         ]

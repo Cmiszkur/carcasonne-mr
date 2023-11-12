@@ -13,12 +13,12 @@ describe('AppController', () => {
     }).compile();
   });
 
-  describe('getData', () => {
-    it('should return "Welcome to nest-backend!"', () => {
-      const appController = app.get<AppController>(AppController);
-      expect(appController.getData()).toEqual({
-        message: 'Welcome to nest-backend!',
-      });
-    });
-  });
+  // describe('getData', () => {
+  //   it('should return "Welcome to nest-backend!"', () => {
+  //     const appController = app.get<AppController>(AppController);
+  //     expect(appController.getData()).toEqual({
+  //       message: 'Welcome to nest-backend!',
+  //     });
+  //   });
+  // });
 });

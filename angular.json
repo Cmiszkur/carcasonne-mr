@@ -4,6 +4,7 @@
   "projects": {
     "carcassonne-client": "apps/carcassonne-client",
     "carcassonne-client-e2e": "apps/carcassonne-client-e2e",
-    "nest-backend": "apps/nest-backend"
+    "nest-backend": "apps/nest-backend",
+    "shared-interfaces": "libs/shared-interfaces"
   }
 }
