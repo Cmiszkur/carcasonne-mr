@@ -42,3 +42,7 @@ Thumbs.db
 
 # Passwords
 .env
+
+# Nx cache
+.nx
+.nx/cache
