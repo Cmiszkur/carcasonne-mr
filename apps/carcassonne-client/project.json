@@ -71,10 +71,10 @@
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
-          "browserTarget": "carcassonne-client:build:production"
+          "buildTarget": "carcassonne-client:build:production"
         },
         "development": {
-          "browserTarget": "carcassonne-client:build:development"
+          "buildTarget": "carcassonne-client:build:development"
         }
       },
       "defaultConfiguration": "development"
@@ -82,11 +82,11 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "browserTarget": "carcassonne-client:build"
+        "buildTarget": "carcassonne-client:build"
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "apps/carcassonne-client/**/*.ts",
@@ -98,8 +98,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/apps/carcassonne-client"],
       "options": {
-        "jestConfig": "apps/carcassonne-client/jest.config.ts",
-        "passWithNoTests": true
+        "jestConfig": "apps/carcassonne-client/jest.config.ts"
       }
     }
   },

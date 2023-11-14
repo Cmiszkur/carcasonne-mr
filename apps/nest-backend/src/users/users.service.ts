@@ -2,7 +2,7 @@ import { RegisterResponse } from '@nest-backend/src/interfaces';
 import { User, UserDocument } from './schemas/user.schema';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { LeanDocument, Model, UpdateWriteOpResult } from 'mongoose';
+import { Model, UpdateWriteOpResult } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -41,7 +41,7 @@ export class UsersService {
             if (err) throw new Error(err.message);
             createUser.password = hash;
             const createdUser = new this.userModel(createUser);
-            createdUser.save((err) => {
+            createdUser.save().then((err) => {
               if (err) {
                 throw new HttpException(
                   'Database error',
@@ -60,7 +60,7 @@ export class UsersService {
     return this.userModel.findOne({ username: username }).select('-__v').lean();
   }
 
-  async findById(id: string): Promise<LeanDocument<UserDocument> | null> {
+  async findById(id: string): Promise<UserDocument | null> {
     return this.userModel.findById(id).lean();
   }
 

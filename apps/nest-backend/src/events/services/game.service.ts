@@ -1,7 +1,7 @@
 import { BasicService } from './basic.service';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, LeanDocument } from 'mongoose';
+import { Model } from 'mongoose';
 import { Room, RoomDocument } from '../schemas/room.schema';
 import { TileDocument, Tiles } from '../schemas/tiles.schema';
 import {
@@ -125,9 +125,7 @@ export class GameService extends BasicService {
       this.removeFallowerFromPlayer(searchedRoom, username);
 
     // Check the point scoring for the new tile and update the paths accordingly
-    const copiedSearchedRoom: LeanDocument<Room> = copy(
-      searchedRoom.toObject()
-    );
+    const copiedSearchedRoom: Room = copy(searchedRoom.toObject());
     const pointCheckingAnswer: PointCheckingAnswer =
       this.pointCountingService.checkNewTile(copiedSearchedRoom, extendedTile);
     searchedRoom.paths = pointCheckingAnswer.paths;
