@@ -185,24 +185,28 @@ export class PointCountingService {
     players: Player[]
   ): Player[] {
     let copiedPlayers = copy(players);
+
     newOrUpdatedPathIds.forEach((newOrUpdatedPathId) => {
       const checkedPath = pathDataMap.get(newOrUpdatedPathId);
-      if (checkedPath) {
-        const checkedPathOwners = checkedPath.pathOwners || [];
-        copiedPlayers = copiedPlayers.map((player) => {
-          const addedPoints = checkedPath.points;
-          const playerWasPathOwner = checkedPathOwners.some(
-            (pathOwner) => pathOwner === player.username
-          );
-          return {
-            ...player,
-            points: playerWasPathOwner
-              ? player.points + addedPoints
-              : player.points,
-          };
-        });
+      if (!checkedPath) {
+        return;
       }
+
+      const checkedPathOwners = checkedPath.pathOwners || [];
+      copiedPlayers = copiedPlayers.map((player) => {
+        const playerWasPathOwner = checkedPathOwners.some(
+          (pathOwner) => pathOwner === player.username
+        );
+        return {
+          ...player,
+          points:
+            playerWasPathOwner && checkedPath.completed
+              ? player.points + checkedPath.points
+              : player.points,
+        };
+      });
     });
+
     return copiedPlayers;
   }
 
