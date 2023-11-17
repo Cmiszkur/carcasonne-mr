@@ -2,17 +2,6 @@ import { TilesAbstract } from '../tiles/tiles-abstract';
 import { Coordinates, PathDataMap, Tile } from '../tiles/tiles-types';
 import { RoomAbstract } from './room-abstract';
 
-export interface SocketAnswer {
-  error: RoomError | null;
-  answer: Answer | null;
-  errorMessage?: string;
-}
-
-export interface Answer {
-  room: RoomAbstract | null;
-  tile: Tile | null;
-}
-
 export interface TilesSet {
   allTiles: TilesAbstract[];
   drawnTile: Tile | null;

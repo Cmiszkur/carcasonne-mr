@@ -1,6 +1,23 @@
-import { Coordinates, ExtendedTile, TileValues } from '../tiles/tiles-types';
+import {
+  Coordinates,
+  ExtendedTile,
+  Tile,
+  TileValues,
+} from '../tiles/tiles-types';
 import { IncomingMessage } from 'http';
 import { Socket } from 'socket.io';
+import { RoomAbstract, RoomError } from '../room';
+
+export interface SocketAnswer {
+  error: RoomError | null;
+  answer: Answer | null;
+  errorMessage?: string;
+}
+
+export interface Answer {
+  room: RoomAbstract | null;
+  tile: Tile | null;
+}
 
 export interface ExtendedSocket extends Socket {
   username: string;

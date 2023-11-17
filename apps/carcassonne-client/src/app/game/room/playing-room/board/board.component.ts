@@ -1,22 +1,20 @@
-import { ExtendedTile, Player } from '../../../models/Room';
+import { Emptytile } from './../../../models/emptytile';
 import {
-  Component,
-  ElementRef,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  SimpleChanges,
-} from '@angular/core';
-import { Position, TileEnvironments, TileValues } from '../../../models/Tile';
+  Coordinates,
+  CurrentTile,
+  Environment,
+  ExtendedTile,
+  Player,
+  Position,
+  TileValues,
+} from '@carcasonne-mr/shared-interfaces';
+import { Component, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
+import { TileEnvironments } from '../../../models/Tile';
 import { KeyValue } from '@angular/common';
-import { Coordinates, Emptytile } from '../../../models/emptytile';
 import { BoardTilesService } from '../../../services/board-tiles.service';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import { Pawn } from '@carcassonne-client/src/app/game/models/pawn';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
-import { takeUntil } from 'rxjs/operators';
-import { SocketService } from '@carcassonne-client/src/app/commons/services/socket.service';
 import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
 
 @Component({
@@ -24,12 +22,9 @@ import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.sass'],
 })
-export class BoardComponent
-  extends BaseComponent
-  implements OnInit, OnChanges, OnDestroy
-{
-  @Input() public tiles: ExtendedTile[] | null;
-  @Input() public currentTile: ExtendedTile | null;
+export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
+  private _currentTile: CurrentTile | null;
+  private _tiles: ExtendedTile[] | null;
   public emptyTiles: Map<string, Emptytile>;
   public translateValueCurrentTile: string;
   /**
@@ -50,12 +45,10 @@ export class BoardComponent
   constructor(
     private el: ElementRef,
     private boardTileService: BoardTilesService,
-    private roomService: RoomService,
-    private socketService: SocketService
+    private roomService: RoomService
   ) {
     super();
-    this.tiles = null;
-    this.currentTile = null;
+    this._tiles = null;
     this.tilesCoordinates = new Set<string>();
     this.emptyTiles = new Map<string, Emptytile>();
     this.firstTilePosition = {} as Coordinates;
@@ -66,19 +59,22 @@ export class BoardComponent
     this.tileAndPawnPlacementConfirmed = false;
     this.currentTileEnvironments = this.getDefaultTileEnvironments();
     this.placedPawn = null;
+    this._currentTile = null;
   }
 
-  ngOnInit(): void {
-    this.listenForNewTiles();
-    this.initFirstTilePosition();
-    this.tiles?.forEach((tile) => {
-      this.placeTilesFromBackendOnBoard(tile);
-      this.placeEmptyTileInMap(
-        tile.tile.tileValues,
-        tile.rotation,
-        tile.coordinates
-      );
-    });
+  public get currentTile(): CurrentTile | null {
+    return this._currentTile;
+  }
+
+  @Input() public set currentTile(tile: CurrentTile | null) {
+    this._currentTile = tile;
+
+    console.log(this.firstTilePosition);
+
+    if (!this.firstTilePosition.x && !this.firstTilePosition.y) {
+      this.firstTilePosition = this.initFirstTilePosition();
+    }
+
     this.currentTileEnvironments = this.currentTile?.tile.tileValues
       ? this.tileValuesToTileEnvironments(
           this.currentTile.tile.tileValues,
@@ -87,16 +83,32 @@ export class BoardComponent
       : this.getDefaultTileEnvironments();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tiles']) {
-      this.resetConfirmation();
-      this.resetTilePlacement();
-    }
+  public get tiles(): ExtendedTile[] | null {
+    return this._tiles;
   }
 
-  public override ngOnDestroy(): void {
-    super.ngOnDestroy();
-    this.socketService.removeListener('tile_placed_new_tile_distributed');
+  @Input() public set tiles(tiles: ExtendedTile[] | null) {
+    this._tiles = tiles;
+
+    if (!this.firstTilePosition.x && !this.firstTilePosition.y) {
+      this.firstTilePosition = this.initFirstTilePosition();
+    }
+
+    this.tiles?.forEach((tile) => {
+      this.placeTilesFromBackendOnBoard(tile);
+      this.placeEmptyTileInMap(
+        tile.tile.tileValues,
+        tile.rotation,
+        tile.coordinates
+      );
+    });
+
+    this.resetConfirmation();
+    this.resetTilePlacement();
+  }
+
+  ngOnInit(): void {
+    this.firstTilePosition = this.initFirstTilePosition();
   }
 
   /**
@@ -131,34 +143,36 @@ export class BoardComponent
   public emptyTileSelected(
     clickedEmptyTile: KeyValue<string, Emptytile>
   ): void {
-    if (!this.tilePlacementConfirmed) {
-      const stringifiedTileCoordinates: string = clickedEmptyTile.key;
-      if (
-        this.previouslyClickedTileCoordinates === stringifiedTileCoordinates
-      ) {
-        if (this.currentTile) {
-          this.currentTile.rotation >= 270
-            ? (this.currentTile.rotation = 0)
-            : (this.currentTile.rotation += 90);
-          this.currentTileEnvironments = this.tileValuesToTileEnvironments(
-            this.currentTile.tile.tileValues,
-            this.currentTile.rotation
-          );
-        }
-      }
+    if (this.tilePlacementConfirmed) {
+      return;
+    }
 
-      const coordinates = JSON.parse(stringifiedTileCoordinates) as Coordinates;
-      const isTilePlacedCorrectly = this.checkCurrentTilePlacement(
-        clickedEmptyTile.value
-      );
-
-      if (this.currentTile) this.currentTile.coordinates = coordinates;
-      this.setTilePlacementRelatedFields(
-        coordinates,
-        isTilePlacedCorrectly,
-        stringifiedTileCoordinates
+    const stringifiedTileCoordinates: string = clickedEmptyTile.key;
+    if (
+      this.previouslyClickedTileCoordinates === stringifiedTileCoordinates &&
+      this.currentTile
+    ) {
+      this.currentTile.rotation >= 270
+        ? (this.currentTile.rotation = 0)
+        : (this.currentTile.rotation += 90);
+      this.currentTileEnvironments = this.tileValuesToTileEnvironments(
+        this.currentTile.tile.tileValues,
+        this.currentTile.rotation
       );
     }
+
+    const coordinates = JSON.parse(stringifiedTileCoordinates) as Coordinates;
+    const isTilePlacedCorrectly = this.checkCurrentTilePlacement(
+      clickedEmptyTile.value
+    );
+
+    if (this.currentTile) this.currentTile.coordinates = coordinates;
+
+    this.setTilePlacementRelatedFields(
+      coordinates,
+      isTilePlacedCorrectly,
+      stringifiedTileCoordinates
+    );
   }
 
   public placeTilesFromBackendOnBoard(tile: ExtendedTile): void {
@@ -200,50 +214,53 @@ export class BoardComponent
     tileRotation: number,
     coordinates?: { x: number; y: number }
   ): void {
-    this.tiles?.forEach(() => {
-      if (!coordinates) coordinates = { x: 0, y: 0 };
+    if (!coordinates) coordinates = { x: 0, y: 0 };
 
-      const tileEnvironments = this.tileValuesToTileEnvironments(
-        tileValues,
-        tileRotation
-      );
+    const tileEnvironments = this.tileValuesToTileEnvironments(
+      tileValues,
+      tileRotation
+    );
+    const topCoordinate = { x: coordinates.x, y: coordinates.y + 1 };
+    const bottomCoordinate = { x: coordinates.x, y: coordinates.y - 1 };
+    const rightCoordinate = { x: coordinates.x + 1, y: coordinates.y };
+    const leftCoordinate = { x: coordinates.x - 1, y: coordinates.y };
 
-      const emptyTile = (
-        coordinates: Coordinates,
-        emptyTileKeyPosition: keyof Emptytile,
-        TileKeyValue: keyof TileEnvironments
-      ) => {
-        const value = this.emptyTiles.get(JSON.stringify(coordinates));
-        const object = {
-          position: this.makeTranslateString(coordinates),
-        } as Emptytile;
-        return {
-          ...(value || object),
-          [emptyTileKeyPosition]: tileEnvironments[TileKeyValue],
-        } as Emptytile;
-      };
+    this.emptyTiles.set(
+      JSON.stringify(rightCoordinate),
+      this.generateEmptyTile(rightCoordinate, 'left', tileEnvironments.right)
+    );
+    this.emptyTiles.set(
+      JSON.stringify(leftCoordinate),
+      this.generateEmptyTile(leftCoordinate, 'right', tileEnvironments.left)
+    );
+    this.emptyTiles.set(
+      JSON.stringify(topCoordinate),
+      this.generateEmptyTile(topCoordinate, 'bottom', tileEnvironments.top)
+    );
+    this.emptyTiles.set(
+      JSON.stringify(bottomCoordinate),
+      this.generateEmptyTile(bottomCoordinate, 'top', tileEnvironments.bottom)
+    );
 
-      this.emptyTiles.set(
-        JSON.stringify({ x: coordinates.x + 1, y: coordinates.y }),
-        emptyTile({ x: coordinates.x + 1, y: coordinates.y }, 'left', 'right')
-      );
-      this.emptyTiles.set(
-        JSON.stringify({ x: coordinates.x - 1, y: coordinates.y }),
-        emptyTile({ x: coordinates.x - 1, y: coordinates.y }, 'right', 'left')
-      );
-      this.emptyTiles.set(
-        JSON.stringify({ x: coordinates.x, y: coordinates.y + 1 }),
-        emptyTile({ x: coordinates.x, y: coordinates.y + 1 }, 'bottom', 'top')
-      );
-      this.emptyTiles.set(
-        JSON.stringify({ x: coordinates.x, y: coordinates.y - 1 }),
-        emptyTile({ x: coordinates.x, y: coordinates.y - 1 }, 'top', 'bottom')
-      );
-
-      this.tilesCoordinates.forEach((coordinates) => {
-        this.emptyTiles.delete(coordinates);
-      });
+    this.tilesCoordinates.forEach((coordinates) => {
+      this.emptyTiles.delete(coordinates);
     });
+  }
+
+  private generateEmptyTile(
+    coordinates: Coordinates,
+    emptyTileKeyPosition: Exclude<keyof Emptytile, 'position'>,
+    environment: Environment
+  ): Emptytile {
+    const value = this.emptyTiles.get(JSON.stringify(coordinates));
+    const object = {
+      position: this.makeTranslateString(coordinates),
+    } as Emptytile;
+
+    return {
+      ...(value || object),
+      [emptyTileKeyPosition]: environment,
+    } as Emptytile;
   }
 
   /**
@@ -262,7 +279,7 @@ export class BoardComponent
    */
   private setTilePlacementRelatedFields(
     coordinates?: Coordinates,
-    isTilePlacedCorrectly: boolean = false,
+    isTilePlacedCorrectly = false,
     stringifiedCoordinates: string = JSON.stringify(coordinates)
   ): void {
     this.previouslyClickedTileCoordinates = coordinates
@@ -285,18 +302,19 @@ export class BoardComponent
     this.tileAndPawnPlacementConfirmed = false;
   }
 
-  private initFirstTilePosition(): void {
+  private initFirstTilePosition(): Coordinates {
     const hostWidth = this.el.nativeElement.offsetWidth;
     const hostHeight = this.el.nativeElement.offsetHeight;
-    this.firstTilePosition = {
+
+    return (this.firstTilePosition = {
       x: hostWidth / 2 - 56,
       y: hostHeight / 2 - 56,
-    };
+    });
   }
 
   private checkCurrentTilePlacement(clickedEmptyTile: Emptytile): boolean {
     if (this.currentTileEnvironments) {
-      let checker: boolean = true;
+      let checker = true;
 
       for (const [key, value] of Object.entries(clickedEmptyTile)) {
         switch (key) {
@@ -330,7 +348,7 @@ export class BoardComponent
 
     const tileEnvironmentsKeys = () => {
       const shiftValue = tileRotation >= 360 ? 0 : tileRotation / 90;
-      let tileEnvironmentsKeysArray: string[] = [
+      const tileEnvironmentsKeysArray: string[] = [
         'top',
         'right',
         'bottom',
@@ -338,14 +356,17 @@ export class BoardComponent
       ];
 
       for (let i = 1; i <= shiftValue; i++) {
-        let firstElement = tileEnvironmentsKeysArray.shift();
+        const firstElement = tileEnvironmentsKeysArray.shift();
         if (firstElement) tileEnvironmentsKeysArray.push(firstElement);
       }
 
       return tileEnvironmentsKeysArray;
     };
 
-    for (const [key, value] of Object.entries(tileValues || {})) {
+    for (const [key, value] of Object.entries(tileValues || {}) as [
+      Environment,
+      [Position[]]
+    ][]) {
       value.forEach((array: Position[]) =>
         array.forEach((string) => {
           switch (string) {
@@ -379,10 +400,10 @@ export class BoardComponent
 
   private getDefaultTileEnvironments(): TileEnvironments {
     return {
-      top: 'fields',
-      right: 'fields',
-      bottom: 'fields',
-      left: 'fields',
+      top: Environment.FIELD,
+      right: Environment.FIELD,
+      bottom: Environment.FIELD,
+      left: Environment.FIELD,
     };
   }
 
@@ -394,12 +415,5 @@ export class BoardComponent
     } else {
       return '';
     }
-  }
-
-  private listenForNewTiles(): void {
-    this.roomService
-      .receiveTilePlacedResponse()
-      .pipe(takeUntil(this.destroyed))
-      .subscribe();
   }
 }

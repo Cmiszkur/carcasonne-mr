@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   Coordinates,
+  Environment,
   ExtendedTile,
   Position,
   TileValues,
@@ -199,11 +200,11 @@ export class CheckTilesService {
       return placedTileValuesFlat.cities.some(
         (positionInCities) => position === positionInCities
       )
-        ? 'cities'
+        ? Environment.CITIES
         : placedTileValuesFlat.roads.some(
             (positionInRoads) => position === positionInRoads
           )
-        ? 'roads'
+        ? Environment.ROADS
         : null;
     } else {
       return null;

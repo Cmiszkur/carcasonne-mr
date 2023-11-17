@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PlayerOptions, ShortenedRoom } from '../models/Room';
+import { PlayerOptions } from '../models/Room';
 import { RoomService } from '../services/room.service';
+import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-starting-room',
@@ -14,7 +15,11 @@ export class StartingRoomComponent implements OnInit {
    */
   public availableRooms: ShortenedRoom[];
 
-  constructor(private roomService: RoomService, private router: Router, private route: ActivatedRoute) {
+  constructor(
+    private roomService: RoomService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
     this.availableRooms = [];
   }
 
@@ -43,7 +48,7 @@ export class StartingRoomComponent implements OnInit {
    * @param options
    */
   public createRoom(options: PlayerOptions): void {
-    this.roomService.createRoom(options?.color).subscribe(createdRoom => {
+    this.roomService.createRoom(options?.color).subscribe((createdRoom) => {
       const roomID: string | null = createdRoom.answer?.room?.roomId || null;
       this.navigateToWaitingRoom(roomID, options);
     });
@@ -55,7 +60,10 @@ export class StartingRoomComponent implements OnInit {
    * @param options
    * @private
    */
-  private navigateToWaitingRoom(roomID: string | null, options: PlayerOptions): void {
+  private navigateToWaitingRoom(
+    roomID: string | null,
+    options: PlayerOptions
+  ): void {
     if (!roomID) return;
     this.router.navigate(['./room/waiting-room'], {
       queryParams: { roomID: roomID, ...options },

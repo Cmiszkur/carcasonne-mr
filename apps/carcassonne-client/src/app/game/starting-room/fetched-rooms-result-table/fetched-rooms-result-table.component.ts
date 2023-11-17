@@ -8,7 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { ShortenedRoom } from '../../models/Room';
+import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-fetched-rooms-result-table',

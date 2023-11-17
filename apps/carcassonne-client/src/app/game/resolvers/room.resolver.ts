@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
-import { ShortenedRoom } from '../models/Room';
 import { RoomService } from '../services/room.service';
+import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 
 @Injectable({
   providedIn: 'root',
 })
-export class RoomResolver  {
+export class RoomResolver {
   constructor(private roomService: RoomService) {}
 
   resolve(): Observable<ShortenedRoom[] | null> {

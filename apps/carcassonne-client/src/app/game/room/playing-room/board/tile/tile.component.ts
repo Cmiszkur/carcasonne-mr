@@ -7,18 +7,19 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import {
-  Position,
-  TileEnvironments,
-  TileValues,
-} from '../../../../models/Tile';
+import { TileEnvironments } from '../../../../models/Tile';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Pawn } from '../../../../models/pawn';
-import { ExtendedTile } from '@carcassonne-client/src/app/game/models/Room';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
-import { Environment } from '@carcassonne-client/src/app/game/models/emptytile';
+import {
+  ExtendedTile,
+  Position,
+  TileValues,
+  Environment,
+  CurrentTile,
+} from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-tile',
@@ -29,7 +30,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   /**
    * Extended tile data.
    */
-  @Input() public extendedTile: ExtendedTile | null;
+  @Input() public extendedTile: ExtendedTile | CurrentTile | null;
   /**
    * Rotation of tile.
    */
@@ -144,7 +145,10 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
           Position.LEFT,
         ];
 
-        for (const [key, value] of Object.entries(tileValues)) {
+        for (const [key, value] of Object.entries(tileValues) as [
+          Environment,
+          [Position[]]
+        ][]) {
           value.forEach((values: Position[]) => {
             values.forEach((environmentValue, environmentIndex) => {
               const environmentValuesIndex =

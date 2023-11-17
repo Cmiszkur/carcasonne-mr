@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ExtendedTile } from '@carcassonne-client/src/app/game/models/Room';
+import { ExtendedTile } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-pawn',

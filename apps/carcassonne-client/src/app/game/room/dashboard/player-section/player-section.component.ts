@@ -1,21 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Player } from '../../../models/Room';
+import { Component, Input } from '@angular/core';
+import { Player } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-player-section',
   templateUrl: './player-section.component.html',
   styleUrls: ['./player-section.component.sass'],
 })
-export class PlayerSectionComponent implements OnInit {
-  /**
-   * Sets player and then fills array to iterate with number of elements
-   * equal to number of meeples.
-   */
-  @Input() public set player(player: Player | null) {
-    this._player = player;
-    this.arrayToIterate = Array(player?.followers).fill(1);
-  }
-
+export class PlayerSectionComponent {
   /**
    * Array with length equal to number of meeples the players have.
    * Used to iterate over in HTML template.
@@ -33,5 +24,12 @@ export class PlayerSectionComponent implements OnInit {
     return this._player;
   }
 
-  ngOnInit(): void {}
+  /**
+   * Sets player and then fills array to iterate with number of elements
+   * equal to number of meeples.
+   */
+  @Input() public set player(player: Player | null) {
+    this._player = player;
+    this.arrayToIterate = Array(player?.followers).fill(1);
+  }
 }

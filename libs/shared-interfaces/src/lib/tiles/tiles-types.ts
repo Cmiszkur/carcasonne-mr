@@ -11,13 +11,13 @@ export enum Position {
 }
 
 export interface TileValues {
-  roads?: [Position[]];
-  cities?: [Position[]];
+  [Environment.ROADS]?: [Position[]];
+  [Environment.CITIES]?: [Position[]];
 }
 
 export interface TileValuesFlat {
-  roads: Position[];
-  cities: Position[];
+  [Environment.ROADS]: Position[];
+  [Environment.CITIES]: Position[];
 }
 
 export interface ExtendedTile {
@@ -30,16 +30,21 @@ export interface ExtendedTile {
   tileValuesAfterRotation: TileValues | null;
 }
 
+export type CurrentTile = Omit<ExtendedTile, 'id' | 'coordinates'> & {
+  coordinates: Coordinates | null;
+};
+
 export interface FollowerDetails {
   username: string;
   playerColor: string;
-  placement: TileEnvironments;
+  placement: Environment;
   position: Position[];
 }
 
-export enum TileEnvironments {
+export enum Environment {
   ROADS = 'roads',
   CITIES = 'cities',
+  FIELD = 'field',
   CHURCH = 'church',
 }
 

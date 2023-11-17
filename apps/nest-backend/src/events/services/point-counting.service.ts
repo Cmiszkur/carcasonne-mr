@@ -16,6 +16,7 @@ import {
   PathDataMap,
   Position,
   TileValues,
+  Environment,
 } from '@carcasonne-mr/shared-interfaces';
 
 @Injectable()
@@ -57,7 +58,7 @@ export class PointCountingService {
         cities,
         uncompletedCitiesPathDataMap,
         coordinates,
-        'cities',
+        Environment.CITIES,
         placedTileId,
         newOrUpdatedPathIds,
         copiedPlacedTile.tile.extraPoints,
@@ -70,7 +71,7 @@ export class PointCountingService {
         roads,
         uncompletedRoadsPathDataMap,
         coordinates,
-        'roads',
+        Environment.ROADS,
         placedTileId,
         newOrUpdatedPathIds,
         copiedPlacedTile.tile.extraPoints,

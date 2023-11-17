@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { Player } from '@carcassonne-client/src/app/game/models/Room';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
+import { Player } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-player-table-cell',

@@ -1,26 +1,24 @@
-import {
-  ExtendedTile,
-  Player,
-  PlayersColors,
-  Room,
-  ShortenedRoom,
-} from '../models/Room';
+import { PlayersColors } from '../models/Room';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
 import { tap } from 'rxjs/operators';
-import {
-  CreateRoomPayload,
-  JoinRoomPayload,
-  RoomError,
-  SocketAnswer,
-  StartGamePayload,
-} from '../models/socket';
+import { RoomError } from '../models/socket';
 import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHandler';
 import { SocketService } from '../../commons/services/socket.service';
 import { AuthService } from '@carcassonne-client/src/app/user/auth.service';
 import { Players } from '../models/Players';
+import {
+  CreateRoomPayload,
+  CurrentTile,
+  JoinRoomPayload,
+  Player,
+  RoomAbstract as Room,
+  ShortenedRoom,
+  SocketAnswer,
+  StartGamePayload,
+} from '@carcasonne-mr/shared-interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -191,7 +189,7 @@ export class RoomService extends SocketService {
     this.socket.emit('start_game', startGamePayload);
   }
 
-  public placeTile(tile: ExtendedTile): void {
+  public placeTile(tile: CurrentTile): void {
     this.socket.emit('tile_placed', {
       roomID: this.currentRoomValue?.roomId,
       extendedTile: tile,

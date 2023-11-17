@@ -1,17 +1,15 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import {
-  PlayersColors,
-  ShortenedRoom,
-} from '@carcassonne-client/src/app/game/models/Room';
+import { PlayersColors } from '@carcassonne-client/src/app/game/models/Room';
 import { PlayerOptionsData } from '../../../models/dialogWindowData';
+import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-player-options-dialog-window',
   templateUrl: './player-options-dialog-window.component.html',
   styleUrls: ['./player-options-dialog-window.component.sass'],
 })
-export class PlayerOptionsDialogWindowComponent implements OnInit {
+export class PlayerOptionsDialogWindowComponent {
   constructor(
     public dialogRef: MatDialogRef<
       PlayerOptionsDialogWindowComponent,
@@ -19,8 +17,6 @@ export class PlayerOptionsDialogWindowComponent implements OnInit {
     >,
     @Inject(MAT_DIALOG_DATA) public data: PlayerOptionsData
   ) {}
-
-  ngOnInit(): void {}
 
   onNoClick(): void {
     this.dialogRef.close();

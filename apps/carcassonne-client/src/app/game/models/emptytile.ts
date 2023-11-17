@@ -1,14 +1,4 @@
-export enum Environment {
-  ROADS = 'roads',
-  CITIES = 'cities',
-  FIELD = 'field',
-  CHURCH = 'church',
-}
-
-export interface Coordinates {
-  x: number;
-  y: number;
-}
+import { Environment } from '@carcasonne-mr/shared-interfaces';
 
 export interface Emptytile {
   top?: Environment;
