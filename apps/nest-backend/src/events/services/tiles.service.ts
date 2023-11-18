@@ -14,8 +14,8 @@ export class TilesService {
     ]);
   }
 
-  public getOppositePositions(position: Position): Position {
-    return this.oppositePositions.get(position) as Position;
+  public getOppositePositions(position: Position): Position | undefined {
+    return this.oppositePositions.get(position);
   }
 
   public getCorrespondingCoordinates(

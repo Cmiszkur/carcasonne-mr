@@ -13,7 +13,6 @@ import { CheckTilesService } from './services/check-tiles.service';
 import {
   CreateRoomPayload,
   ExtendedSocket,
-  GetNewTilePayload,
   JoinRoomPayload,
   LeaveRoomPayload,
   PlacedTilePayload,
@@ -64,27 +63,6 @@ export class EventsGateway implements OnGatewayConnection {
         .emit('new_player_joined', joinedRoomAnswer?.answer?.room?.players);
     }
     client.emit('joined_room', joinedRoomAnswer);
-  }
-
-  // @SubscribeMessage('check_tile')
-  // async handleCheckTile(client: ExtendedSocket, payload: CheckTilePayload): Promise<void> {
-  //   const isOK: boolean = await this.tilesService.checkTile(payload.roomID, payload.coordinates, payload.tileValues, payload.rotation);
-  //   console.log('isOK', isOK);
-  //   client.emit('checked_tile', isOK);
-  // }
-
-  //TODO: Zastanowić się czy ten endpoint ma dalej sens.
-  @SubscribeMessage('get_new_tile')
-  async handdleGetNewTile(
-    client: ExtendedSocket,
-    payload: GetNewTilePayload
-  ): Promise<void> {
-    const username = client.username;
-    const selectedTile: SocketAnswer = await this.gameService.getNewTile(
-      payload.roomID,
-      username
-    );
-    client.emit('selected_tile', selectedTile);
   }
 
   @SubscribeMessage('create_room')

@@ -183,34 +183,6 @@ export default class RoomService extends BasicService {
   }
 
   /**
-   * On success creates answer with room object and on error creates message with error and error message.
-   * @param filter
-   * @param update
-   * @param options
-   * @returns
-   */
-  private async findRoomAndUpdate(
-    filter: FilterQuery<RoomDocument>,
-    update: UpdateQuery<RoomDocument>,
-    options?: QueryOptions
-  ): Promise<SocketAnswer> {
-    return this.roomModel
-      .findOneAndUpdate(filter, update, options)
-      .exec()
-      .then(
-        (room: RoomDocument | null) => {
-          return this.createAnswer(room ? null : RoomError.ROOM_NOT_FOUND, {
-            room,
-            tile: null,
-          });
-        },
-        () => {
-          return this.createAnswer(RoomError.DATABASE_ERROR, null);
-        }
-      );
-  }
-
-  /**
    * Deletes previous room.
    * @param roomId
    * @private

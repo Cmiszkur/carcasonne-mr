@@ -115,8 +115,7 @@ export class PointCountingService {
     tileId: string,
     newOrUpdatedPathIds: Set<string>,
     extraPoints: boolean,
-    placedFallower?: FollowerDetails,
-    pathIdFromPreviousTile?: string
+    placedFallower?: FollowerDetails
   ): void {
     citiesOrRoads.forEach((positionSet) => {
       if (positionSet.length >= 2) {
@@ -137,19 +136,10 @@ export class PointCountingService {
           position
         );
         const pathId =
-          pathIdFromPreviousTile ||
-          this.getPathId(pathData, nextTile) ||
-          this.initializePath(pathData);
-        const isNextTileAlreadyChecked: boolean = this.isTileAlreadyChecked(
-          pathId,
-          pathData,
-          position,
-          nextTile?.id
-        );
-        const nextTileCitiesOrRoads: [Position[]] | undefined =
-          nextTile?.tileValuesAfterRotation?.[tileValuesKey];
+          this.getPathId(pathData, nextTile) || this.initializePath(pathData);
 
         newOrUpdatedPathIds.add(pathId);
+
         this.updatePathData(
           pathData,
           tileId,
@@ -160,21 +150,6 @@ export class PointCountingService {
           extraPoints,
           position
         );
-        //TODO: To się chyba nigdy nie wykona, może do usunięcia.
-        if (nextTile && nextTileCitiesOrRoads && !isNextTileAlreadyChecked) {
-          this.checkNextTile(
-            board,
-            nextTileCitiesOrRoads,
-            pathData,
-            nextTile.coordinates,
-            tileValuesKey,
-            nextTile.id,
-            newOrUpdatedPathIds,
-            nextTile.tile.extraPoints,
-            undefined,
-            pathId
-          );
-        }
       }
     });
   }
@@ -279,7 +254,7 @@ export class PointCountingService {
     });
     const mergedPathData: PathData = {
       points: mergedPoints,
-      pathOwners: Array.from(mergedOwners),
+      pathOwners: mergedOwners,
       countedTiles: mergedCountedTiles,
       completed: false,
     };
@@ -342,22 +317,6 @@ export class PointCountingService {
       isCompleted.push(!!nextTile);
     });
     return isCompleted.every(Boolean);
-  }
-
-  private isTileAlreadyChecked(
-    pathId: string,
-    pathData: PathDataMap,
-    position: Position,
-    tileId?: string
-  ): boolean {
-    return (
-      pathData
-        .get(pathId)
-        ?.countedTiles?.get(tileId || '')
-        ?.checkedPositions.has(
-          this.tilesService.getOppositePositions(position)
-        ) || false
-    );
   }
 
   /**

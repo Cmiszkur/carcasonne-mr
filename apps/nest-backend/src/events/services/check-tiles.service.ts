@@ -11,6 +11,7 @@ import {
 } from '@carcasonne-mr/shared-interfaces';
 import { Room, RoomDocument } from '../schemas/room.schema';
 import { TilesService } from './tiles.service';
+import { copy } from '../functions/copyObject';
 
 @Injectable()
 export class CheckTilesService {
@@ -28,15 +29,14 @@ export class CheckTilesService {
       uncheckedTiles ||
       (await this.roomModel.findOne({ roomId: roomID }).lean())?.board ||
       [];
-    const tilesWithCoordinatesToCheck: Map<Position, ExtendedTile> | null =
-      this.setTilesWithCoordinatesToCheck(
-        _uncheckedTiles,
-        extendedTile.coordinates
-      );
-    //this.setTilesWithCoordinatesToCheck might return null when coordinates are already taken
-    if (tilesWithCoordinatesToCheck === null) {
+    const tileCoordinates = extendedTile.coordinates;
+
+    if (this.coordinatesAlreadyTaken(_uncheckedTiles, tileCoordinates)) {
       return false;
     }
+
+    const tilesWithCoordinatesToCheck: Map<Position, ExtendedTile> | null =
+      this.setTilesWithCoordinatesToCheck(_uncheckedTiles, tileCoordinates);
     const tileValuesAfterRotation = this.tilesValuesAfterRotation(
       extendedTile.tile.tileValues,
       extendedTile.rotation
@@ -60,19 +60,14 @@ export class CheckTilesService {
     if (tileValues === null) {
       return null;
     }
-    const copiedTileValues: TileValues = JSON.parse(
-      JSON.stringify(tileValues)
-    ) as TileValues;
+    const copiedTileValues: TileValues = copy(tileValues);
     const positions: Position[] = [
       Position.TOP,
       Position.RIGHT,
       Position.BOTTOM,
       Position.LEFT,
     ];
-    const rotationValueToIndexSkip: Map<number, number> = new Map<
-      number,
-      number
-    >([
+    const rotationValueToIndexSkip = new Map<number, number>([
       [0, 0],
       [90, 1],
       [180, 2],
@@ -110,52 +105,38 @@ export class CheckTilesService {
   private setTilesWithCoordinatesToCheck(
     uncheckedTiles: ExtendedTile[],
     coordinates: Coordinates
-  ): Map<Position, ExtendedTile> | null {
-    const coordinatesAlreadyTaken: boolean =
-      uncheckedTiles.findIndex((tile) =>
-        this.tilesService.checkCoordinates(tile.coordinates, coordinates)
-      ) >= 0;
-    if (coordinatesAlreadyTaken) {
-      return null;
-    }
-    const tilesWithCoordinatesToCheck: Map<Position, ExtendedTile> = new Map<
-      Position,
-      ExtendedTile
-    >();
+  ): Map<Position, ExtendedTile> {
+    const tilesWithCoordinatesToCheck = new Map<Position, ExtendedTile>();
     const coordinatesToCheck: Coordinates[] = [
       { x: coordinates.x - 1, y: coordinates.y },
       { x: coordinates.x + 1, y: coordinates.y },
       { x: coordinates.x, y: coordinates.y - 1 },
       { x: coordinates.x, y: coordinates.y + 1 },
     ];
-    const indexToPositionValue: Map<number, Position> = new Map<
-      number,
-      Position
-    >([
+    const indexToPositionValue = new Map<number, Position>([
       [1, Position.LEFT],
       [2, Position.RIGHT],
       [3, Position.BOTTOM],
       [4, Position.TOP],
     ]);
 
-    coordinatesToCheck.forEach(
-      (coordinates: Coordinates, coordinatesIndex: number) => {
-        uncheckedTiles.forEach((tileToCheck: ExtendedTile) => {
-          if (
-            this.tilesService.checkCoordinates(
-              tileToCheck.coordinates,
-              coordinates
-            )
-          ) {
-            const checkedTilePosition: Position | undefined =
-              indexToPositionValue.get(coordinatesIndex + 1);
-            checkedTilePosition &&
-              tilesWithCoordinatesToCheck.set(checkedTilePosition, tileToCheck);
-            return;
-          }
-        });
-      }
-    );
+    coordinatesToCheck.forEach((coordinates, coordinatesIndex) => {
+      uncheckedTiles.every((tileToCheck) => {
+        const matchingCoordinates = this.tilesService.checkCoordinates(
+          tileToCheck.coordinates,
+          coordinates
+        );
+
+        if (!matchingCoordinates) {
+          return true;
+        }
+        const checkedTilePosition = indexToPositionValue.get(
+          coordinatesIndex + 1
+        );
+        tilesWithCoordinatesToCheck.set(checkedTilePosition, tileToCheck);
+        return false;
+      });
+    });
     return tilesWithCoordinatesToCheck;
   }
 
@@ -174,6 +155,7 @@ export class CheckTilesService {
         this.tilesService.getOppositePositions(position);
       const currentlyCheckedTileValues: TileValues | null =
         tileWithCoordinatesToCheck.tileValuesAfterRotation;
+
       if (oppositePosition) {
         const checkedTileEnvironment = this.getEnvironmentFromPostition(
           currentlyCheckedTileValues,
@@ -196,19 +178,22 @@ export class CheckTilesService {
   ): keyof TileValuesFlat | null {
     const placedTileValuesFlat: TileValuesFlat | null =
       this.flatTileValues(tileValues);
-    if (placedTileValuesFlat) {
-      return placedTileValuesFlat.cities.some(
-        (positionInCities) => position === positionInCities
-      )
-        ? Environment.CITIES
-        : placedTileValuesFlat.roads.some(
-            (positionInRoads) => position === positionInRoads
-          )
-        ? Environment.ROADS
-        : null;
-    } else {
+
+    if (!placedTileValuesFlat) {
       return null;
     }
+
+    const hasCitiesInPosition = placedTileValuesFlat.cities.some(
+      (positionInCities) => position === positionInCities
+    );
+    const hasRoadsInPosition = placedTileValuesFlat.roads.some(
+      (positionInRoads) => position === positionInRoads
+    );
+
+    if (hasCitiesInPosition) {
+      return Environment.CITIES;
+    }
+    return hasRoadsInPosition ? Environment.ROADS : null;
   }
 
   private flatTileValues(tileValues: TileValues | null): TileValuesFlat | null {
@@ -218,5 +203,16 @@ export class CheckTilesService {
           roads: tileValues.roads?.flat() || [],
         }
       : null;
+  }
+
+  private coordinatesAlreadyTaken(
+    tiles: ExtendedTile[],
+    coordinates: Coordinates
+  ): boolean {
+    return (
+      tiles.findIndex((tile) =>
+        this.tilesService.checkCoordinates(tile.coordinates, coordinates)
+      ) >= 0
+    );
   }
 }

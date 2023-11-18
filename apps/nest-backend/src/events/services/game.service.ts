@@ -57,7 +57,7 @@ export class GameService extends BasicService {
     }
 
     //Updating fields.
-    await this.drawTileAndUpdateTiles(searchedRoom, username, allTiles);
+    this.drawTileAndUpdate(searchedRoom, username, allTiles);
     const extendedStartingTile: ExtendedTile =
       this.getExtendedStartingTile(startingTile);
     searchedRoom.board.push(extendedStartingTile);
@@ -104,11 +104,7 @@ export class GameService extends BasicService {
     );
 
     // Draw a tile for the next player and update the tilesLeft count
-    await this.drawTileAndUpdateTiles(
-      searchedRoom,
-      nextPlayer,
-      searchedRoom.tilesLeft
-    );
+    this.drawTileAndUpdate(searchedRoom, nextPlayer, searchedRoom.tilesLeft);
 
     // Generate a unique ID for the placed tile and set its values after rotation
     extendedTile.id = crypto.randomUUID();
@@ -144,67 +140,21 @@ export class GameService extends BasicService {
   }
 
   /**
-   * Gets random tile from the remaining tiles and pushes a move into boardMoves.
-   * @param roomId
-   * @param player
-   * @returns
-   */
-  public async getNewTile(
-    roomId: string,
-    player: string
-  ): Promise<SocketAnswer> {
-    let tilesLeft: Tiles[] = [];
-    let selectedTile: Tile | null = null;
-    await this.drawTile(roomId, null).then((tilesSet: TilesSet) => {
-      tilesLeft = tilesSet.allTiles;
-      selectedTile = tilesSet.drawnTile;
-    });
-    if (!selectedTile || !!tilesLeft.length) {
-      //FIXME: Lepszy opis błędu.
-      return this.createAnswer(RoomError.NO_STARTING_TILE_FOUND, null);
-    }
-    return await this.roomModel
-      .updateOne(
-        { roomId: roomId },
-        {
-          tilesLeft: tilesLeft,
-          lastChosenTile: { tile: selectedTile, player: player },
-        }
-      )
-      .exec()
-      .then(
-        () => {
-          return this.createAnswer(null, { tile: selectedTile, room: null });
-        },
-        (err: Error) => {
-          return this.createAnswer(RoomError.DATABASE_ERROR, null, err.message);
-        }
-      );
-  }
-
-  //TODO: Zastanowić się nad lepszą nazwą.
-  /**
    * Draws tile from left tiles and updates field ``lastChosenTile`` and ``tilesLeft``
    * @param room
    * @param username
    * @param tiles
    */
-  private async drawTileAndUpdateTiles(
+  private drawTileAndUpdate(
     room: RoomDocument,
     username: string,
     tiles: Tiles[]
-  ): Promise<void> {
-    let allTiles: Tiles[] = tiles;
-    let drawnTile: Tile | null = null;
-
-    await this.drawTile(null, allTiles).then((tilesSet: TilesSet) => {
-      drawnTile = tilesSet.drawnTile;
-      allTiles = tilesSet.allTiles;
-    });
-    room.lastChosenTile = drawnTile
-      ? { tile: drawnTile, player: username }
+  ): void {
+    const tilesSet: TilesSet = this.drawTile(tiles);
+    room.lastChosenTile = tilesSet.drawnTile
+      ? { tile: tilesSet.drawnTile, player: username }
       : null;
-    room.tilesLeft = allTiles;
+    room.tilesLeft = tilesSet.allTiles;
   }
 
   private chooseNextPlayer(players: Player[], currentPlayer: string): string {
@@ -214,20 +164,8 @@ export class GameService extends BasicService {
     return players[(indexOfCurrentPlayer + 1) % players.length].username;
   }
 
-  private async drawTile(
-    roomId: string | null,
-    providedTilesLeft: Tiles[] | null
-  ): Promise<TilesSet> {
-    let tilesLeft: Tiles[] =
-      providedTilesLeft ||
-      (roomId
-        ? (
-            await this.roomModel
-              .findOne({ roomId: roomId })
-              .select('tilesLeft')
-              .exec()
-          )?.tilesLeft || []
-        : []);
+  private drawTile(providedTilesLeft: Tiles[] | null): TilesSet {
+    let tilesLeft: Tiles[] = copy(providedTilesLeft);
     const pickedTileId: string = this.pickRandomTileId(tilesLeft);
     const drawnTile =
       tilesLeft.find((tiles) => tiles.id === pickedTileId)?.tile || null;
