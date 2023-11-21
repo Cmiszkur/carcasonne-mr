@@ -11,7 +11,6 @@ import {
 } from '@carcasonne-mr/shared-interfaces';
 import { Room, RoomDocument } from '../schemas/room.schema';
 import { TilesService } from './tiles.service';
-import { copy } from '../functions/copyObject';
 
 @Injectable()
 export class CheckTilesService {
@@ -26,9 +25,7 @@ export class CheckTilesService {
     uncheckedTiles?: ExtendedTile[]
   ): Promise<boolean> {
     const _uncheckedTiles: ExtendedTile[] =
-      uncheckedTiles ||
-      (await this.roomModel.findOne({ roomId: roomID }).lean())?.board ||
-      [];
+      uncheckedTiles || (await this.roomModel.findOne({ roomId: roomID }).lean())?.board || [];
     const tileCoordinates = extendedTile.coordinates;
 
     if (this.coordinatesAlreadyTaken(_uncheckedTiles, tileCoordinates)) {
@@ -37,61 +34,10 @@ export class CheckTilesService {
 
     const tilesWithCoordinatesToCheck: Map<Position, ExtendedTile> | null =
       this.setTilesWithCoordinatesToCheck(_uncheckedTiles, tileCoordinates);
-    const tileValuesAfterRotation = this.tilesValuesAfterRotation(
-      extendedTile.tile.tileValues,
-      extendedTile.rotation
-    );
     return this.compareTileValues(
-      tileValuesAfterRotation,
+      extendedTile.tileValuesAfterRotation,
       tilesWithCoordinatesToCheck
     );
-  }
-
-  /**
-   * Returns tile values after rotation.
-   * @param tileValues
-   * @param rotation
-   * @returns
-   */
-  public tilesValuesAfterRotation(
-    tileValues: TileValues | null,
-    rotation: number
-  ): TileValues | null {
-    if (tileValues === null) {
-      return null;
-    }
-    const copiedTileValues: TileValues = copy(tileValues);
-    const positions: Position[] = [
-      Position.TOP,
-      Position.RIGHT,
-      Position.BOTTOM,
-      Position.LEFT,
-    ];
-    const rotationValueToIndexSkip = new Map<number, number>([
-      [0, 0],
-      [90, 1],
-      [180, 2],
-      [270, 3],
-    ]);
-    const indexesToSkip: number | undefined =
-      rotationValueToIndexSkip.get(rotation);
-
-    for (const [key, positionsInTileValues] of Object.entries(
-      copiedTileValues
-    )) {
-      (positionsInTileValues as [Position[]]).forEach(
-        (positionSet: Position[]) => {
-          positionSet.forEach((position: Position, positionIndex: number) => {
-            const indexInPositionsTable: number = positions.indexOf(position);
-            if (indexesToSkip && indexInPositionsTable >= 0) {
-              positionSet[positionIndex] =
-                positions[(indexInPositionsTable + indexesToSkip) % 4];
-            }
-          });
-        }
-      );
-    }
-    return copiedTileValues;
   }
 
   /**
@@ -130,9 +76,7 @@ export class CheckTilesService {
         if (!matchingCoordinates) {
           return true;
         }
-        const checkedTilePosition = indexToPositionValue.get(
-          coordinatesIndex + 1
-        );
+        const checkedTilePosition = indexToPositionValue.get(coordinatesIndex + 1);
         tilesWithCoordinatesToCheck.set(checkedTilePosition, tileToCheck);
         return false;
       });
@@ -147,10 +91,7 @@ export class CheckTilesService {
     let isOK = false;
 
     //Iterates through tiles that are nearby placed tile.
-    for (const [
-      position,
-      tileWithCoordinatesToCheck,
-    ] of tilesWithCoordinatesToCheck) {
+    for (const [position, tileWithCoordinatesToCheck] of tilesWithCoordinatesToCheck) {
       const oppositePosition: Position | undefined =
         this.tilesService.getOppositePositions(position);
       const currentlyCheckedTileValues: TileValues | null =
@@ -161,10 +102,7 @@ export class CheckTilesService {
           currentlyCheckedTileValues,
           oppositePosition
         );
-        const placedTileEnvironment = this.getEnvironmentFromPostition(
-          tileValues,
-          position
-        );
+        const placedTileEnvironment = this.getEnvironmentFromPostition(tileValues, position);
         isOK = placedTileEnvironment === checkedTileEnvironment;
       }
     }
@@ -176,8 +114,7 @@ export class CheckTilesService {
     tileValues: TileValues | null,
     position: Position
   ): keyof TileValuesFlat | null {
-    const placedTileValuesFlat: TileValuesFlat | null =
-      this.flatTileValues(tileValues);
+    const placedTileValuesFlat: TileValuesFlat | null = this.flatTileValues(tileValues);
 
     if (!placedTileValuesFlat) {
       return null;
@@ -205,10 +142,7 @@ export class CheckTilesService {
       : null;
   }
 
-  private coordinatesAlreadyTaken(
-    tiles: ExtendedTile[],
-    coordinates: Coordinates
-  ): boolean {
+  private coordinatesAlreadyTaken(tiles: ExtendedTile[], coordinates: Coordinates): boolean {
     return (
       tiles.findIndex((tile) =>
         this.tilesService.checkCoordinates(tile.coordinates, coordinates)

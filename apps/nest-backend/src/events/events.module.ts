@@ -9,8 +9,9 @@ import { Room, RoomSchema } from './schemas/room.schema';
 import { UsersService } from '@nest-backend/src/users/users.service';
 import { User, UserSchema } from '@nest-backend/src/users/schemas/user.schema';
 import { CheckTilesService } from './services/check-tiles.service';
-import { PointCountingService } from './services/point-counting.service';
+import { PathService } from './services/path.service';
 import { TilesService } from './services/tiles.service';
+import { PointCountingService } from './services/point-counting.service';
 
 @Module({
   providers: [
@@ -20,8 +21,9 @@ import { TilesService } from './services/tiles.service';
     CheckTilesService,
     GameService,
     BasicService,
-    PointCountingService,
+    PathService,
     TilesService,
+    PointCountingService,
   ],
   imports: [
     MongooseModule.forFeature([

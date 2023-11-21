@@ -20,8 +20,10 @@ import {
 } from '@carcasonne-mr/shared-interfaces';
 import { CheckTilesService } from './check-tiles.service';
 import * as crypto from 'crypto';
-import { PointCountingService } from './point-counting.service';
+import { PathService } from './path.service';
 import { copy } from '../functions/copyObject';
+import { TilesService } from './tiles.service';
+import { PointCountingService } from './point-counting.service';
 
 @Injectable()
 export class GameService extends BasicService {
@@ -29,15 +31,14 @@ export class GameService extends BasicService {
     @InjectModel(Room.name) private roomModel: Model<RoomDocument>,
     @InjectModel(Tiles.name) private tileModel: Model<TileDocument>,
     private checkTilesService: CheckTilesService,
+    private pathService: PathService,
+    private tilesService: TilesService,
     private pointCountingService: PointCountingService
   ) {
     super();
   }
 
-  public async startGame(
-    roomId: string,
-    username: string
-  ): Promise<SocketAnswer> {
+  public async startGame(roomId: string, username: string): Promise<SocketAnswer> {
     const startingTilesSet: TilesSet | null = await this.getStartingTilesSet();
     const startingTile: Tile | null = startingTilesSet?.drawnTile || null;
     const searchedRoom: RoomDocument | null = await this.roomModel.findOne({
@@ -58,8 +59,7 @@ export class GameService extends BasicService {
 
     //Updating fields.
     this.drawTileAndUpdate(searchedRoom, username, allTiles);
-    const extendedStartingTile: ExtendedTile =
-      this.getExtendedStartingTile(startingTile);
+    const extendedStartingTile: ExtendedTile = this.getExtendedStartingTile(startingTile);
     searchedRoom.board.push(extendedStartingTile);
     searchedRoom.boardMoves.push(this.getStartingBoardMove());
     searchedRoom.paths = this.getDefaultPaths(extendedStartingTile);
@@ -98,45 +98,65 @@ export class GameService extends BasicService {
     }
 
     // Choose the next player in turn
-    const nextPlayer: string = this.chooseNextPlayer(
-      searchedRoom.players,
-      username
-    );
+    const nextPlayer: string = this.chooseNextPlayer(searchedRoom.players, username);
 
     // Draw a tile for the next player and update the tilesLeft count
     this.drawTileAndUpdate(searchedRoom, nextPlayer, searchedRoom.tilesLeft);
 
-    // Generate a unique ID for the placed tile and set its values after rotation
-    extendedTile.id = crypto.randomUUID();
-    this.setTilesAfterRotationValue(extendedTile);
-
     // Add the placed tile to the board and record the move in boardMoves
     searchedRoom.board.push(extendedTile);
-    searchedRoom.boardMoves.push(
-      this.getBoardMove(extendedTile.coordinates, username)
-    );
+    searchedRoom.boardMoves.push(this.getBoardMove(extendedTile.coordinates, username));
 
     // If a pawn is placed on the tile, remove the corresponding follower from the player's inventory
-    if (this.checkIfPawnWasPlaced(extendedTile))
+    if (this.checkIfPawnWasPlaced(extendedTile)) {
       this.removeFallowerFromPlayer(searchedRoom, username);
+    }
 
     // Check the point scoring for the new tile and update the paths accordingly
     const copiedSearchedRoom: Room = copy(searchedRoom.toObject());
-    const pointCheckingAnswer: PointCheckingAnswer =
-      this.pointCountingService.checkNewTile(copiedSearchedRoom, extendedTile);
+    const pointCheckingAnswer: PointCheckingAnswer = this.pathService.checkNewTile(
+      copiedSearchedRoom,
+      extendedTile
+    );
     searchedRoom.paths = pointCheckingAnswer.paths;
     searchedRoom.players = pointCheckingAnswer.players;
+
+    // Updates players points if tile was placed near church and church has been completed
+    const tilesWithChurches = this.tilesService.checkForChurchesAround(
+      searchedRoom.board,
+      extendedTile
+    );
+    if (tilesWithChurches.length) {
+      const churchCounting = this.pointCountingService.updatePlayersPointsFromChurches(
+        searchedRoom.board,
+        tilesWithChurches,
+        searchedRoom.gameEnded,
+        searchedRoom.players
+      );
+
+      searchedRoom.players = churchCounting.updatedPlayers;
+      searchedRoom.board = this.updateBoardAfterChurchCompletion(
+        searchedRoom.board,
+        churchCounting.tilesWithCompletedChurches
+      );
+    }
 
     // Save the modified room and return an answer indicating success
     return this.saveRoom(searchedRoom);
   }
 
-  private setTilesAfterRotationValue(extendedTile: ExtendedTile): void {
-    extendedTile.tileValuesAfterRotation =
-      this.checkTilesService.tilesValuesAfterRotation(
-        extendedTile.tile.tileValues,
-        extendedTile.rotation
-      );
+  private updateBoardAfterChurchCompletion(
+    board: ExtendedTile[],
+    tilesWithCompletedChurches: string[]
+  ): ExtendedTile[] {
+    return board.map((tile) => {
+      const tileHasChurchCompleted = tilesWithCompletedChurches.some((id) => id === tile.id);
+      return {
+        ...tile,
+        fallowerDetails: tileHasChurchCompleted ? null : tile.fallowerDetails,
+        isFollowerPlaced: tileHasChurchCompleted ? false : tile.isFollowerPlaced,
+      };
+    });
   }
 
   /**
@@ -145,11 +165,7 @@ export class GameService extends BasicService {
    * @param username
    * @param tiles
    */
-  private drawTileAndUpdate(
-    room: RoomDocument,
-    username: string,
-    tiles: Tiles[]
-  ): void {
+  private drawTileAndUpdate(room: RoomDocument, username: string, tiles: Tiles[]): void {
     const tilesSet: TilesSet = this.drawTile(tiles);
     room.lastChosenTile = tilesSet.drawnTile
       ? { tile: tilesSet.drawnTile, player: username }
@@ -167,28 +183,21 @@ export class GameService extends BasicService {
   private drawTile(providedTilesLeft: Tiles[] | null): TilesSet {
     let tilesLeft: Tiles[] = copy(providedTilesLeft);
     const pickedTileId: string = this.pickRandomTileId(tilesLeft);
-    const drawnTile =
-      tilesLeft.find((tiles) => tiles.id === pickedTileId)?.tile || null;
+    const drawnTile = tilesLeft.find((tiles) => tiles.id === pickedTileId)?.tile || null;
     tilesLeft = this.deletePickedTile(tilesLeft, pickedTileId);
     return { allTiles: tilesLeft, drawnTile };
   }
 
   private pickRandomTileId(tilesLeft: Tiles[]): string {
     const tilesDispersed: string[] = tilesLeft.flatMap((tiles) => {
-      return Array(tiles.numberOfTiles).fill(
-        tiles.id,
-        0,
-        tiles.numberOfTiles - 1
-      ) as string[];
+      return Array(tiles.numberOfTiles).fill(tiles.id, 0, tiles.numberOfTiles - 1) as string[];
     });
     const randomNumber: number = Math.floor(Math.random() * tilesLeft.length);
     return tilesDispersed[randomNumber];
   }
 
   private deletePickedTile(tilesLeft: Tiles[], tilesId: string): Tiles[] {
-    const indexOfElementToDelete: number = tilesLeft.findIndex(
-      (tiles) => tiles.id === tilesId
-    );
+    const indexOfElementToDelete: number = tilesLeft.findIndex((tiles) => tiles.id === tilesId);
     tilesLeft[indexOfElementToDelete].numberOfTiles -= 1;
     if (tilesLeft[indexOfElementToDelete].numberOfTiles === 0)
       delete tilesLeft[indexOfElementToDelete];
@@ -225,10 +234,7 @@ export class GameService extends BasicService {
     return this.getBoardMove({ x: 0, y: 0 }, null);
   }
 
-  private getBoardMove(
-    coordinates: Coordinates | null,
-    player: string | null
-  ): BoardMove {
+  private getBoardMove(coordinates: Coordinates | null, player: string | null): BoardMove {
     return {
       coordinates: coordinates,
       player: player,
@@ -250,9 +256,7 @@ export class GameService extends BasicService {
    * @param username
    */
   private removeFallowerFromPlayer(room: Room, username: string): void {
-    const playerIndex: number = room.players.findIndex(
-      (p) => p.username === username
-    );
+    const playerIndex: number = room.players.findIndex((p) => p.username === username);
     room.players[playerIndex].followers -= 1;
   }
 

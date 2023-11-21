@@ -2,7 +2,7 @@ import { BasicService } from './basic.service';
 import { Tiles, TileDocument } from '../schemas/tiles.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Room, RoomDocument } from '../schemas/room.schema';
-import { FilterQuery, Model, QueryOptions, UpdateQuery } from 'mongoose';
+import { Model } from 'mongoose';
 import { UsersService } from '@nest-backend/src/users/users.service';
 import {
   Player,
@@ -27,8 +27,9 @@ export default class RoomService extends BasicService {
     color: string,
     deletePrevious = false
   ): Promise<SocketAnswer> {
-    const roomCreatedPreviously: string | null =
-      await this.usersService.checkIfRoomCreatedByUser(host);
+    const roomCreatedPreviously: string | null = await this.usersService.checkIfRoomCreatedByUser(
+      host
+    );
 
     if (roomCreatedPreviously === roomID) {
       if (deletePrevious) {
@@ -66,11 +67,7 @@ export default class RoomService extends BasicService {
    * @param username - username of joining player
    * @param color - meeple color of joining player
    */
-  public async joinRoom(
-    roomId: string,
-    username: string,
-    color?: string
-  ): Promise<SocketAnswer> {
+  public async joinRoom(roomId: string, username: string, color?: string): Promise<SocketAnswer> {
     const roomToJoin: RoomDocument | null = await this.roomModel.findOne({
       roomId: roomId,
     });
@@ -87,8 +84,7 @@ export default class RoomService extends BasicService {
           username,
           PlayerState.CONNECTED
         );
-        roomToJoin.hostLeftDate =
-          roomToJoin.roomHost === username ? null : roomToJoin.hostLeftDate;
+        roomToJoin.hostLeftDate = roomToJoin.roomHost === username ? null : roomToJoin.hostLeftDate;
         return this.saveRoom(roomToJoin);
       } else {
         return this.createAnswer(RoomError.GAME_HAS_ALREADY_STARTED, null);
@@ -124,10 +120,7 @@ export default class RoomService extends BasicService {
    * @param username - username of leaving player.
    * @returns
    */
-  public async leaveRoom(
-    roomId: string,
-    username: string
-  ): Promise<SocketAnswer> {
+  public async leaveRoom(roomId: string, username: string): Promise<SocketAnswer> {
     const leftRoom: RoomDocument | null = await this.roomModel.findOne({
       roomId: roomId,
     });
@@ -142,12 +135,9 @@ export default class RoomService extends BasicService {
       );
     } else {
       leftRoom.numberOfPlayers -= 1;
-      leftRoom.players = leftRoom.players.filter(
-        (player) => player.username !== username
-      );
+      leftRoom.players = leftRoom.players.filter((player) => player.username !== username);
     }
-    leftRoom.hostLeftDate =
-      leftRoom.roomHost === username ? new Date() : leftRoom.hostLeftDate;
+    leftRoom.hostLeftDate = leftRoom.roomHost === username ? new Date() : leftRoom.hostLeftDate;
     return this.saveRoom(leftRoom);
   }
 
@@ -171,11 +161,7 @@ export default class RoomService extends BasicService {
    * @param state - the state to be set after the change
    * @private
    */
-  private changePlayerState(
-    players: Player[],
-    username: string,
-    state: PlayerState
-  ): Player[] {
+  private changePlayerState(players: Player[], username: string, state: PlayerState): Player[] {
     return players.map((player) => {
       if (player.username === username) player.state = state;
       return player;
@@ -187,9 +173,7 @@ export default class RoomService extends BasicService {
    * @param roomId
    * @private
    */
-  private async deletePreviousRoom(
-    roomId: string
-  ): Promise<RoomDocument | null> {
+  private async deletePreviousRoom(roomId: string): Promise<RoomDocument | null> {
     return this.roomModel.findOneAndDelete({ roomId: roomId });
   }
 
