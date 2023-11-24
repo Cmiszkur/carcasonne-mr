@@ -9,7 +9,7 @@
 
   <mat-icon class="rotate_icon" *ngIf="isCurrentTile">rotate_right</mat-icon>
 
-  <ng-container *ngIf="isTilePlacementConfirmed">
+  <ng-container *ngIf="isTilePlacementConfirmed; else alreadyPlacedPawns">
     <button mat-icon-button 
             *ngFor="let pawn of pawns" 
             [style.transform]="pawn.transformValue" 
@@ -20,6 +20,16 @@
       </mat-icon>
     </button>
   </ng-container>
+
+  <ng-template #alreadyPlacedPawns>
+    <mat-icon *ngIf="this.extendedTile.fallowerDetails as fallowerDetails" 
+              class="placed-pawn"
+              [style.fill]="fallowerDetails.playerColor"
+              [style.transform]="pawn?.transformValue"
+              svgIcon="follower"
+              aria-hidden="false">
+      </mat-icon>
+  </ng-template>
 
 </div>
 
