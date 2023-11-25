@@ -5,7 +5,7 @@ import { RoomService } from '../../services/room.service';
 import {
   JoinRoomPayload,
   RoomAbstract,
-  SocketAnswer,
+  SocketAnswerReceived,
 } from '@carcasonne-mr/shared-interfaces';
 
 @Injectable({
@@ -16,7 +16,7 @@ export class JoinRoomResolver {
   resolve(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Observable<SocketAnswer | RoomAbstract> {
+  ): Observable<SocketAnswerReceived | RoomAbstract> {
     const queryParams: Partial<JoinRoomPayload> = { ...state.root.queryParams };
     return this.roomService.currentRoomValue
       ? of(this.roomService.currentRoomValue)

@@ -32,7 +32,7 @@ export class StartingRoomComponent implements OnInit {
    * @param selectedRoom - room selected from results table.
    */
   public saveSelectedRoom(selectedRoom: ShortenedRoom): void {
-    this.roomService.setSelectedRoom = selectedRoom;
+    this.roomService.setSelectedRoom(selectedRoom);
   }
 
   /**
@@ -60,10 +60,7 @@ export class StartingRoomComponent implements OnInit {
    * @param options
    * @private
    */
-  private navigateToWaitingRoom(
-    roomID: string | null,
-    options: PlayerOptions
-  ): void {
+  private navigateToWaitingRoom(roomID: string | null, options: PlayerOptions): void {
     if (!roomID) return;
     this.router.navigate(['./room/waiting-room'], {
       queryParams: { roomID: roomID, ...options },

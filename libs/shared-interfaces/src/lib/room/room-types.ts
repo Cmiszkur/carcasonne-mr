@@ -54,10 +54,7 @@ export interface PointCheckingAnswer {
 
 export type ShortenedRoom = Pick<
   RoomAbstract,
-  | 'players'
-  | 'numberOfPlayers'
-  | 'roomHost'
-  | 'roomId'
-  | 'gameStarted'
-  | 'gameEnded'
+  'players' | 'numberOfPlayers' | 'roomHost' | 'roomId' | 'gameStarted' | 'gameEnded'
 >;
+
+export type RoomReceived = Omit<RoomAbstract, 'paths'> & { paths: string };

@@ -1,18 +1,18 @@
-import {
-  Coordinates,
-  ExtendedTile,
-  Tile,
-  TileValues,
-} from '../tiles/tiles-types';
+import { RoomReceived } from './../room/room-types';
+import { Coordinates, ExtendedTile, Tile, TileValues } from '../tiles/tiles-types';
 import { IncomingMessage } from 'http';
 import { Socket } from 'socket.io';
 import { RoomAbstract, RoomError } from '../room';
+
+export type SocketAnswerReceived = Omit<SocketAnswer, 'answer'> & { answer: AnswerReceived | null };
 
 export interface SocketAnswer {
   error: RoomError | null;
   answer: Answer | null;
   errorMessage?: string;
 }
+
+export type AnswerReceived = Omit<Answer, 'room'> & { room: RoomReceived };
 
 export interface Answer {
   room: RoomAbstract | null;

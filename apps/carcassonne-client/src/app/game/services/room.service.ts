@@ -9,14 +9,16 @@ import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHand
 import { SocketService } from '../../commons/services/socket.service';
 import { AuthService } from '@carcassonne-client/src/app/user/auth.service';
 import { Players } from '../models/Players';
+import { deserializeObj } from '@shared-functions';
 import {
   CreateRoomPayload,
   CurrentTile,
   JoinRoomPayload,
   Player,
   RoomAbstract as Room,
+  RoomReceived,
   ShortenedRoom,
-  SocketAnswer,
+  SocketAnswerReceived,
   StartGamePayload,
 } from '@carcasonne-mr/shared-interfaces';
 
@@ -93,8 +95,11 @@ export class RoomService extends SocketService {
     return this.players$.value;
   }
 
-  public setPlayers(players: Players | null): void {
-    this.players$.next(players);
+  public setPlayers(players: Player[]): void {
+    this.players$.next({
+      loggedPlayer: this.findPlayer(players),
+      otherPlayers: this.getRestOfThePlayers(players),
+    });
   }
 
   public setSelectedRoomId(roomId: string) {
@@ -105,18 +110,18 @@ export class RoomService extends SocketService {
    * Sets selected room and selected room id.
    * @param room
    */
-  public set setSelectedRoom(room: ShortenedRoom) {
+  public setSelectedRoom(room: ShortenedRoom) {
     this.setSelectedRoomId(room.roomId);
     this.selectedRoom$.next(room);
   }
 
-  public set setCurrentRoom(room: Room) {
-    const players: Player[] = room.players;
-    this.setPlayers({
-      loggedPlayer: this.findPlayer(players),
-      otherPlayers: this.getRestOfThePlayers(players),
+  public setCurrentRoom(room: RoomReceived) {
+    this.setPlayers(room.players);
+
+    this.currentRoom$.next({
+      ...room,
+      paths: deserializeObj(room.paths),
     });
-    this.currentRoom$.next(room);
   }
 
   public getRoom(): Observable<Room> {
@@ -141,13 +146,10 @@ export class RoomService extends SocketService {
    * @param color - meeple color
    * @param roomID - id of room to join
    */
-  public joinRoom(color?: string, roomID?: string): Observable<SocketAnswer> {
+  public joinRoom(color?: string, roomID?: string): Observable<SocketAnswerReceived> {
     const _roomID: string | undefined = this.selectedRoomId || roomID;
     if (!_roomID) {
-      throw new CustomError(
-        RoomError.ROOM_ID_NOT_SPECIFIED,
-        'Choose room which you want to join'
-      );
+      throw new CustomError(RoomError.ROOM_ID_NOT_SPECIFIED, 'Choose room which you want to join');
     }
     //TODO: Zastanowić się nad obłsugą tego błedu lub rezygnacją ze sprawdzania tego na froncie.
     // if (!color && !this.currentRoomValue?.gameStarted) {
@@ -164,12 +166,9 @@ export class RoomService extends SocketService {
    * Creates room, updates current room and returns socket response.
    * @param color - meeple color
    */
-  public createRoom(color?: PlayersColors | null): Observable<SocketAnswer> {
+  public createRoom(color?: PlayersColors | null): Observable<SocketAnswerReceived> {
     if (!color) {
-      throw new CustomError(
-        RoomError.MEEPLE_COLOR_NOT_SPECIFIED,
-        'Choose your meeple color'
-      );
+      throw new CustomError(RoomError.MEEPLE_COLOR_NOT_SPECIFIED, 'Choose your meeple color');
     }
     const createRoomPayload: CreateRoomPayload = { color };
     this.connect();
@@ -200,9 +199,9 @@ export class RoomService extends SocketService {
    * Listens for ``joined_room`` response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  public receiveJoinRoomResponse(): Observable<SocketAnswer> {
-    return this.fromEventOnce<SocketAnswer>('joined_room').pipe(
-      tap((socketAnswer) => this.updateRoom(socketAnswer))
+  public receiveJoinRoomResponse(): Observable<SocketAnswerReceived> {
+    return this.fromEventOnce<SocketAnswerReceived>('joined_room').pipe(
+      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
     );
   }
 
@@ -210,10 +209,10 @@ export class RoomService extends SocketService {
    * Listens for ``game_started`` response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  public receiveGameStartedResponse(): Observable<SocketAnswer> {
+  public receiveGameStartedResponse(): Observable<SocketAnswerReceived> {
     this.connect();
-    return this.fromEventOnce<SocketAnswer>('game_started').pipe(
-      tap((socketAnswer) => this.updateRoom(socketAnswer))
+    return this.fromEventOnce<SocketAnswerReceived>('game_started').pipe(
+      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
     );
   }
 
@@ -224,7 +223,7 @@ export class RoomService extends SocketService {
   public receiveNewPlayerJoinedResponse(): Observable<Player[]> {
     this.connect();
     return this.fromEvent<Player[]>('new_player_joined').pipe(
-      tap((players) => this.updatePlayers(players))
+      tap((players) => this.setPlayers(players))
     );
   }
 
@@ -234,9 +233,7 @@ export class RoomService extends SocketService {
    */
   public receivePlayerLeftResponse(): Observable<Player[]> {
     this.connect();
-    return this.fromEvent<Player[]>('player_left').pipe(
-      tap((players) => this.updatePlayers(players))
-    );
+    return this.fromEvent<Player[]>('player_left').pipe(tap((players) => this.setPlayers(players)));
   }
 
   /**
@@ -244,44 +241,32 @@ export class RoomService extends SocketService {
    * Updates current room with returned new tiles.
    * @returns
    */
-  public receiveTilePlacedResponse(): Observable<SocketAnswer> {
+  public receiveTilePlacedResponse(): Observable<SocketAnswerReceived> {
     this.connect();
-    return this.fromEvent<SocketAnswer>(
-      'tile_placed_new_tile_distributed'
-    ).pipe(tap((socketAnswer) => this.updateRoom(socketAnswer)));
+    return this.fromEvent<SocketAnswerReceived>('tile_placed_new_tile_distributed').pipe(
+      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
+    );
   }
 
   /**
    * Listens for ``game_started`` response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  private receiveCreateRoomResponse(): Observable<SocketAnswer> {
+  private receiveCreateRoomResponse(): Observable<SocketAnswerReceived> {
     this.connect();
-    return this.fromEventOnce<SocketAnswer>('created_room_response').pipe(
-      tap((socketAnswer) => this.updateRoom(socketAnswer))
+    return this.fromEventOnce<SocketAnswerReceived>('created_room_response').pipe(
+      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
     );
   }
 
   /**
-   * Updates players in current room.
-   * @param players
-   * @private
-   */
-  private updatePlayers(players: Player[]): void {
-    const currentRoom: Room | null = this.currentRoomValue;
-    if (!currentRoom) return;
-    currentRoom.players = players;
-    this.setCurrentRoom = currentRoom;
-  }
-
-  /**
    * Updates current room.
-   * @param socketAnswer
+   * @param SocketAnswerReceived
    * @private
    */
-  private updateRoom(socketAnswer: SocketAnswer): void {
-    const room: Room | null = socketAnswer.answer?.room || null;
-    if (room) this.setCurrentRoom = room;
+  private updateRoom(SocketAnswerReceived: SocketAnswerReceived): void {
+    const room: RoomReceived | null = SocketAnswerReceived.answer?.room || null;
+    if (room) this.setCurrentRoom(room);
   }
 
   /**
@@ -289,11 +274,7 @@ export class RoomService extends SocketService {
    * @private
    */
   private findPlayer(players: Player[]): Player | null {
-    return (
-      players.find(
-        (player) => player.username === this.authService.user?.username
-      ) || null
-    );
+    return players.find((player) => player.username === this.authService.user?.username) || null;
   }
 
   /**
@@ -304,8 +285,7 @@ export class RoomService extends SocketService {
   private getRestOfThePlayers(_players: Player[]): Player[] {
     const players: Player[] = Constants.copy<Player[]>(_players);
     players.forEach((player, index, array) => {
-      if (player.username === this.authService.user?.username)
-        delete array[index];
+      if (player.username === this.authService.user?.username) delete array[index];
     });
     return players;
   }
