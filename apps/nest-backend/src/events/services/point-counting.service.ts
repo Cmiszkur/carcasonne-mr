@@ -7,7 +7,7 @@ import {
   TileValues,
 } from '@carcasonne-mr/shared-interfaces';
 import { Injectable } from '@nestjs/common';
-import { copy } from '../functions/copyObject';
+import { copy } from '@shared-functions';
 import { TilesService } from './tiles.service';
 import { ChurchCounting } from '../interfaces';
 

@@ -45,7 +45,7 @@ export function deserializeObj<T>(serializedObj: string): T {
 }
 
 function isMapReplacerData(value: unknown): value is MapReplacerData {
-  return isObject(value) && (value.dataType === 'Map' || value.dataType === 'Set');
+  return isObject(value) && (value['dataType'] === 'Map' || value['dataType'] === 'Set');
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

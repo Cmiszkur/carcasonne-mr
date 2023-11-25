@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Room } from '../schemas/room.schema';
 import { TilesService } from './tiles.service';
 import * as crypto from 'crypto';
-import { copy } from '../functions/copyObject';
+import { copy } from '@shared-functions';
 import {
   Paths,
   Player,

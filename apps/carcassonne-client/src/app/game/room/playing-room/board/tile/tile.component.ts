@@ -95,7 +95,11 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
     } else {
       const fallowerDetails = this.extendedTile?.fallowerDetails;
       this.pawn = fallowerDetails
-        ? this.generatePawn(fallowerDetails.position, fallowerDetails.placement)
+        ? this.generatePawn(
+            fallowerDetails.position,
+            fallowerDetails.placement,
+            this.extendedTile?.tile.hasChurch
+          )
         : null;
     }
   }
@@ -199,16 +203,20 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
     return possiblePawnPlacements;
   }
 
-  private generatePawn(values: Position[], key: Environment): Pawn | null {
-    if (!values.length) {
+  private generatePawn(
+    values: Position[],
+    key: Environment,
+    hasChurch: boolean = false
+  ): Pawn | null {
+    if (!values.length && !hasChurch) {
       return null;
     }
 
-    if (values.length >= 2) {
+    if (values.length >= 2 || hasChurch) {
       return {
         transformValue: 'translate(32px, 32px)',
-        placement: key,
-        position: values,
+        placement: hasChurch ? Environment.CHURCH : key,
+        position: hasChurch ? [] : values,
       };
     }
 

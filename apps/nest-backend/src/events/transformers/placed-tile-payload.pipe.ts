@@ -1,10 +1,10 @@
 import { PlacedTilePayload } from '@carcasonne-mr/shared-interfaces';
 import { Injectable, PipeTransform } from '@nestjs/common';
-import { TilesService } from '../services/tiles.service';
+import { TileValuesAfterRotation } from '@shared-functions';
 
 @Injectable()
 export class PlacedTilePayloadPipe implements PipeTransform<PlacedTilePayload> {
-  constructor(private tilesService: TilesService) {}
+  constructor() {}
 
   transform(value: PlacedTilePayload) {
     const { roomID, extendedTile } = value;
@@ -14,7 +14,7 @@ export class PlacedTilePayloadPipe implements PipeTransform<PlacedTilePayload> {
       extendedTile: {
         ...extendedTile,
         id: crypto.randomUUID(),
-        tileValuesAfterRotation: this.tilesService.tilesValuesAfterRotation(
+        tileValuesAfterRotation: TileValuesAfterRotation(
           extendedTile.tile.tileValues,
           extendedTile.rotation
         ),

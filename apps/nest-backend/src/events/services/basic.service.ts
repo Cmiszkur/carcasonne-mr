@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Answer,
-  SocketAnswer,
-  RoomError,
-} from '@carcasonne-mr/shared-interfaces';
+import { Answer, SocketAnswer, RoomError } from '@carcasonne-mr/shared-interfaces';
 import { Room, RoomDocument } from '../schemas/room.schema';
 
 @Injectable()

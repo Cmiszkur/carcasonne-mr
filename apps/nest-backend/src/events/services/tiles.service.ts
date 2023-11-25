@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Coordinates, Position, ExtendedTile, TileValues } from '@carcasonne-mr/shared-interfaces';
-import { copy } from '../functions/copyObject';
+import { Coordinates, Position, ExtendedTile } from '@carcasonne-mr/shared-interfaces';
 
 @Injectable()
 export class TilesService {
@@ -67,42 +66,6 @@ export class TilesService {
         return board.find((tile) => this.checkCoordinates(tile.coordinates, coordinate));
       })
       .filter(Boolean);
-  }
-
-  /**
-   * Returns tile values after rotation.
-   * @param tileValues
-   * @param rotation
-   * @returns
-   */
-  public tilesValuesAfterRotation(
-    tileValues: TileValues | null,
-    rotation: number
-  ): TileValues | null {
-    if (tileValues === null) {
-      return null;
-    }
-    const copiedTileValues: TileValues = copy(tileValues);
-    const positions: Position[] = [Position.TOP, Position.RIGHT, Position.BOTTOM, Position.LEFT];
-    const rotationValueToIndexSkip = new Map<number, number>([
-      [0, 0],
-      [90, 1],
-      [180, 2],
-      [270, 3],
-    ]);
-    const indexesToSkip: number | undefined = rotationValueToIndexSkip.get(rotation);
-
-    for (const [key, positionsInTileValues] of Object.entries(copiedTileValues)) {
-      (positionsInTileValues as [Position[]]).forEach((positionSet: Position[]) => {
-        positionSet.forEach((position: Position, positionIndex: number) => {
-          const indexInPositionsTable: number = positions.indexOf(position);
-          if (indexesToSkip && indexInPositionsTable >= 0) {
-            positionSet[positionIndex] = positions[(indexInPositionsTable + indexesToSkip) % 4];
-          }
-        });
-      });
-    }
-    return copiedTileValues;
   }
 
   private topCoordinates(coordinates: Coordinates): Coordinates {

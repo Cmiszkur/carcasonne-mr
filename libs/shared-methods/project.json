@@ -1,0 +1,33 @@
+{
+  "name": "shared-methods",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared-methods/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared-methods",
+        "main": "libs/shared-methods/src/index.ts",
+        "tsConfig": "libs/shared-methods/tsconfig.lib.json",
+        "assets": ["libs/shared-methods/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared-methods/**/*.ts", "libs/shared-methods/package.json"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/shared-methods/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

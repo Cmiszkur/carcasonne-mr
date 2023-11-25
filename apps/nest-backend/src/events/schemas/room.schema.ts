@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { deserializeObj, serializeObj } from '../functions/copyObject';
+import { deserializeObj, serializeObj } from '@shared-functions';
 import { Tiles } from './tiles.schema';
 import {
   RoomAbstract,

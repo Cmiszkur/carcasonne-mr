@@ -21,7 +21,7 @@ import {
 import { CheckTilesService } from './check-tiles.service';
 import * as crypto from 'crypto';
 import { PathService } from './path.service';
-import { copy } from '../functions/copyObject';
+import { copy } from '@shared-functions';
 import { TilesService } from './tiles.service';
 import { PointCountingService } from './point-counting.service';
 
