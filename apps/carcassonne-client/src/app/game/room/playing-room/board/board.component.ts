@@ -16,6 +16,7 @@ import { BaseComponent } from '@carcassonne-client/src/app/commons/components/ba
 import { Pawn } from '@carcassonne-client/src/app/game/models/pawn';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
 import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
+import { TileValuesAfterRotation } from '@shared-functions';
 
 @Component({
   selector: 'app-board',
@@ -96,11 +97,8 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
 
     this.tiles?.forEach((tile) => {
       this.placeTilesFromBackendOnBoard(tile);
-      this.placeEmptyTileInMap(
-        tile.tile.tileValues,
-        tile.rotation,
-        tile.coordinates
-      );
+      this.placeEmptyTileInMap(tile.tile.tileValues, tile.rotation, tile.coordinates);
+      this.clearRedundantEmptyTiles();
     });
 
     this.resetConfirmation();
@@ -140,18 +138,13 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
    * Makes translate string that is used to position the tile in DOM, saves empty tile state and updates tile fields.
    * @param clickedEmptyTile - contains coordinates as string and empty tile information.
    */
-  public emptyTileSelected(
-    clickedEmptyTile: KeyValue<string, Emptytile>
-  ): void {
+  public emptyTileSelected(clickedEmptyTile: KeyValue<string, Emptytile>): void {
     if (this.tilePlacementConfirmed) {
       return;
     }
 
     const stringifiedTileCoordinates: string = clickedEmptyTile.key;
-    if (
-      this.previouslyClickedTileCoordinates === stringifiedTileCoordinates &&
-      this.currentTile
-    ) {
+    if (this.previouslyClickedTileCoordinates === stringifiedTileCoordinates && this.currentTile) {
       this.currentTile.rotation >= 270
         ? (this.currentTile.rotation = 0)
         : (this.currentTile.rotation += 90);
@@ -162,9 +155,7 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
     }
 
     const coordinates = JSON.parse(stringifiedTileCoordinates) as Coordinates;
-    const isTilePlacedCorrectly = this.checkCurrentTilePlacement(
-      clickedEmptyTile.value
-    );
+    const isTilePlacedCorrectly = this.checkCurrentTilePlacement(clickedEmptyTile.value);
 
     if (this.currentTile) this.currentTile.coordinates = coordinates;
 
@@ -192,11 +183,9 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
    * Sends placed tile extended format with placed pawn.
    */
   public sendPlacedTileToServer(): void {
-    const loggedPlayer: Player | null =
-      this.roomService.playersValue?.loggedPlayer || null;
+    const loggedPlayer: Player | null = this.roomService.playersValue?.loggedPlayer || null;
     if (!this.currentTile || !loggedPlayer) return;
-    this.currentTile.isFollowerPlaced =
-      this.tileAndPawnPlacementConfirmed && !!this.placedPawn;
+    this.currentTile.isFollowerPlaced = this.tileAndPawnPlacementConfirmed && !!this.placedPawn;
     this.currentTile.fallowerDetails =
       this.tileAndPawnPlacementConfirmed && !!this.placedPawn
         ? {
@@ -216,10 +205,7 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
   ): void {
     if (!coordinates) coordinates = { x: 0, y: 0 };
 
-    const tileEnvironments = this.tileValuesToTileEnvironments(
-      tileValues,
-      tileRotation
-    );
+    const tileEnvironments = this.tileValuesToTileEnvironments(tileValues, tileRotation);
     const topCoordinate = { x: coordinates.x, y: coordinates.y + 1 };
     const bottomCoordinate = { x: coordinates.x, y: coordinates.y - 1 };
     const rightCoordinate = { x: coordinates.x + 1, y: coordinates.y };
@@ -241,7 +227,9 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
       JSON.stringify(bottomCoordinate),
       this.generateEmptyTile(bottomCoordinate, 'top', tileEnvironments.bottom)
     );
+  }
 
+  private clearRedundantEmptyTiles(): void {
     this.tilesCoordinates.forEach((coordinates) => {
       this.emptyTiles.delete(coordinates);
     });
@@ -282,12 +270,8 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
     isTilePlacedCorrectly = false,
     stringifiedCoordinates: string = JSON.stringify(coordinates)
   ): void {
-    this.previouslyClickedTileCoordinates = coordinates
-      ? stringifiedCoordinates
-      : '';
-    this.translateValueCurrentTile = coordinates
-      ? this.makeTranslateString(coordinates)
-      : '';
+    this.previouslyClickedTileCoordinates = coordinates ? stringifiedCoordinates : '';
+    this.translateValueCurrentTile = coordinates ? this.makeTranslateString(coordinates) : '';
     this.isTilePlacedCorrectly = isTilePlacedCorrectly;
     this.boardTileService.changeClickedEmptyTileState(
       coordinates ? [stringifiedCoordinates, isTilePlacedCorrectly] : null
@@ -343,56 +327,34 @@ export class BoardComponent extends BaseComponent implements OnInit, OnDestroy {
     tileValues: TileValues | null,
     tileRotation: number
   ): TileEnvironments {
-    const tileEnvironments: TileEnvironments =
-      this.getDefaultTileEnvironments();
+    const tileEnvironments: TileEnvironments = this.getDefaultTileEnvironments();
 
-    const tileEnvironmentsKeys = () => {
-      const shiftValue = tileRotation >= 360 ? 0 : tileRotation / 90;
-      const tileEnvironmentsKeysArray: string[] = [
-        'top',
-        'right',
-        'bottom',
-        'left',
-      ];
+    const tileValuesAfterRotation = TileValuesAfterRotation(tileValues, tileRotation);
 
-      for (let i = 1; i <= shiftValue; i++) {
-        const firstElement = tileEnvironmentsKeysArray.shift();
-        if (firstElement) tileEnvironmentsKeysArray.push(firstElement);
-      }
+    if (!tileValuesAfterRotation) {
+      return tileEnvironments;
+    }
 
-      return tileEnvironmentsKeysArray;
-    };
-
-    for (const [key, value] of Object.entries(tileValues || {}) as [
+    for (const [key, value] of Object.entries(tileValuesAfterRotation) as [
       Environment,
       [Position[]]
     ][]) {
-      value.forEach((array: Position[]) =>
-        array.forEach((string) => {
-          switch (string) {
-            case 'TOP':
-              tileEnvironments[
-                tileEnvironmentsKeys()[0] as keyof TileEnvironments
-              ] = key;
-              break;
-            case 'RIGHT':
-              tileEnvironments[
-                tileEnvironmentsKeys()[1] as keyof TileEnvironments
-              ] = key;
-              break;
-            case 'BOTTOM':
-              tileEnvironments[
-                tileEnvironmentsKeys()[2] as keyof TileEnvironments
-              ] = key;
-              break;
-            case 'LEFT':
-              tileEnvironments[
-                tileEnvironmentsKeys()[3] as keyof TileEnvironments
-              ] = key;
-              break;
-          }
-        })
-      );
+      value.flat().forEach((position) => {
+        switch (position) {
+          case 'TOP':
+            tileEnvironments.top = key;
+            break;
+          case 'RIGHT':
+            tileEnvironments.right = key;
+            break;
+          case 'BOTTOM':
+            tileEnvironments.bottom = key;
+            break;
+          case 'LEFT':
+            tileEnvironments.left = key;
+            break;
+        }
+      });
     }
 
     return tileEnvironments;
