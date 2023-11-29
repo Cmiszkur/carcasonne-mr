@@ -1,5 +1,5 @@
 import { AuthService } from '../auth.service';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoginAuthResponse } from '../../interfaces/responseInterfaces';
@@ -8,6 +8,7 @@ import { LoginAuthResponse } from '../../interfaces/responseInterfaces';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
   usernameFormControl = new UntypedFormControl('', [Validators.required]);

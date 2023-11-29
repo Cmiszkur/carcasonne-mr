@@ -1,10 +1,11 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-no-pawn-confirmation-dialog-window',
   templateUrl: './no-pawn-confirmation-dialog-window.component.html',
   styleUrls: ['./no-pawn-confirmation-dialog-window.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NoPawnConfirmationDialogWindowComponent {
   constructor(

@@ -57,4 +57,4 @@ export type ShortenedRoom = Pick<
   'players' | 'numberOfPlayers' | 'roomHost' | 'roomId' | 'gameStarted' | 'gameEnded'
 >;
 
-export type RoomReceived = Omit<RoomAbstract, 'paths'> & { paths: string };
+export type RoomReceived = Omit<RoomAbstract, 'paths'> & { paths: string | object };

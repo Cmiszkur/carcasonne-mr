@@ -1,5 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -14,6 +15,7 @@ import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
   selector: 'app-fetched-rooms-result-table',
   templateUrl: './fetched-rooms-result-table.component.html',
   styleUrls: ['./fetched-rooms-result-table.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FetchedRoomsResultTableComponent implements OnChanges {
   public displayedColumns: string[];
@@ -23,13 +25,7 @@ export class FetchedRoomsResultTableComponent implements OnChanges {
   @Output() public selectedRoom: EventEmitter<ShortenedRoom>;
 
   constructor() {
-    this.displayedColumns = [
-      'select',
-      'roomId',
-      'players',
-      'roomHost',
-      'numberOfPlayers',
-    ];
+    this.displayedColumns = ['select', 'roomId', 'players', 'roomHost', 'numberOfPlayers'];
     this.dataSource = new MatTableDataSource<ShortenedRoom>([]);
     this.selection = new SelectionModel<ShortenedRoom>(false, []);
     this.availableRooms = null;
@@ -39,9 +35,7 @@ export class FetchedRoomsResultTableComponent implements OnChanges {
   public ngOnChanges(changes: SimpleChanges) {
     if (changes['availableRooms']?.currentValue) {
       if (this.availableRooms) {
-        this.dataSource = new MatTableDataSource<ShortenedRoom>(
-          this.availableRooms
-        );
+        this.dataSource = new MatTableDataSource<ShortenedRoom>(this.availableRooms);
       }
     }
   }

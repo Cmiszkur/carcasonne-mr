@@ -1,3 +1,4 @@
+import { BoardService } from './../services/board.service';
 import {
   Component,
   EventEmitter,
@@ -6,10 +7,10 @@ import {
   OnInit,
   Output,
   SimpleChanges,
+  signal,
 } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
-import { Pawn } from '../../../../models/pawn';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
 import {
@@ -19,6 +20,7 @@ import {
   Environment,
   CurrentTile,
 } from '@carcasonne-mr/shared-interfaces';
+import { Pawn } from '../../../models/pawn';
 
 @Component({
   selector: 'app-tile',
@@ -53,9 +55,9 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   /**
    * Pawns corresponding to possible positions on the tile.
    */
-  public pawns: Pawn[];
+  public pawns = signal<Pawn[]>([]);
 
-  public pawn: Pawn | null;
+  public pawn = signal<Pawn | null>(null);
 
   /**
    * Color of pawns of logged in player.
@@ -65,15 +67,14 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   constructor(
     iconRegistry: MatIconRegistry,
     sanitizer: DomSanitizer,
-    private roomService: RoomService
+    private roomService: RoomService,
+    private boardService: BoardService
   ) {
     super();
     this.extendedTile = null;
     this.rotation = 0;
     this.translate = '';
     this.isTilePlacementConfirmed = false;
-    this.pawns = [];
-    this.pawn = null;
     this.isCurrentTile = false;
     this.loggedPlayerColor = this.roomService.playersValue?.loggedPlayer?.color || null;
     iconRegistry.addSvgIcon(
@@ -85,22 +86,15 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['isTilePlacementConfirmed']) {
-      if (this.isCurrentTile) this.pawns = this.fillPossiblePawnPlacements();
+      if (this.isCurrentTile) this.setPawns();
     }
   }
 
   ngOnInit() {
     if (this.isCurrentTile) {
-      this.pawns = this.fillPossiblePawnPlacements();
+      this.setPawns();
     } else {
-      const fallowerDetails = this.extendedTile?.fallowerDetails;
-      this.pawn = fallowerDetails
-        ? this.generatePawn(
-            fallowerDetails.position,
-            fallowerDetails.placement,
-            this.extendedTile?.tile.hasChurch
-          )
-        : null;
+      this.setPawn();
     }
   }
 
@@ -118,9 +112,29 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
    * @param pawn clicked pawn
    */
   public placePawn(pawn: Pawn): void {
-    this.pawns.forEach((p) => (p.selected = false));
-    pawn.selected = true;
-    this.placedPawn.emit(pawn);
+    this.pawns.update((pawns) => {
+      return pawns.map((p) => {
+        return { ...p, selected: p.transformValue === pawn.transformValue };
+      });
+    });
+    this.boardService.setPlacedPawn(pawn);
+  }
+
+  private setPawn(): void {
+    const fallowerDetails = this.extendedTile?.fallowerDetails;
+    this.pawn.set(
+      fallowerDetails
+        ? this.generatePawn(
+            fallowerDetails.position,
+            fallowerDetails.placement,
+            this.extendedTile?.tile.hasChurch
+          )
+        : null
+    );
+  }
+
+  private setPawns(): void {
+    this.pawns.set(this.fillPossiblePawnPlacements());
   }
 
   private fillPossiblePawnPlacements(): Pawn[] {

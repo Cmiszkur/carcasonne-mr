@@ -1,43 +1,71 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
+import { TileEnvironments } from './../../models/Tile';
+import { Emptytile } from '@carcassonne-client/src/app/game/models/emptytile';
+import { Pawn } from '@carcassonne-client/src/app/game/models/pawn';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+  Signal,
+  ChangeDetectionStrategy,
+  signal,
+} from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { AuthService } from '../../../user/auth.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import {
+  Coordinates,
   CurrentTile,
   ExtendedTile,
+  ExtendedTranslatedTile,
   RoomAbstract,
-  Tile,
+  TileAndPlayer,
 } from '@carcasonne-mr/shared-interfaces';
 import { SocketService } from '@carcassonne-client/src/app/commons/services/socket.service';
+import { BoardTilesService } from '../../services/board-tiles.service';
+import { serializeObj } from '@shared-functions';
+import { EmptyTilesService } from './services/empty-tiles.service';
+import { BoardService } from './services/board.service';
 
 @Component({
-  selector: 'app-waiting-room',
+  selector: 'app-playing-room',
   templateUrl: './playing-room.component.html',
   styleUrls: ['./playing-room.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlayingRoomComponent
-  extends BaseComponent
-  implements OnInit, OnDestroy
-{
-  public username: string | null;
-  public tiles: ExtendedTile[] | null;
-  public currentTile: CurrentTile | null;
-  private newRoom: RoomAbstract | null;
+export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDestroy {
+  /**
+   * Indicates confirmation of tile placement. Based on this variable possible pawn placements are determined.
+   */
+  public tilePlacementConfirmed = signal<boolean>(false);
+  public currentTile: Signal<CurrentTile | null> = this.boardService.currentTile;
+  public tiles: Signal<ExtendedTranslatedTile[] | null> = this.boardService.tiles;
+  public currentTileEnvironments: Signal<TileEnvironments> =
+    this.emptyTilesService.currentTileEnvironments;
+  public emptyTiles: Signal<Emptytile[]> = this.emptyTilesService.emptyTiles;
+  public placedPawn: Signal<Pawn | null> = this.boardService.placedPawn;
+  public isTilePlacedCorrectly = signal<boolean>(false);
+  private previouslyClickedTileCoordinates: string = '';
+  public username: string | null = this.authService.user?.username || null;
+  public clickedEmptyTileColor = signal<{ emptyTileId: string; borderColor: string } | null>(null);
 
   constructor(
     private roomService: RoomService,
     private authService: AuthService,
-    private socketService: SocketService
+    private socketService: SocketService,
+    private el: ElementRef,
+    private boardTileService: BoardTilesService,
+    private emptyTilesService: EmptyTilesService,
+    private boardService: BoardService
   ) {
     super();
-    this.newRoom = this.roomService.currentRoomValue;
-    this.currentTile = this.setCurrentTile(this.newRoom?.lastChosenTile?.tile);
-    this.username = this.authService.user?.username || null;
-    this.tiles = this.newRoom?.board || null;
   }
 
   ngOnInit(): void {
+    this.initFirstTilePosition();
+    this.updatePlayingRoom(this.roomService.currentRoomValue);
     this.listenForNewTiles();
   }
 
@@ -46,19 +74,59 @@ export class PlayingRoomComponent
     this.socketService.removeListener('tile_placed_new_tile_distributed');
   }
 
+  public trackByIndex(index: number): number {
+    return index;
+  }
+
   /**
-   * Generates current tile with defaults values.
-   * @param tile
-   * @private
+   * Cancel choice of tile or pawn placement.
    */
-  private static generateCurrentTile(tile: Tile): CurrentTile {
-    return {
-      tile: tile,
-      isFollowerPlaced: false,
-      rotation: 0,
-      tileValuesAfterRotation: tile.tileValues,
-      coordinates: null,
-    };
+  public cancelChoice(): void {
+    this.tilePlacementConfirmed.set(false);
+  }
+
+  /**
+   * Confirms choice of tile or pawn placement. When `data.pawnPlaced` is returned as undefined it means that the player
+   * didn't make a choice regarding pawn placement, therefore the app shouldn't send tile to backend.
+   */
+  public confirmChoice(data: ConfirmationButtonData): void {
+    this.tilePlacementConfirmed.set(data.tilePlaced);
+
+    if (this.tilePlacementConfirmed() && data.pawnPlaced !== undefined) {
+      this.boardService.sendPlacedTileToServer(!!data.pawnPlaced);
+    }
+  }
+
+  /**
+   * Handles choice of tile placement when empty space (also reffered as empty tile) is clicked.
+   * If previously clicked coordinates are the same as the current one, then current tile rotation is changed.
+   * Makes translate string that is used to position the tile in DOM, saves empty tile state and updates tile fields.
+   * @param clickedEmptyTile - contains coordinates as string and empty tile information.
+   */
+  public emptyTileSelected(clickedEmptyTile: Emptytile): void {
+    if (this.tilePlacementConfirmed()) return;
+
+    const coordinates = clickedEmptyTile.coordinates;
+
+    if (this.previouslyClickedTileCoordinates === serializeObj(coordinates)) {
+      this.boardService.rotateCurrentTile();
+      this.emptyTilesService.setCurrentTileEnvironments(this.currentTile());
+    } else {
+      this.boardService.updateCurrentTileCoordinates(coordinates);
+    }
+
+    const isTilePlacedCorrectly =
+      this.emptyTilesService.checkCurrentTilePlacement(clickedEmptyTile);
+
+    this.setClickedEmptyTileBorderColor(
+      clickedEmptyTile.id,
+      isTilePlacedCorrectly ? 'green' : 'red'
+    );
+    this.setTilePlacementRelatedFields(coordinates, isTilePlacedCorrectly);
+  }
+
+  private setClickedEmptyTileBorderColor(emptyTileId: string, borderColor: string) {
+    return this.clickedEmptyTileColor.set({ emptyTileId, borderColor });
   }
 
   /**
@@ -66,15 +134,19 @@ export class PlayingRoomComponent
    * @param tile
    * @private
    */
-  private setCurrentTile(
-    tile: Tile | null | undefined,
-    activePlayer?: string
-  ): CurrentTile | null {
-    console.log(this.username, this.newRoom?.lastChosenTile?.player);
-    const isUsersTurn: boolean = this.username === activePlayer;
-    return tile && isUsersTurn
-      ? PlayingRoomComponent.generateCurrentTile(tile)
-      : null;
+  private setCurrentTile(lastChosenTile: TileAndPlayer): void {
+    const isUsersTurn: boolean = this.username === lastChosenTile.player;
+    const tile = lastChosenTile.tile;
+
+    this.boardService.setCurrentTile(tile && isUsersTurn ? tile : null);
+    this.emptyTilesService.setCurrentTileEnvironments(this.currentTile());
+  }
+
+  private setTiles(tiles: ExtendedTile[]): void {
+    this.boardService.setTiles(tiles);
+    this.emptyTilesService.setEmptyTiles(tiles);
+    this.cancelChoice();
+    this.resetTilePlacement();
   }
 
   /**
@@ -84,13 +156,51 @@ export class PlayingRoomComponent
     this.roomService
       .receiveTilePlacedResponse()
       .pipe(takeUntil(this.destroyed))
-      .subscribe((answer) => {
-        const room = answer.answer?.room;
-        this.tiles = room?.board || null;
-        this.currentTile = this.setCurrentTile(
-          room?.lastChosenTile?.tile,
-          room?.lastChosenTile?.player
-        );
+      .subscribe(() => {
+        this.updatePlayingRoom(this.roomService.currentRoomValue);
       });
+  }
+
+  private updatePlayingRoom(room?: RoomAbstract | null): void {
+    const lastChosenTile = room?.lastChosenTile;
+    const tiles = room?.board;
+    if (tiles) this.setTiles(tiles);
+    if (lastChosenTile) this.setCurrentTile(lastChosenTile);
+  }
+
+  private initFirstTilePosition(): void {
+    const hostWidth = this.el.nativeElement.offsetWidth;
+    const hostHeight = this.el.nativeElement.offsetHeight;
+
+    this.boardService.setFirstTilePosition({
+      x: hostWidth / 2 - 56,
+      y: hostHeight / 2 - 56,
+    });
+  }
+
+  /**
+   * Resets tile placement by reverting some fields to default state.
+   */
+  private resetTilePlacement(): void {
+    this.setTilePlacementRelatedFields();
+  }
+
+  /**
+   * Sets fields responsible for the tile placement.
+   * When coordinates are not passed, method reverts fields value to default state set in constructor.
+   * @param coordinates
+   * @param isTilePlacedCorrectly
+   * @param stringifiedCoordinates
+   */
+  private setTilePlacementRelatedFields(
+    coordinates?: Coordinates,
+    isTilePlacedCorrectly = false,
+    stringifiedCoordinates: string = JSON.stringify(coordinates)
+  ): void {
+    this.previouslyClickedTileCoordinates = coordinates ? stringifiedCoordinates : '';
+    this.isTilePlacedCorrectly.set(isTilePlacedCorrectly);
+    this.boardTileService.changeClickedEmptyTileState(
+      coordinates ? [stringifiedCoordinates, isTilePlacedCorrectly] : null
+    );
   }
 }

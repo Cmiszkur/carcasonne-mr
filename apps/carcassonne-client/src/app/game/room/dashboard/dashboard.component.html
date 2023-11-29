@@ -1,5 +1,5 @@
-<app-player-section [player]="player">
+<app-player-section [player]="player()">
 </app-player-section>
 <div class="divider"></div>
-<app-player-section *ngFor="let player of restOfThePlayers" [player]="player">
+<app-player-section *ngFor="let player of restOfThePlayers()" [player]="player">
 </app-player-section>

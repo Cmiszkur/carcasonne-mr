@@ -1,5 +1,5 @@
 import { ThemesService } from '../themes.service';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
 
@@ -7,6 +7,7 @@ import { MatIconRegistry } from '@angular/material/icon';
   selector: 'app-toolbar',
   templateUrl: './toolbar.component.html',
   styleUrls: ['./toolbar.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolbarComponent {
   constructor(
@@ -22,10 +23,7 @@ export class ToolbarComponent {
       'moon',
       sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/Moon.svg')
     );
-    iconRegistry.addSvgIcon(
-      'sun',
-      sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/Sun.svg')
-    );
+    iconRegistry.addSvgIcon('sun', sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/Sun.svg'));
   }
 
   changeTheme(input: string) {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PlayerOptions } from '../models/Room';
 import { RoomService } from '../services/room.service';
@@ -8,6 +8,7 @@ import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
   selector: 'app-starting-room',
   templateUrl: './starting-room.component.html',
   styleUrls: ['./starting-room.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StartingRoomComponent implements OnInit {
   /**
@@ -62,6 +63,7 @@ export class StartingRoomComponent implements OnInit {
    */
   private navigateToWaitingRoom(roomID: string | null, options: PlayerOptions): void {
     if (!roomID) return;
+
     this.router.navigate(['./room/waiting-room'], {
       queryParams: { roomID: roomID, ...options },
       relativeTo: this.route,

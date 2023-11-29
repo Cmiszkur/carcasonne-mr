@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PlayersColors } from '@carcassonne-client/src/app/game/models/Room';
 import { PlayerOptionsData } from '../../../models/dialogWindowData';
@@ -8,13 +8,11 @@ import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
   selector: 'app-player-options-dialog-window',
   templateUrl: './player-options-dialog-window.component.html',
   styleUrls: ['./player-options-dialog-window.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayerOptionsDialogWindowComponent {
   constructor(
-    public dialogRef: MatDialogRef<
-      PlayerOptionsDialogWindowComponent,
-      PlayerOptionsData
-    >,
+    public dialogRef: MatDialogRef<PlayerOptionsDialogWindowComponent, PlayerOptionsData>,
     @Inject(MAT_DIALOG_DATA) public data: PlayerOptionsData
   ) {}
 
@@ -33,9 +31,7 @@ export class PlayerOptionsDialogWindowComponent {
   public get availableColors(): string[] {
     const shortenedRoom: ShortenedRoom | null = this.data.shortenedRoom;
     if (shortenedRoom === null) return this.colors;
-    const takenColors: string[] = shortenedRoom.players.map(
-      (player) => player.color
-    );
+    const takenColors: string[] = shortenedRoom.players.map((player) => player.color);
     return this.colors.filter((color) => takenColors.indexOf(color) === -1);
   }
 }

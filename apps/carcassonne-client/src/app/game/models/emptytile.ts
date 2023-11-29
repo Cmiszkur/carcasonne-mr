@@ -1,4 +1,4 @@
-import { Environment } from '@carcasonne-mr/shared-interfaces';
+import { Coordinates, Environment } from '@carcasonne-mr/shared-interfaces';
 
 export interface Emptytile {
   top?: Environment;
@@ -6,4 +6,6 @@ export interface Emptytile {
   bottom?: Environment;
   left?: Environment;
   position: string;
+  coordinates: Coordinates;
+  id: string;
 }

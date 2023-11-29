@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { RoomService } from '../services/room.service';
 import { BaseComponent } from '../../commons/components/base/base.component';
@@ -8,6 +8,7 @@ import { takeUntil } from 'rxjs/operators';
   selector: 'app-room',
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RoomComponent extends BaseComponent implements OnDestroy {
   /**
@@ -46,11 +47,7 @@ export class RoomComponent extends BaseComponent implements OnDestroy {
 
   public override ngOnDestroy() {
     super.ngOnDestroy();
-    this.roomService.removeManyListeners(
-      'new_player_joined',
-      'player_left',
-      'game_started'
-    );
+    this.roomService.removeManyListeners('new_player_joined', 'player_left', 'game_started');
     this.roomService.disconnect();
   }
 }

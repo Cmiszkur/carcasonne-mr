@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Player } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-player-section',
   templateUrl: './player-section.component.html',
   styleUrls: ['./player-section.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayerSectionComponent {
   /**

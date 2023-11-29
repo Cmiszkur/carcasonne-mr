@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -6,9 +6,14 @@ import { ActivatedRoute, Router } from '@angular/router';
   selector: 'app-waiting-room',
   templateUrl: './waiting-room.component.html',
   styleUrls: ['./waiting-room.component.sass'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WaitingRoomComponent implements OnInit {
-  constructor(private roomService: RoomService, private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private roomService: RoomService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   public ngOnInit(): void {
     this.listenForCurrentRoomChanges();
@@ -27,7 +32,7 @@ export class WaitingRoomComponent implements OnInit {
    * @private
    */
   private listenForCurrentRoomChanges(): void {
-    this.roomService.currentRoom.subscribe(currentRoom => {
+    this.roomService.currentRoom.subscribe((currentRoom) => {
       if (currentRoom) {
         const gameStarted: boolean = currentRoom.gameStarted;
         const roomID: string = currentRoom.roomId;

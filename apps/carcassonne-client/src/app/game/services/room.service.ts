@@ -120,7 +120,10 @@ export class RoomService extends SocketService {
 
     this.currentRoom$.next({
       ...room,
-      paths: deserializeObj(room.paths),
+      paths:
+        typeof room.paths === 'string'
+          ? deserializeObj(room.paths)
+          : { cities: new Map(), roads: new Map() },
     });
   }
 
