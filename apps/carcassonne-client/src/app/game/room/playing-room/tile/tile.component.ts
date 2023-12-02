@@ -1,13 +1,4 @@
-import {
-  Component,
-  EventEmitter,
-  Input,
-  OnChanges,
-  OnInit,
-  Output,
-  SimpleChanges,
-  signal,
-} from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, effect, signal } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
@@ -43,10 +34,6 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
    */
   @Input() public isCurrentTile: boolean;
   /**
-   * Emits pawn placed on a tile.
-   */
-  @Output() public placedPawn: EventEmitter<Pawn>;
-  /**
    * Pawns corresponding to possible positions on the tile.
    */
   public possiblePawnPlacements = this.tileService.possiblePawnPlacements;
@@ -75,7 +62,8 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
       'follower',
       sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/follower.svg')
     );
-    this.placedPawn = new EventEmitter();
+
+    effect(() => console.log(this.tileService.placedPawn()));
   }
 
   ngOnChanges(changes: SimpleChanges) {

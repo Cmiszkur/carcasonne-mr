@@ -11,7 +11,7 @@
 
   <ng-container *ngIf="isTilePlacementConfirmed; else alreadyPlacedPawns">
     <button mat-icon-button 
-            *ngFor="let pawn of pawns()" 
+            *ngFor="let pawn of possiblePawnPlacements()" 
             [style.transform]="pawn.transformValue" 
             (click)="placePawn(pawn)">
       <mat-icon [style.fill]="!pawn.selected ? '#5c5c5c' : loggedPlayerColor"

@@ -30,8 +30,8 @@ export class TileService {
 
   constructor(private roomService: RoomService) {}
 
-  public setPlacedPawn(placedPawn: Pawn | null): void {
-    this._placedPawn.set(placedPawn);
+  public clearPlacedTile(): void {
+    this.setPlacedPawn(null);
   }
 
   public fillPossiblePawnPlacements(extendedTile: ExtendedTile | CurrentTile | null): void {
@@ -141,5 +141,9 @@ export class TileService {
       default:
         return '';
     }
+  }
+
+  private setPlacedPawn(placedPawn: Pawn | null): void {
+    this._placedPawn.set(placedPawn);
   }
 }

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { TileService } from './../tile/services/tile.service';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  computed,
+} from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
 import { NoPawnConfirmationDialogWindowComponent } from './no-pawn-confirmation-dialog-window/no-pawn-confirmation-dialog-window.component';
@@ -11,25 +19,21 @@ import { NoPawnConfirmationDialogWindowComponent } from './no-pawn-confirmation-
 })
 export class TileAndPawnConfirmationButtonComponent {
   @Input() public isTilePlacedCorrectly: boolean;
-  /**
-   * Indicates confirmation of tile placement. Based on this variable possible pawn placements are determined.
-   */
   @Input() public tilePlacementConfirmed: boolean;
-  @Input() public pawnPlaced: boolean;
   @Output() public confirmation: EventEmitter<ConfirmationButtonData> = new EventEmitter();
+  public pawnPlaced = computed(() => !!this.tileService.placedPawn());
 
-  constructor(public dialog: MatDialog) {
+  constructor(public dialog: MatDialog, private tileService: TileService) {
     this.confirmation = new EventEmitter<ConfirmationButtonData>();
     this.isTilePlacedCorrectly = false;
     this.tilePlacementConfirmed = false;
-    this.pawnPlaced = false;
   }
 
   public confirmChoice(): void {
     if (this.isTilePlacedCorrectly) {
-      console.log('this.tilePlacementConfirmed', this.tilePlacementConfirmed, this.pawnPlaced);
+      console.log('this.tilePlacementConfirmed', this.tilePlacementConfirmed, this.pawnPlaced());
       if (this.tilePlacementConfirmed) {
-        if (this.pawnPlaced) {
+        if (this.pawnPlaced()) {
           this.confirmation.emit({ tilePlaced: true, pawnPlaced: true });
         } else {
           this.openDialog();

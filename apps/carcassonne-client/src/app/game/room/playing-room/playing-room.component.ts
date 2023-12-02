@@ -1,3 +1,4 @@
+import { TileService } from './tile/services/tile.service';
 import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
 import { TileEnvironments } from './../../models/Tile';
 import { Emptytile } from '@carcassonne-client/src/app/game/models/emptytile';
@@ -56,7 +57,8 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
     private el: ElementRef,
     private boardTileService: BoardTilesService,
     private emptyTilesService: EmptyTilesService,
-    private boardService: BoardService
+    private boardService: BoardService,
+    private tileService: TileService
   ) {
     super();
   }
@@ -81,6 +83,7 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
    */
   public cancelChoice(): void {
     this.tilePlacementConfirmed.set(false);
+    this.tileService.clearPlacedTile();
   }
 
   /**
@@ -155,6 +158,7 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
       .receiveTilePlacedResponse()
       .pipe(takeUntil(this.destroyed))
       .subscribe(() => {
+        this.tileService.clearPlacedTile();
         this.updatePlayingRoom(this.roomService.currentRoomValue);
       });
   }
