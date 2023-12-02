@@ -11,6 +11,7 @@ import {
 } from '@carcasonne-mr/shared-interfaces';
 import { Room, RoomDocument } from '../schemas/room.schema';
 import { TilesService } from './tiles.service';
+import { checkCoordinates } from '@shared-functions';
 
 @Injectable()
 export class CheckTilesService {
@@ -68,10 +69,7 @@ export class CheckTilesService {
 
     coordinatesToCheck.forEach((coordinates, coordinatesIndex) => {
       uncheckedTiles.every((tileToCheck) => {
-        const matchingCoordinates = this.tilesService.checkCoordinates(
-          tileToCheck.coordinates,
-          coordinates
-        );
+        const matchingCoordinates = checkCoordinates(tileToCheck.coordinates, coordinates);
 
         if (!matchingCoordinates) {
           return true;
@@ -143,10 +141,6 @@ export class CheckTilesService {
   }
 
   private coordinatesAlreadyTaken(tiles: ExtendedTile[], coordinates: Coordinates): boolean {
-    return (
-      tiles.findIndex((tile) =>
-        this.tilesService.checkCoordinates(tile.coordinates, coordinates)
-      ) >= 0
-    );
+    return tiles.findIndex((tile) => checkCoordinates(tile.coordinates, coordinates)) >= 0;
   }
 }

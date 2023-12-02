@@ -1,3 +1,4 @@
+import { TileService } from './../tile/services/tile.service';
 import { Injectable, signal } from '@angular/core';
 import {
   Coordinates,
@@ -7,7 +8,6 @@ import {
   Player,
   Tile,
 } from '@carcasonne-mr/shared-interfaces';
-import { Pawn } from '@carcassonne-client/src/app/game/models/pawn';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
 
 @Injectable({
@@ -20,13 +20,10 @@ export class BoardService {
   private _firstTilePosition = signal<Coordinates | null>(null);
   public firstTilePosition = this._firstTilePosition.asReadonly();
 
-  private _placedPawn = signal<Pawn | null>(null);
-  public placedPawn = this._placedPawn.asReadonly();
-
   private _tiles = signal<ExtendedTranslatedTile[]>([]);
   public tiles = this._tiles.asReadonly();
 
-  constructor(private roomService: RoomService) {}
+  constructor(private roomService: RoomService, private tileService: TileService) {}
 
   public setCurrentTile(tile: Tile | null): void {
     this._currentTile.set(tile ? this.generateCurrentTile(tile) : null);
@@ -34,10 +31,6 @@ export class BoardService {
 
   public setFirstTilePosition(coordinates: Coordinates): void {
     this._firstTilePosition.set(coordinates);
-  }
-
-  public setPlacedPawn(placedPawn: Pawn | null): void {
-    this._placedPawn.set(placedPawn);
   }
 
   public setTiles(tiles: ExtendedTile[]): void {
@@ -73,7 +66,7 @@ export class BoardService {
   public sendPlacedTileToServer(tileAndPawnPlacementConfirmed: boolean): void {
     const loggedPlayer: Player | null = this.roomService.playersValue?.loggedPlayer || null;
     const currentTile = this.currentTile();
-    const placedPawn = this.placedPawn();
+    const placedPawn = this.tileService.placedPawn();
 
     if (!currentTile || !loggedPlayer) return;
 

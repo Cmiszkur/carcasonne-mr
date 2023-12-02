@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Room } from '../schemas/room.schema';
-import { TilesService } from './tiles.service';
 import * as crypto from 'crypto';
-import { copy } from '@shared-functions';
+import {
+  calculateNearestCoordinates,
+  copy,
+  searchForPathWithGivenCoordinates,
+} from '@shared-functions';
 import {
   Paths,
   Player,
@@ -22,10 +25,7 @@ import { PointCountingService } from './point-counting.service';
 
 @Injectable()
 export class PathService {
-  constructor(
-    private tilesService: TilesService,
-    private pointCountingService: PointCountingService
-  ) {}
+  constructor(private pointCountingService: PointCountingService) {}
 
   private get emptyPathData(): PathData {
     return {
@@ -109,11 +109,13 @@ export class PathService {
       const pathDataMapRecordArray: [string, PathData][] = [];
 
       positionSet.forEach((position) => {
-        const nearestTileCoordinates: Coordinates | null =
-          this.tilesService.getCorrespondingCoordinates(position, coordinates);
+        const nearestTileCoordinates: Coordinates | null = calculateNearestCoordinates(
+          position,
+          coordinates
+        );
 
         if (nearestTileCoordinates) {
-          const pathDataMapRecord = this.searchForPathWithGivenCoordinates(
+          const pathDataMapRecord = searchForPathWithGivenCoordinates(
             nearestTileCoordinates,
             pathDataMap
           );
@@ -176,26 +178,15 @@ export class PathService {
     pathDataMap.set(crypto.randomUUID(), mergedPathData);
   }
 
-  private searchForPathWithGivenCoordinates(
-    coordinates: Coordinates,
-    pathDataMap: PathDataMap
-  ): [string, PathData] | null {
-    return (
-      Array.from(pathDataMap).find((array: [string, PathData]) => {
-        return Array.from(array[1].countedTiles.values()).find((countedTile) => {
-          return this.tilesService.checkCoordinates(countedTile.coordinates, coordinates);
-        });
-      }) ?? null
-    );
-  }
-
   private extractNearestTile(
     board: ExtendedTile[],
     coordinates: Coordinates,
     position: Position
   ): ExtendedTile | null {
-    const nearestTileCoordinates: Coordinates | null =
-      this.tilesService.getCorrespondingCoordinates(position, coordinates);
+    const nearestTileCoordinates: Coordinates | null = calculateNearestCoordinates(
+      position,
+      coordinates
+    );
     return nearestTileCoordinates
       ? this.findTileWithGivenCoordinates(board, nearestTileCoordinates)
       : null;

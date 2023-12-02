@@ -1,4 +1,3 @@
-import { BoardService } from './../services/board.service';
 import {
   Component,
   EventEmitter,
@@ -13,14 +12,9 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
-import {
-  ExtendedTile,
-  Position,
-  TileValues,
-  Environment,
-  CurrentTile,
-} from '@carcasonne-mr/shared-interfaces';
+import { ExtendedTile, CurrentTile } from '@carcasonne-mr/shared-interfaces';
 import { Pawn } from '../../../models/pawn';
+import { TileService } from './services/tile.service';
 
 @Component({
   selector: 'app-tile',
@@ -55,7 +49,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   /**
    * Pawns corresponding to possible positions on the tile.
    */
-  public pawns = signal<Pawn[]>([]);
+  public possiblePawnPlacements = this.tileService.possiblePawnPlacements;
 
   public pawn = signal<Pawn | null>(null);
 
@@ -65,10 +59,10 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   public loggedPlayerColor: string | null;
 
   constructor(
-    iconRegistry: MatIconRegistry,
-    sanitizer: DomSanitizer,
+    private iconRegistry: MatIconRegistry,
+    private sanitizer: DomSanitizer,
     private roomService: RoomService,
-    private boardService: BoardService
+    private tileService: TileService
   ) {
     super();
     this.extendedTile = null;
@@ -86,13 +80,13 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['isTilePlacementConfirmed']) {
-      if (this.isCurrentTile) this.setPawns();
+      if (this.isCurrentTile) this.tileService.fillPossiblePawnPlacements(this.extendedTile);
     }
   }
 
   ngOnInit() {
     if (this.isCurrentTile) {
-      this.setPawns();
+      this.tileService.fillPossiblePawnPlacements(this.extendedTile);
     } else {
       this.setPawn();
     }
@@ -112,155 +106,19 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
    * @param pawn clicked pawn
    */
   public placePawn(pawn: Pawn): void {
-    this.pawns.update((pawns) => {
-      return pawns.map((p) => {
-        return { ...p, selected: p.transformValue === pawn.transformValue };
-      });
-    });
-    this.boardService.setPlacedPawn(pawn);
+    this.tileService.placePawn(pawn);
   }
 
   private setPawn(): void {
     const fallowerDetails = this.extendedTile?.fallowerDetails;
     this.pawn.set(
       fallowerDetails
-        ? this.generatePawn(
+        ? this.tileService.generatePawn(
             fallowerDetails.position,
             fallowerDetails.placement,
             this.extendedTile?.tile.hasChurch
           )
         : null
     );
-  }
-
-  private setPawns(): void {
-    this.pawns.set(this.fillPossiblePawnPlacements());
-  }
-
-  private fillPossiblePawnPlacements(): Pawn[] {
-    const possiblePawnPlacements: Pawn[] = [];
-
-    if (this.extendedTile) {
-      if (this.extendedTile.tile.hasChurch) {
-        possiblePawnPlacements.push({
-          transformValue: 'translate(32px, 32px)',
-          placement: Environment.CHURCH,
-          position: [],
-        });
-      }
-
-      const tileValues: TileValues | null = this.extendedTile.tile.tileValues
-        ? JSON.parse(JSON.stringify(this.extendedTile.tile.tileValues))
-        : null;
-
-      if (tileValues?.roads || tileValues?.cities) {
-        const shiftValue = this.rotation >= 360 ? 0 : this.rotation / 90;
-        const environmentValues: Position[] = [
-          Position.TOP,
-          Position.RIGHT,
-          Position.BOTTOM,
-          Position.LEFT,
-        ];
-
-        for (const [key, value] of Object.entries(tileValues) as [Environment, [Position[]]][]) {
-          value.forEach((values: Position[]) => {
-            values.forEach((environmentValue, environmentIndex) => {
-              const environmentValuesIndex = environmentValues.indexOf(environmentValue);
-              const environmentValuesIndexWithRotation = (environmentValuesIndex + shiftValue) % 4;
-              values[environmentIndex] = environmentValues[environmentValuesIndexWithRotation];
-            });
-
-            if (values.length >= 2) {
-              possiblePawnPlacements.push({
-                transformValue: 'translate(32px, 32px)',
-                placement: key,
-                position: values,
-              });
-            }
-
-            if (values.length === 1) {
-              switch (values[0]) {
-                case 'TOP':
-                  possiblePawnPlacements.push({
-                    transformValue: 'translate(32px, 0)',
-                    placement: key,
-                    position: [Position.TOP],
-                  });
-                  break;
-                case 'RIGHT':
-                  possiblePawnPlacements.push({
-                    transformValue: 'translate(70px, 32px)',
-                    placement: key,
-                    position: [Position.RIGHT],
-                  });
-                  break;
-                case 'BOTTOM':
-                  possiblePawnPlacements.push({
-                    transformValue: 'translate(32px, 70px)',
-                    placement: key,
-                    position: [Position.BOTTOM],
-                  });
-                  break;
-                case 'LEFT':
-                  possiblePawnPlacements.push({
-                    transformValue: 'translate(0, 32px)',
-                    placement: key,
-                    position: [Position.LEFT],
-                  });
-                  break;
-              }
-            }
-          });
-        }
-      }
-    }
-    return possiblePawnPlacements;
-  }
-
-  private generatePawn(
-    values: Position[],
-    key: Environment,
-    hasChurch: boolean = false
-  ): Pawn | null {
-    if (!values.length && !hasChurch) {
-      return null;
-    }
-
-    if (values.length >= 2 || hasChurch) {
-      return {
-        transformValue: 'translate(32px, 32px)',
-        placement: hasChurch ? Environment.CHURCH : key,
-        position: hasChurch ? [] : values,
-      };
-    }
-
-    switch (values[0]) {
-      case 'TOP':
-        return {
-          transformValue: 'translate(32px, 0)',
-          placement: key,
-          position: [Position.TOP],
-        };
-      case 'RIGHT':
-        return {
-          transformValue: 'translate(70px, 32px)',
-          placement: key,
-          position: [Position.RIGHT],
-        };
-      case 'BOTTOM':
-        return {
-          transformValue: 'translate(32px, 70px)',
-          placement: key,
-          position: [Position.BOTTOM],
-        };
-      case 'LEFT':
-        return {
-          transformValue: 'translate(0, 32px)',
-          placement: key,
-          position: [Position.LEFT],
-        };
-      default:
-        return null;
-    }
   }
 }

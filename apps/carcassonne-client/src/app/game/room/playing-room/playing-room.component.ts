@@ -1,7 +1,6 @@
 import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
 import { TileEnvironments } from './../../models/Tile';
 import { Emptytile } from '@carcassonne-client/src/app/game/models/emptytile';
-import { Pawn } from '@carcassonne-client/src/app/game/models/pawn';
 import {
   Component,
   OnInit,
@@ -45,7 +44,6 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
   public currentTileEnvironments: Signal<TileEnvironments> =
     this.emptyTilesService.currentTileEnvironments;
   public emptyTiles: Signal<Emptytile[]> = this.emptyTilesService.emptyTiles;
-  public placedPawn: Signal<Pawn | null> = this.boardService.placedPawn;
   public isTilePlacedCorrectly = signal<boolean>(false);
   private previouslyClickedTileCoordinates: string = '';
   public username: string | null = this.authService.user?.username || null;
