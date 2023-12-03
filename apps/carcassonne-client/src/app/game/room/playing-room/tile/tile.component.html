@@ -7,6 +7,11 @@
     [alt]="extendedTile.tile.tileName"
     [style.transform]="makeRotateTransformString(rotation)">
 
+  <img *ngIf="extendedTile.tile.extraPoints"
+       class="emblem"
+       [src]="getImageSource('emblem')"
+       [alt]="'emblem'">
+
   <mat-icon class="rotate_icon" *ngIf="isCurrentTile">rotate_right</mat-icon>
 
   <ng-container *ngIf="isTilePlacementConfirmed; else alreadyPlacedPawns">

@@ -2,10 +2,16 @@
 \:host
   display: block
 
-  img
+  img:not(.emblem)
     width: 100px
     height: 100px
     border-radius: $tile-border-radius
+
+  img.emblem
+    // transform: translate(0, 70px)
+    position: absolute
+    inset: -56px 33px
+    transform: scale(0.2)
 
   button, mat-icon.rotate_icon, mat-icon.placed-pawn
     position: absolute
