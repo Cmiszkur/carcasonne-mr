@@ -117,7 +117,8 @@ export class PathService {
         if (nearestTileCoordinates) {
           const pathDataMapRecord = searchForPathWithGivenCoordinates(
             nearestTileCoordinates,
-            pathDataMap
+            pathDataMap,
+            position
           );
 
           if (pathDataMapRecord) pathDataMapRecordArray.push(pathDataMapRecord);

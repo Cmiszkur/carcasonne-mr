@@ -121,7 +121,8 @@ export class TileService {
         const calculatedCoordinates = calculateNearestCoordinates(position, coordinates);
         const numberOfPathOwners = searchForPathWithGivenCoordinates(
           calculatedCoordinates,
-          pathData
+          pathData,
+          position
         )?.[1].pathOwners.length;
         return !!numberOfPathOwners;
       });

@@ -17,7 +17,6 @@ import {
   Player,
   RoomAbstract as Room,
   RoomAbstract,
-  RoomReceived,
   ShortenedRoom,
   SocketAnswer,
   SocketAnswerReceived,
@@ -117,16 +116,9 @@ export class RoomService extends SocketService {
     this.selectedRoom$.next(room);
   }
 
-  public setCurrentRoom(room: RoomReceived) {
+  public setCurrentRoom(room: RoomAbstract) {
     this.setPlayers(room.players);
-
-    this.currentRoom$.next({
-      ...room,
-      paths:
-        typeof room.paths === 'string'
-          ? deserializeObj(room.paths)
-          : { cities: new Map(), roads: new Map() },
-    });
+    this.currentRoom$.next(room);
   }
 
   public getRoom(): Observable<Room> {

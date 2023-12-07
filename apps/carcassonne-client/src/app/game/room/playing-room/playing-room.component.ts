@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { AuthService } from '../../../user/auth.service';
-import { filter, takeUntil, tap } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import {
   Coordinates,
