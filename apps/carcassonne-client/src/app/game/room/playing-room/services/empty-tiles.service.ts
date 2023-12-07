@@ -57,6 +57,22 @@ export class EmptyTilesService {
     );
   }
 
+  public updatedEmptyTilesTranslateValue(): void {
+    this._emptyTiles.update((_emptyTiles) => {
+      return _emptyTiles.map((emptyTile) => {
+        return {
+          ...emptyTile,
+          position: emptyTile.position
+            ? {
+                ...emptyTile.position,
+                top: emptyTile.position.top - this.boardService.boardOffsetYAxisWithMargin,
+              }
+            : null,
+        };
+      });
+    });
+  }
+
   private tileValuesToTileEnvironments(
     tileValues: TileValues | null,
     tileRotation: number
@@ -165,7 +181,7 @@ export class EmptyTilesService {
     };
 
     return value
-      ? { ...value, ...partialEmptyTile }
+      ? { ...value, ...partialEmptyTile, position }
       : { position, coordinates, ...partialEmptyTile };
   }
 

@@ -30,11 +30,13 @@ export interface ExtendedTile {
   tileValuesAfterRotation: TileValues | null;
 }
 
-export type ExtendedTranslatedTile = ExtendedTile & { translateValue: string };
+export type ExtendedTranslatedTile = ExtendedTile & {
+  translateValue: { left: number; top: number } | null;
+};
 
 export type CurrentTile = Omit<ExtendedTile, 'id' | 'coordinates'> & {
   coordinates: Coordinates | null;
-  translateValue: string;
+  translateValue: { left: number; top: number } | null;
 };
 
 export interface FollowerDetails {

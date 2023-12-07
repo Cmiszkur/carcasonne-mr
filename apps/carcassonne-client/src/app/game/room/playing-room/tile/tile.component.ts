@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges, effect, signal } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, signal } from '@angular/core';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
@@ -24,7 +24,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   /**
    * Translate string, which is used in template to position tile in DOM.
    */
-  @Input() public translate: string;
+  @Input() public translate: { left: number; top: number } | null;
   /**
    * Indicates confirmation of tile placement. Based on this variable possible pawn placements are determined.
    */
@@ -54,7 +54,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
     super();
     this.extendedTile = null;
     this.rotation = 0;
-    this.translate = '';
+    this.translate = null;
     this.isTilePlacementConfirmed = false;
     this.isCurrentTile = false;
     this.loggedPlayerColor = this.roomService.playersValue?.loggedPlayer?.color || null;
@@ -62,8 +62,6 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
       'follower',
       sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/follower.svg')
     );
-
-    effect(() => console.log(this.tileService.placedPawn()));
   }
 
   ngOnChanges(changes: SimpleChanges) {

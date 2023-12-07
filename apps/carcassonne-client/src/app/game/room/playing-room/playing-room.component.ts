@@ -10,10 +10,12 @@ import {
   Signal,
   ChangeDetectionStrategy,
   signal,
+  AfterViewInit,
+  ViewChild,
 } from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { AuthService } from '../../../user/auth.service';
-import { takeUntil } from 'rxjs/operators';
+import { filter, takeUntil, tap } from 'rxjs/operators';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import {
   Coordinates,
@@ -35,20 +37,25 @@ import { BoardService } from './services/board.service';
   styleUrls: ['./playing-room.component.sass'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDestroy {
+export class PlayingRoomComponent
+  extends BaseComponent
+  implements OnInit, OnDestroy, AfterViewInit
+{
   /**
    * Indicates confirmation of tile placement. Based on this variable possible pawn placements are determined.
    */
   public tilePlacementConfirmed = signal<boolean>(false);
   public currentTile: Signal<CurrentTile | null> = this.boardService.currentTile;
-  public tiles: Signal<ExtendedTranslatedTile[] | null> = this.boardService.tiles;
+  public tiles: Signal<ExtendedTranslatedTile[]> = this.boardService.tiles;
   public currentTileEnvironments: Signal<TileEnvironments> =
     this.emptyTilesService.currentTileEnvironments;
   public emptyTiles: Signal<Emptytile[]> = this.emptyTilesService.emptyTiles;
   public isTilePlacedCorrectly = signal<boolean>(false);
-  private previouslyClickedTileCoordinates: string = '';
   public username: string | null = this.authService.user?.username || null;
   public clickedEmptyTileColor = signal<{ emptyTileId: string; borderColor: string } | null>(null);
+  @ViewChild('board', { read: ElementRef }) private boardDivElRef?: ElementRef;
+  @ViewChild('blank', { read: ElementRef }) private blankDivElRef?: ElementRef;
+  private previouslyClickedTileCoordinates: string = '';
 
   constructor(
     private roomService: RoomService,
@@ -72,6 +79,11 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
   public override ngOnDestroy(): void {
     super.ngOnDestroy();
     this.socketService.removeListener('tile_placed_new_tile_distributed');
+  }
+
+  public ngAfterViewInit(): void {
+    const v = this.boardService.setBoardOffsetYAxis();
+    if (v) this.addSpaceYAxisAndUpdateVariables(v);
   }
 
   public trackByIndex(index: number): number {
@@ -126,6 +138,24 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
     this.setTilePlacementRelatedFields(coordinates, isTilePlacedCorrectly);
   }
 
+  private addSpaceYAxisAndUpdateVariables(_v: number): void {
+    this.addSpaceYAxis(_v);
+    this.boardService.updatedTilesTranslateValue();
+    this.emptyTilesService.updatedEmptyTilesTranslateValue();
+  }
+
+  private addSpaceYAxis(boardOffset: number): void {
+    const boardDivElRef = this.boardDivElRef?.nativeElement;
+    const blankDivElRef = this.blankDivElRef?.nativeElement;
+
+    if (boardOffset <= 0 && boardDivElRef && blankDivElRef) {
+      const v = -boardOffset + this.boardService.boardOffsetYAxisWithMargin + 20;
+      blankDivElRef.style.height = blankDivElRef.offsetHeight + v + 'px';
+      boardDivElRef.scrollTo(boardDivElRef.scrollLeft, boardDivElRef.scrollTop + v);
+      this.boardService.boardOffsetYAxisWithMargin = boardOffset - 20;
+    }
+  }
+
   private setClickedEmptyTileBorderColor(emptyTileId: string, borderColor: string) {
     return this.clickedEmptyTileColor.set({ emptyTileId, borderColor });
   }
@@ -156,8 +186,15 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
   private listenForNewTiles(): void {
     this.roomService
       .receiveTilePlacedResponse()
-      .pipe(takeUntil(this.destroyed))
-      .subscribe(() => {
+      .pipe(
+        takeUntil(this.destroyed),
+        filter((room): room is RoomAbstract => !!room)
+      )
+      .subscribe((room) => {
+        const v = this.boardService.setBoardOffsetYAxis(room.board);
+
+        if (v) this.addSpaceYAxis(v);
+
         this.tileService.clearPlacedTile();
         this.updatePlayingRoom(this.roomService.currentRoomValue);
       });
@@ -175,8 +212,8 @@ export class PlayingRoomComponent extends BaseComponent implements OnInit, OnDes
     const hostHeight = this.el.nativeElement.offsetHeight;
 
     this.boardService.setFirstTilePosition({
-      x: hostWidth / 2 - 56,
-      y: hostHeight / 2 - 56,
+      x: Math.ceil(hostWidth / 2) - 56,
+      y: Math.ceil(hostHeight / 2) - 56,
     });
   }
 

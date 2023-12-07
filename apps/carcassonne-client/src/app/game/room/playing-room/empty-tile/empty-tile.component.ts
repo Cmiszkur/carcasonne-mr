@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmptyTileComponent {
-  @Input() translate: string = '';
+  @Input() translate: { left: number; top: number } | null = null;
 
   constructor() {}
 }

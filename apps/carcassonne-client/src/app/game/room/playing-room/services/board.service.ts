@@ -23,7 +23,33 @@ export class BoardService {
   private _tiles = signal<ExtendedTranslatedTile[]>([]);
   public tiles = this._tiles.asReadonly();
 
+  private _boardOffsetYAxis = signal<number | null>(null);
+  public boardOffsetYAxis = this._boardOffsetYAxis.asReadonly();
+
+  public boardOffsetYAxisWithMargin = 0;
+
   constructor(private roomService: RoomService, private tileService: TileService) {}
+
+  private getHighestYAxis(tiles: ExtendedTranslatedTile[] | ExtendedTile[]): number | null {
+    return tiles.length > 0
+      ? tiles
+          .map((tile) => tile.coordinates.y)
+          .reduce((prevValue, currValue) => (prevValue < currValue ? currValue : prevValue))
+      : null;
+  }
+
+  public setBoardOffsetYAxis(
+    tiles: ExtendedTranslatedTile[] | ExtendedTile[] = this.tiles()
+  ): number | null {
+    const firstTilePosition = this.firstTilePosition();
+    const highestYAxis = this.getHighestYAxis(tiles);
+    this._boardOffsetYAxis.set(
+      firstTilePosition && highestYAxis
+        ? firstTilePosition.y - (highestYAxis + 1) * 100 - (highestYAxis + 1) * 12 + 6
+        : null
+    );
+    return this.boardOffsetYAxis();
+  }
 
   public setCurrentTile(tile: Tile | null): void {
     this._currentTile.set(tile ? this.generateCurrentTile(tile) : null);
@@ -35,6 +61,22 @@ export class BoardService {
 
   public setTiles(tiles: ExtendedTile[]): void {
     this._tiles.set(this.mapExtendedTiles(tiles));
+  }
+
+  public updatedTilesTranslateValue(): void {
+    this._tiles.update((tiles) => {
+      return tiles.map((tile) => {
+        return {
+          ...tile,
+          translateValue: tile.translateValue
+            ? {
+                ...tile.translateValue,
+                top: tile.translateValue.top - this.boardOffsetYAxisWithMargin,
+              }
+            : null,
+        };
+      });
+    });
   }
 
   public rotateCurrentTile(): void {
@@ -83,14 +125,15 @@ export class BoardService {
     this.roomService.placeTile(currentTile);
   }
 
-  public makeTranslateString(coordinates: Coordinates): string {
+  public makeTranslateString(coordinates: Coordinates): { left: number; top: number } | null {
     const firstTilePosition = this.firstTilePosition();
     if (firstTilePosition) {
-      return `translate(
-        ${firstTilePosition.x + 112 * coordinates.x}px,
-        ${firstTilePosition.y - 112 * coordinates.y}px)`;
+      return {
+        left: firstTilePosition.x + 112 * coordinates.x,
+        top: firstTilePosition.y - 112 * coordinates.y - this.boardOffsetYAxisWithMargin,
+      };
     } else {
-      return '';
+      return null;
     }
   }
 
@@ -115,7 +158,7 @@ export class BoardService {
       rotation: 0,
       tileValuesAfterRotation: tile.tileValues,
       coordinates: null,
-      translateValue: '',
+      translateValue: null,
     };
   }
 }

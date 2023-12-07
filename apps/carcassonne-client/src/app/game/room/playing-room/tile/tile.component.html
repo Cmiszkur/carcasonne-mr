@@ -1,6 +1,7 @@
 <div *ngIf="extendedTile"
      [ngClass]="'tile'"
-     [ngStyle]="isTilePlacementConfirmed ? {'transform': translate, 'z-index': 10} : {'transform': translate}">
+     [style.z-index]="isTilePlacementConfirmed ? 10 : 0"
+     [ngStyle]="translate ? { top: translate.top + 'px', left: translate.left + 'px' } : null">
 
   <img
     [src]="getImageSource(extendedTile.tile.tileName)"

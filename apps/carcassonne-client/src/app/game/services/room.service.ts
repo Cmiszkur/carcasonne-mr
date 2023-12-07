@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { RoomError } from '../models/socket';
 import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHandler';
 import { SocketService } from '../../commons/services/socket.service';
@@ -16,8 +16,10 @@ import {
   JoinRoomPayload,
   Player,
   RoomAbstract as Room,
+  RoomAbstract,
   RoomReceived,
   ShortenedRoom,
+  SocketAnswer,
   SocketAnswerReceived,
   StartGamePayload,
 } from '@carcasonne-mr/shared-interfaces';
@@ -149,7 +151,7 @@ export class RoomService extends SocketService {
    * @param color - meeple color
    * @param roomID - id of room to join
    */
-  public joinRoom(color?: string, roomID?: string): Observable<SocketAnswerReceived> {
+  public joinRoom(color?: string, roomID?: string): Observable<SocketAnswer> {
     const _roomID: string | undefined = this.selectedRoomId || roomID;
     if (!_roomID) {
       throw new CustomError(RoomError.ROOM_ID_NOT_SPECIFIED, 'Choose room which you want to join');
@@ -169,7 +171,7 @@ export class RoomService extends SocketService {
    * Creates room, updates current room and returns socket response.
    * @param color - meeple color
    */
-  public createRoom(color?: PlayersColors | null): Observable<SocketAnswerReceived> {
+  public createRoom(color?: PlayersColors | null): Observable<SocketAnswer> {
     if (!color) {
       throw new CustomError(RoomError.MEEPLE_COLOR_NOT_SPECIFIED, 'Choose your meeple color');
     }
@@ -202,9 +204,10 @@ export class RoomService extends SocketService {
    * Listens for ``joined_room`` response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  public receiveJoinRoomResponse(): Observable<SocketAnswerReceived> {
+  public receiveJoinRoomResponse(): Observable<SocketAnswer> {
     return this.fromEventOnce<SocketAnswerReceived>('joined_room').pipe(
-      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
+      map((socketAnswerReceived) => this.mapSocketAnswerReceived(socketAnswerReceived)),
+      tap((socketAnswer) => this.updateRoom(socketAnswer))
     );
   }
 
@@ -212,10 +215,11 @@ export class RoomService extends SocketService {
    * Listens for ``game_started`` response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  public receiveGameStartedResponse(): Observable<SocketAnswerReceived> {
+  public receiveGameStartedResponse(): Observable<SocketAnswer> {
     this.connect();
     return this.fromEventOnce<SocketAnswerReceived>('game_started').pipe(
-      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
+      map((socketAnswerReceived) => this.mapSocketAnswerReceived(socketAnswerReceived)),
+      tap((socketAnswer) => this.updateRoom(socketAnswer))
     );
   }
 
@@ -244,31 +248,54 @@ export class RoomService extends SocketService {
    * Updates current room with returned new tiles.
    * @returns
    */
-  public receiveTilePlacedResponse(): Observable<SocketAnswerReceived> {
+  public receiveTilePlacedResponse(): Observable<RoomAbstract | null> {
     this.connect();
     return this.fromEvent<SocketAnswerReceived>('tile_placed_new_tile_distributed').pipe(
-      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
+      map((socketAnswerReceived) => this.mapSocketAnswerReceived(socketAnswerReceived)),
+      tap((socketAnswer) => this.updateRoom(socketAnswer)),
+      map((socketAnswer) => socketAnswer.answer?.room ?? null)
     );
+  }
+
+  private mapSocketAnswerReceived(socketAnswerReceived: SocketAnswerReceived): SocketAnswer {
+    const room = socketAnswerReceived.answer?.room;
+    return {
+      error: socketAnswerReceived.error,
+      answer: {
+        room: room
+          ? {
+              ...room,
+              paths:
+                typeof room.paths === 'string'
+                  ? deserializeObj(room.paths)
+                  : { cities: new Map(), roads: new Map() },
+            }
+          : null,
+        tile: socketAnswerReceived.answer?.tile ?? null,
+      },
+      errorMessage: socketAnswerReceived.errorMessage,
+    };
   }
 
   /**
    * Listens for ``game_started`` response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  private receiveCreateRoomResponse(): Observable<SocketAnswerReceived> {
+  private receiveCreateRoomResponse(): Observable<SocketAnswer> {
     this.connect();
     return this.fromEventOnce<SocketAnswerReceived>('created_room_response').pipe(
-      tap((SocketAnswerReceived) => this.updateRoom(SocketAnswerReceived))
+      map((socketAnswerReceived) => this.mapSocketAnswerReceived(socketAnswerReceived)),
+      tap((socketAnswer) => this.updateRoom(socketAnswer))
     );
   }
 
   /**
    * Updates current room.
-   * @param SocketAnswerReceived
+   * @param socketAnswer
    * @private
    */
-  private updateRoom(SocketAnswerReceived: SocketAnswerReceived): void {
-    const room: RoomReceived | null = SocketAnswerReceived.answer?.room || null;
+  private updateRoom(socketAnswer: SocketAnswer): void {
+    const room: RoomAbstract | null = socketAnswer.answer?.room || null;
     if (room) this.setCurrentRoom(room);
   }
 

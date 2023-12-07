@@ -5,7 +5,7 @@ export interface Emptytile {
   right?: Environment;
   bottom?: Environment;
   left?: Environment;
-  position: string;
+  position: { left: number; top: number } | null;
   coordinates: Coordinates;
   id: string;
 }
