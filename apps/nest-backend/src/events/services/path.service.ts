@@ -112,6 +112,7 @@ export class PathService {
   ): void {
     positionSets.forEach((positionSet) => {
       const pathDataMapRecordArray: [string, PathData][] = [];
+      let pathId: string;
 
       positionSet.forEach((position) => {
         const nearestTileCoordinates: Coordinates | null = calculateNearestCoordinates(
@@ -131,12 +132,12 @@ export class PathService {
       });
 
       if (pathDataMapRecordArray.length >= 2) {
-        this.mergePaths(pathDataMapRecordArray, pathDataMap, placedFallower);
+        pathId = this.mergePaths(pathDataMapRecordArray, pathDataMap, placedFallower);
+      } else {
+        pathId = pathDataMapRecordArray[0]
+          ? pathDataMapRecordArray[0][0]
+          : this.initializePath(pathDataMap);
       }
-
-      const pathId: string = pathDataMapRecordArray[0]
-        ? pathDataMapRecordArray[0][0]
-        : this.initializePath(pathDataMap);
 
       this.updatePathData(
         pathDataMap,
@@ -156,7 +157,7 @@ export class PathService {
     pathDataMapRecordArray: [string, PathData][],
     pathDataMap: PathDataMap,
     placedFallower?: FollowerDetails
-  ): void {
+  ): string {
     const mergedCountedTiles: CountedTiles = new Map<string, CountedTile>();
     let mergedOwners: string[] = [];
     let mergedPoints = 0;
@@ -181,7 +182,9 @@ export class PathService {
       completed: false,
     };
     //Setting new merged path
-    pathDataMap.set(crypto.randomUUID(), mergedPathData);
+    const newPathId = crypto.randomUUID();
+    pathDataMap.set(newPathId, mergedPathData);
+    return newPathId;
   }
 
   private extractNearestTile(
