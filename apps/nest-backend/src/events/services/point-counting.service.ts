@@ -3,7 +3,6 @@ import {
   PathData,
   PathDataMap,
   Player,
-  Position,
   TileValues,
 } from '@carcasonne-mr/shared-interfaces';
 import { Injectable } from '@nestjs/common';
@@ -102,11 +101,10 @@ export class PointCountingService {
   public countPoints(
     pathData: PathData,
     tileValuesKey: keyof TileValues,
-    extraPoints = false,
-    ...positions: Position[]
+    extraPoints = false
   ): number {
     const isCities = tileValuesKey === 'cities';
-    const basePoints = positions.length * (isCities ? 2 : 1);
+    const basePoints = isCities ? 2 : 1;
     return pathData.points + (extraPoints && isCities ? basePoints * 2 : basePoints);
   }
 }

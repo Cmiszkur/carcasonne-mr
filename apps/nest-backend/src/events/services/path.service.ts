@@ -248,8 +248,7 @@ export class PathService {
     searchedPathData.points = this.pointCountingService.countPoints(
       searchedPathData,
       tileValuesKey,
-      extraPoints,
-      ...positions
+      extraPoints
     );
   }
 
