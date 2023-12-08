@@ -6,9 +6,10 @@ import * as session from 'express-session';
 import passport = require('passport');
 import { AppModule } from './app/app.module';
 import { SessionAdapter } from './events/events.adapter';
+import { CustomLoggerService } from './custom-logger/custom-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const configService = app.get(ConfigService);
   const sessionSecret = configService.get('SESSION_SECRET');
   const MongoUri = configService.get('MONGO_URI');
@@ -25,6 +26,7 @@ async function bootstrap() {
     origin: 'http://localhost:4200',
     credentials: true,
   });
+  app.useLogger(app.get(CustomLoggerService));
   app.use(sessionMiddleware);
   app.use(passport.initialize());
   app.use(passport.session());

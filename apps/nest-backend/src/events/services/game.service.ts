@@ -135,7 +135,7 @@ export class GameService extends BasicService {
       );
 
       searchedRoom.players = churchCounting.updatedPlayers;
-      searchedRoom.board = this.updateBoardAfterChurchCompletion(
+      searchedRoom.board = this.removeFallowersFromTiles(
         searchedRoom.board,
         churchCounting.tilesWithCompletedChurches
       );
@@ -145,16 +145,13 @@ export class GameService extends BasicService {
     return this.saveRoom(searchedRoom);
   }
 
-  private updateBoardAfterChurchCompletion(
-    board: ExtendedTile[],
-    tilesWithCompletedChurches: string[]
-  ): ExtendedTile[] {
+  private removeFallowersFromTiles(board: ExtendedTile[], tilesId: string[]): ExtendedTile[] {
     return board.map((tile) => {
-      const tileHasChurchCompleted = tilesWithCompletedChurches.some((id) => id === tile.id);
+      const removeTileFallower = tilesId.some((id) => id === tile.id);
       return {
         ...tile,
-        fallowerDetails: tileHasChurchCompleted ? null : tile.fallowerDetails,
-        isFollowerPlaced: tileHasChurchCompleted ? false : tile.isFollowerPlaced,
+        fallowerDetails: removeTileFallower ? null : tile.fallowerDetails,
+        isFollowerPlaced: removeTileFallower ? false : tile.isFollowerPlaced,
       };
     });
   }

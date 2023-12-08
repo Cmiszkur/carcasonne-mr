@@ -12,6 +12,7 @@ import { CheckTilesService } from './services/check-tiles.service';
 import { PathService } from './services/path.service';
 import { TilesService } from './services/tiles.service';
 import { PointCountingService } from './services/point-counting.service';
+import { CustomLoggerModule } from '../custom-logger/custom-logger.module';
 
 @Module({
   providers: [
@@ -31,6 +32,7 @@ import { PointCountingService } from './services/point-counting.service';
       { name: Tiles.name, schema: TilesSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    CustomLoggerModule,
   ],
   exports: [RoomService],
 })

@@ -22,10 +22,14 @@ import {
   Environment,
 } from '@carcasonne-mr/shared-interfaces';
 import { PointCountingService } from './point-counting.service';
+import { CustomLoggerService } from '@nest-backend/src/custom-logger/custom-logger.service';
 
 @Injectable()
 export class PathService {
-  constructor(private pointCountingService: PointCountingService) {}
+  constructor(
+    private pointCountingService: PointCountingService,
+    private customLoggerService: CustomLoggerService
+  ) {}
 
   private get emptyPathData(): PathData {
     return {
@@ -84,7 +88,8 @@ export class PathService {
       roads: new Map([...paths.roads, ...uncompletedRoadsPathDataMap]),
     };
 
-    this.logPaths(mergedPaths.roads, mergedPaths.cities);
+    this.customLoggerService.logPaths(mergedPaths.roads, mergedPaths.cities);
+
     return {
       paths: mergedPaths,
       players: this.pointCountingService.updatePlayersPointsFromPathData(
@@ -314,32 +319,5 @@ export class PathService {
       isCompleted.push(isTileCompleted);
     });
     return isCompleted.every(Boolean);
-  }
-
-  private logPaths(roadsPathDataMap: PathDataMap, citiesPathDataMap: PathDataMap): void {
-    roadsPathDataMap.forEach((pathData, pathId) => {
-      console.log('roads pathId: ', pathId);
-      console.log(' path completed: ', pathData.completed);
-      console.log(' path points: ', pathData.points);
-      pathData.countedTiles.forEach((countedTile, tileId) => {
-        console.log('   tileId: ', tileId);
-        console.log('   tile coordinates: ', countedTile.coordinates);
-        console.log('   tile checked positions: ', countedTile.checkedPositions);
-        console.log('   =============================================');
-      });
-      console.log('==================================================');
-    });
-
-    citiesPathDataMap.forEach((pathData, pathId) => {
-      console.log('cities pathId: ', pathId);
-      console.log(' path completed: ', pathData.completed);
-      console.log(' path points: ', pathData.points);
-      pathData.countedTiles.forEach((countedTile, tileId) => {
-        console.log('   tileId: ', tileId);
-        console.log('   tile coordinates: ', countedTile.coordinates);
-        console.log('   tile checked positions: ', countedTile.checkedPositions);
-      });
-      console.log('==================================================');
-    });
   }
 }
