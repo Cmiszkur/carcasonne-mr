@@ -30,17 +30,22 @@ export class TileAndPawnConfirmationButtonComponent {
   }
 
   public confirmChoice(): void {
-    if (this.isTilePlacedCorrectly) {
-      console.log('this.tilePlacementConfirmed', this.tilePlacementConfirmed, this.pawnPlaced());
-      if (this.tilePlacementConfirmed) {
-        if (this.pawnPlaced()) {
-          this.confirmation.emit({ tilePlaced: true, pawnPlaced: true });
-        } else {
-          this.openDialog();
-        }
+    if (!this.isTilePlacedCorrectly) {
+      return;
+    }
+
+    if (this.tilePlacementConfirmed) {
+      if (this.pawnPlaced()) {
+        this.confirmation.emit({ tilePlaced: true, pawnPlaced: true });
       } else {
-        this.confirmation.emit({ tilePlaced: true });
+        if (this.tileService.possiblePawnPlacements().length > 0) {
+          this.openDialog();
+        } else {
+          this.confirmation.emit({ tilePlaced: true, pawnPlaced: false });
+        }
       }
+    } else {
+      this.confirmation.emit({ tilePlaced: true });
     }
   }
 
