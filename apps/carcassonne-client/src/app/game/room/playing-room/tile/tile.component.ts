@@ -57,7 +57,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
     this.translate = null;
     this.isTilePlacementConfirmed = false;
     this.isCurrentTile = false;
-    this.loggedPlayerColor = this.roomService.playersValue?.loggedPlayer?.color || null;
+    this.loggedPlayerColor = this.roomService.players()?.loggedPlayer?.color || null;
     iconRegistry.addSvgIcon(
       'follower',
       sanitizer.bypassSecurityTrustResourceUrl('assets/SVG/follower.svg')
@@ -65,14 +65,16 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['isTilePlacementConfirmed']) {
-      if (this.isCurrentTile) this.tileService.fillPossiblePawnPlacements(this.extendedTile);
+    if (changes['isTilePlacementConfirmed'] && this.shouldFillPossiblePawnPlacements()) {
+      this.tileService.fillPossiblePawnPlacements(this.extendedTile);
     }
   }
 
   ngOnInit() {
     if (this.isCurrentTile) {
-      this.tileService.fillPossiblePawnPlacements(this.extendedTile);
+      if (this.playerHasEnoughFollowers()) {
+        this.tileService.fillPossiblePawnPlacements(this.extendedTile);
+      }
     } else {
       this.setPawn();
     }
@@ -106,5 +108,14 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
           )
         : null
     );
+  }
+
+  private shouldFillPossiblePawnPlacements(): boolean {
+    return this.isCurrentTile && this.playerHasEnoughFollowers();
+  }
+
+  private playerHasEnoughFollowers(): boolean {
+    const loggedPlayer = this.roomService.players()?.loggedPlayer;
+    return !!loggedPlayer && loggedPlayer.followers > 0;
   }
 }

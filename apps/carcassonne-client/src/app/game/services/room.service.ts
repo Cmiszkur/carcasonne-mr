@@ -1,6 +1,6 @@
 import { PlayersColors } from '../models/Room';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
 import { map, tap } from 'rxjs/operators';
@@ -53,10 +53,8 @@ export class RoomService extends SocketService {
    */
   private currentRoom$: BehaviorSubject<Room | null>;
 
-  /**
-   * Holds logged in player and rest of the players.
-   */
-  private players$: BehaviorSubject<Players | null>;
+  private _players = signal<Players | null>(null);
+  public players = this._players.asReadonly();
 
   constructor(private http: HttpClient, private authService: AuthService) {
     super();
@@ -65,7 +63,6 @@ export class RoomService extends SocketService {
     this.selectedRoomId$ = new BehaviorSubject<string | null>(null);
     this.currentRoom$ = new BehaviorSubject<Room | null>(null);
     this.selectedRoom$ = new BehaviorSubject<ShortenedRoom | null>(null);
-    this.players$ = new BehaviorSubject<Players | null>(null);
   }
 
   public get availableRooms(): ShortenedRoom[] | null {
@@ -88,16 +85,8 @@ export class RoomService extends SocketService {
     return this.currentRoom$.asObservable();
   }
 
-  public get players(): Observable<Players | null> {
-    return this.players$.asObservable();
-  }
-
-  public get playersValue(): Players | null {
-    return this.players$.value;
-  }
-
   public setPlayers(players: Player[]): void {
-    this.players$.next({
+    this._players.set({
       loggedPlayer: this.findPlayer(players),
       otherPlayers: this.getRestOfThePlayers(players),
     });

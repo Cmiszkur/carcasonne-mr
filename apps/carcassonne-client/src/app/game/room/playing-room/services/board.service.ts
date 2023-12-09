@@ -106,7 +106,7 @@ export class BoardService {
    * Sends placed tile extended format with placed pawn.
    */
   public sendPlacedTileToServer(tileAndPawnPlacementConfirmed: boolean): void {
-    const loggedPlayer: Player | null = this.roomService.playersValue?.loggedPlayer || null;
+    const loggedPlayer: Player | null = this.roomService.players()?.loggedPlayer || null;
     const currentTile = this.currentTile();
     const placedPawn = this.tileService.placedPawn();
 
