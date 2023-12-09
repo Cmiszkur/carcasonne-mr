@@ -17,6 +17,7 @@ import {
   PathDataMap,
   Position,
   Tile,
+  PathData,
 } from '@carcasonne-mr/shared-interfaces';
 import { CheckTilesService } from './check-tiles.service';
 import * as crypto from 'crypto';
@@ -119,7 +120,14 @@ export class GameService extends BasicService {
       extendedTile
     );
     searchedRoom.paths = pointCheckingAnswer.paths;
-    searchedRoom.players = pointCheckingAnswer.players;
+    searchedRoom.players = this.pointCountingService.updatePlayersPointsFromPathData(
+      pointCheckingAnswer.recentlyCompletedPaths,
+      searchedRoom.players
+    );
+    searchedRoom.board = this.clearFallowersFromCompletedPaths(
+      pointCheckingAnswer.recentlyCompletedPaths,
+      searchedRoom.board
+    );
 
     // Updates players points if tile was placed near church and church has been completed
     const tilesWithChurches = this.tilesService.checkForChurchesAround(
@@ -154,6 +162,18 @@ export class GameService extends BasicService {
         isFollowerPlaced: removeTileFallower ? false : tile.isFollowerPlaced,
       };
     });
+  }
+
+  private clearFallowersFromCompletedPaths(
+    recentlyCompletedPaths: [string, PathData][],
+    board: ExtendedTile[]
+  ) {
+    const tileIds = recentlyCompletedPaths.flatMap((pathArray) => {
+      const path = pathArray[1];
+      return Array.from(path.countedTiles.keys());
+    });
+
+    return this.removeFallowersFromTiles(board, tileIds);
   }
 
   /**

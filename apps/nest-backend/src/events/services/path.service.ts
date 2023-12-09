@@ -8,7 +8,6 @@ import {
 } from '@shared-functions';
 import {
   Paths,
-  Player,
   PointCheckingAnswer,
   Coordinates,
   CountedTile,
@@ -47,7 +46,6 @@ export class PathService {
     const uncompletedRoadsPathDataMap: PathDataMap = uncompletedPaths.roads;
     const uncompletedCitiesPathDataMap: PathDataMap = uncompletedPaths.cities;
     const placedFallower: FollowerDetails | undefined = copiedPlacedTile.fallowerDetails;
-    const players: Player[] = room.players;
     const cities: [Position[]] | undefined = copiedPlacedTile.tileValuesAfterRotation?.cities;
     const roads: [Position[]] | undefined = copiedPlacedTile.tileValuesAfterRotation?.roads;
     const coordinates: Coordinates = copiedPlacedTile.coordinates;
@@ -92,10 +90,9 @@ export class PathService {
 
     return {
       paths: mergedPaths,
-      players: this.pointCountingService.updatePlayersPointsFromPathData(
+      recentlyCompletedPaths: this.recentlyCompletedPaths(
         new Map([...uncompletedPaths.cities, ...uncompletedPaths.roads]),
-        newOrUpdatedPathIds,
-        players
+        newOrUpdatedPathIds
       ),
     };
   }
@@ -322,5 +319,14 @@ export class PathService {
       isCompleted.push(isTileCompleted);
     });
     return isCompleted.every(Boolean);
+  }
+
+  private recentlyCompletedPaths(
+    pathDataMap: PathDataMap,
+    newOrUpdatedPathIds: Set<string>
+  ): [string, PathData][] {
+    return Array.from(pathDataMap).filter(([pathId, pathData]) => {
+      return newOrUpdatedPathIds.has(pathId) && pathData.completed;
+    });
   }
 }

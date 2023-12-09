@@ -1,10 +1,4 @@
-import {
-  ExtendedTile,
-  PathData,
-  PathDataMap,
-  Player,
-  TileValues,
-} from '@carcasonne-mr/shared-interfaces';
+import { ExtendedTile, PathData, Player, TileValues } from '@carcasonne-mr/shared-interfaces';
 import { Injectable } from '@nestjs/common';
 import { copy } from '@shared-functions';
 import { TilesService } from './tiles.service';
@@ -71,26 +65,23 @@ export class PointCountingService {
   }
 
   public updatePlayersPointsFromPathData(
-    pathDataMap: PathDataMap,
-    newOrUpdatedPathIds: Set<string>,
+    completedPaths: [string, PathData][],
     players: Player[]
   ): Player[] {
     let copiedPlayers = copy(players);
 
-    newOrUpdatedPathIds.forEach((newOrUpdatedPathId) => {
-      const checkedPath = pathDataMap.get(newOrUpdatedPathId);
-      if (!checkedPath || !checkedPath.completed) {
-        return;
-      }
+    completedPaths.forEach((path) => {
+      const checkedPath = path[1];
 
       const checkedPathOwners = checkedPath.pathOwners || [];
       copiedPlayers = copiedPlayers.map((player) => {
-        const playerWasPathOwner = checkedPathOwners.some(
+        const playerFallowers = checkedPathOwners.filter(
           (pathOwner) => pathOwner === player.username
-        );
+        ).length;
         return {
           ...player,
-          points: playerWasPathOwner ? player.points + checkedPath.points : player.points,
+          points: playerFallowers > 0 ? player.points + checkedPath.points : player.points,
+          followers: player.followers + playerFallowers,
         };
       });
     });

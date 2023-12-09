@@ -1,5 +1,5 @@
 import { TilesAbstract } from '../tiles/tiles-abstract';
-import { Coordinates, PathDataMap, Tile } from '../tiles/tiles-types';
+import { Coordinates, PathData, PathDataMap, Tile } from '../tiles/tiles-types';
 import { RoomAbstract } from './room-abstract';
 
 export interface TilesSet {
@@ -49,7 +49,7 @@ export interface Paths {
 
 export interface PointCheckingAnswer {
   paths: Paths;
-  players: Player[];
+  recentlyCompletedPaths: [string, PathData][];
 }
 
 export type ShortenedRoom = Pick<
