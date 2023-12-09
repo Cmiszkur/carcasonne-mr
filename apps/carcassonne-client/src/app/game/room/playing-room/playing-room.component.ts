@@ -82,8 +82,17 @@ export class PlayingRoomComponent
   }
 
   public ngAfterViewInit(): void {
-    const v = this.boardService.setBoardOffsetYAxis();
-    if (v) this.addSpaceYAxisAndUpdateVariables(v);
+    const boardOffsetYAxis = this.boardService.setBoardOffsetYAxis();
+    const boardOffsetXAxis = this.boardService.setBoardOffsetXAxis();
+
+    console.log('boardOffsetXAxis after view init', boardOffsetXAxis);
+
+    if (boardOffsetYAxis) this.addSpaceYAxis(boardOffsetYAxis);
+    if (boardOffsetXAxis) this.addSpaceXAxis(boardOffsetXAxis);
+    if (boardOffsetXAxis || boardOffsetYAxis) {
+      this.boardService.updatedTilesTranslateValue();
+      this.emptyTilesService.updatedEmptyTilesTranslateValue();
+    }
   }
 
   public trackByIndex(index: number): number {
@@ -156,6 +165,18 @@ export class PlayingRoomComponent
     }
   }
 
+  private addSpaceXAxis(boardOffset: number): void {
+    const boardDivElRef = this.boardDivElRef?.nativeElement;
+    const blankDivElRef = this.blankDivElRef?.nativeElement;
+
+    if (boardOffset <= 0 && boardDivElRef && blankDivElRef) {
+      const v = -boardOffset + this.boardService.boardOffsetXAxisWithMargin + 20;
+      blankDivElRef.style.width = blankDivElRef.offsetWidth + v + 'px';
+      boardDivElRef.scrollTo(boardDivElRef.scrollLeft + v, boardDivElRef.scrollTop);
+      this.boardService.boardOffsetXAxisWithMargin = boardOffset - 20;
+    }
+  }
+
   private setClickedEmptyTileBorderColor(emptyTileId: string, borderColor: string) {
     return this.clickedEmptyTileColor.set({ emptyTileId, borderColor });
   }
@@ -191,9 +212,11 @@ export class PlayingRoomComponent
         filter((room): room is RoomAbstract => !!room)
       )
       .subscribe((room) => {
-        const v = this.boardService.setBoardOffsetYAxis(room.board);
+        const boardOffsetYAxis = this.boardService.setBoardOffsetYAxis(room.board);
+        const boardOffsetXAxis = this.boardService.setBoardOffsetXAxis(room.board);
 
-        if (v) this.addSpaceYAxis(v);
+        if (boardOffsetYAxis) this.addSpaceYAxis(boardOffsetYAxis);
+        if (boardOffsetXAxis) this.addSpaceXAxis(boardOffsetXAxis);
 
         this.tileService.clearPlacedTile();
         this.updatePlayingRoom(this.roomService.currentRoomValue);

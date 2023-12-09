@@ -66,6 +66,7 @@ export class EmptyTilesService {
             ? {
                 ...emptyTile.position,
                 top: emptyTile.position.top - this.boardService.boardOffsetYAxisWithMargin,
+                left: emptyTile.position.left - this.boardService.boardOffsetXAxisWithMargin,
               }
             : null,
         };

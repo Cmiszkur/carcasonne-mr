@@ -26,14 +26,25 @@ export class BoardService {
   private _boardOffsetYAxis = signal<number | null>(null);
   public boardOffsetYAxis = this._boardOffsetYAxis.asReadonly();
 
+  private _boardOffsetXAxis = signal<number | null>(null);
+  public boardOffsetXAxis = this._boardOffsetXAxis.asReadonly();
+
   public boardOffsetYAxisWithMargin = 0;
+
+  public boardOffsetXAxisWithMargin = 0;
 
   constructor(private roomService: RoomService, private tileService: TileService) {}
 
-  private getHighestYAxis(tiles: ExtendedTranslatedTile[] | ExtendedTile[]): number | null {
+  private getHighestAxis(
+    tiles: ExtendedTranslatedTile[] | ExtendedTile[],
+    axis: keyof Coordinates
+  ): number | null {
     return tiles.length > 0
       ? tiles
-          .map((tile) => tile.coordinates.y)
+          .map((tile) => {
+            const xy = tile.coordinates[axis];
+            return axis === 'x' ? -xy : xy;
+          })
           .reduce((prevValue, currValue) => (prevValue < currValue ? currValue : prevValue))
       : null;
   }
@@ -42,13 +53,30 @@ export class BoardService {
     tiles: ExtendedTranslatedTile[] | ExtendedTile[] = this.tiles()
   ): number | null {
     const firstTilePosition = this.firstTilePosition();
-    const highestYAxis = this.getHighestYAxis(tiles);
+    const highestYAxis = this.getHighestAxis(tiles, 'y');
     this._boardOffsetYAxis.set(
       firstTilePosition && highestYAxis
         ? firstTilePosition.y - (highestYAxis + 1) * 100 - (highestYAxis + 1) * 12 + 6
         : null
     );
     return this.boardOffsetYAxis();
+  }
+
+  public setBoardOffsetXAxis(
+    tiles: ExtendedTranslatedTile[] | ExtendedTile[] = this.tiles()
+  ): number | null {
+    const firstTilePosition = this.firstTilePosition();
+    const lowestXAxis = this.getHighestAxis(tiles, 'x');
+
+    console.log('lowest x axis', lowestXAxis);
+    console.log('first tile position x axis', firstTilePosition?.x);
+
+    this._boardOffsetXAxis.set(
+      firstTilePosition && lowestXAxis
+        ? firstTilePosition.x - (lowestXAxis + 1) * 100 - (lowestXAxis + 1) * 12 + 6
+        : null
+    );
+    return this.boardOffsetXAxis();
   }
 
   public setCurrentTile(tile: Tile | null): void {
@@ -72,6 +100,7 @@ export class BoardService {
             ? {
                 ...tile.translateValue,
                 top: tile.translateValue.top - this.boardOffsetYAxisWithMargin,
+                left: tile.translateValue.left - this.boardOffsetXAxisWithMargin,
               }
             : null,
         };
@@ -129,7 +158,7 @@ export class BoardService {
     const firstTilePosition = this.firstTilePosition();
     if (firstTilePosition) {
       return {
-        left: firstTilePosition.x + 112 * coordinates.x,
+        left: firstTilePosition.x + 112 * coordinates.x - this.boardOffsetXAxisWithMargin,
         top: firstTilePosition.y - 112 * coordinates.y - this.boardOffsetYAxisWithMargin,
       };
     } else {
