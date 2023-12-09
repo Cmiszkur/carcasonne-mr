@@ -1,3 +1,4 @@
+import { FollowerService } from './services/follower.service';
 import { BasicService } from './services/basic.service';
 import { GameService } from './services/game.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -25,6 +26,7 @@ import { CustomLoggerModule } from '../custom-logger/custom-logger.module';
     PathService,
     TilesService,
     PointCountingService,
+    FollowerService,
   ],
   imports: [
     MongooseModule.forFeature([

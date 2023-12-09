@@ -35,6 +35,7 @@ export enum RoomError {
   GAME_HAS_ALREADY_STARTED = 'Game has already started',
   PLACEMENT_NOT_CORRECT = 'Tile placement is not correct',
   MEEPLE_COLOR_NOT_SPECIFIED = 'Meeple color not specified',
+  NOT_ENOUGH_FOLLOWERS = "Player doesn't have enough followers",
 }
 
 export interface TileAndPlayer {

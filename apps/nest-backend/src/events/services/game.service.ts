@@ -1,3 +1,4 @@
+import { FollowerService } from './follower.service';
 import { BasicService } from './basic.service';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -34,7 +35,8 @@ export class GameService extends BasicService {
     private checkTilesService: CheckTilesService,
     private pathService: PathService,
     private tilesService: TilesService,
-    private pointCountingService: PointCountingService
+    private pointCountingService: PointCountingService,
+    private followerService: FollowerService
   ) {
     super();
   }
@@ -108,9 +110,12 @@ export class GameService extends BasicService {
     searchedRoom.board.push(extendedTile);
     searchedRoom.boardMoves.push(this.getBoardMove(extendedTile.coordinates, username));
 
-    // If a pawn is placed on the tile, remove the corresponding follower from the player's inventory
-    if (this.checkIfPawnWasPlaced(extendedTile)) {
-      this.removeFallowerFromPlayer(searchedRoom, username);
+    // If a pawn is placed on the tile, remove one follower from the player
+    if (extendedTile.fallowerDetails) {
+      if (!this.followerService.playerHasEnoughFollowers(searchedRoom.players, username)) {
+        return this.createAnswer(RoomError.NOT_ENOUGH_FOLLOWERS, null);
+      }
+      searchedRoom.players = this.followerService.removeFallowerFromPlayer(searchedRoom, username);
     }
 
     // Check the point scoring for the new tile and update the paths accordingly
@@ -124,7 +129,7 @@ export class GameService extends BasicService {
       pointCheckingAnswer.recentlyCompletedPaths,
       searchedRoom.players
     );
-    searchedRoom.board = this.clearFallowersFromCompletedPaths(
+    searchedRoom.board = this.followerService.clearFollowersFromCompletedPaths(
       pointCheckingAnswer.recentlyCompletedPaths,
       searchedRoom.board
     );
@@ -143,7 +148,7 @@ export class GameService extends BasicService {
       );
 
       searchedRoom.players = churchCounting.updatedPlayers;
-      searchedRoom.board = this.removeFallowersFromTiles(
+      searchedRoom.board = this.followerService.removeFollowersFromTiles(
         searchedRoom.board,
         churchCounting.tilesWithCompletedChurches
       );
@@ -151,29 +156,6 @@ export class GameService extends BasicService {
 
     // Save the modified room and return an answer indicating success
     return this.saveRoom(searchedRoom);
-  }
-
-  private removeFallowersFromTiles(board: ExtendedTile[], tilesId: string[]): ExtendedTile[] {
-    return board.map((tile) => {
-      const removeTileFallower = tilesId.some((id) => id === tile.id);
-      return {
-        ...tile,
-        fallowerDetails: removeTileFallower ? null : tile.fallowerDetails,
-        isFollowerPlaced: removeTileFallower ? false : tile.isFollowerPlaced,
-      };
-    });
-  }
-
-  private clearFallowersFromCompletedPaths(
-    recentlyCompletedPaths: [string, PathData][],
-    board: ExtendedTile[]
-  ) {
-    const tileIds = recentlyCompletedPaths.flatMap((pathArray) => {
-      const path = pathArray[1];
-      return Array.from(path.countedTiles.keys());
-    });
-
-    return this.removeFallowersFromTiles(board, tileIds);
   }
 
   /**
@@ -256,25 +238,6 @@ export class GameService extends BasicService {
       coordinates: coordinates,
       player: player,
     };
-  }
-
-  /**
-   * Checks if pawn was placed on newly send tile.
-   * @param tile
-   * @returns
-   */
-  private checkIfPawnWasPlaced(tile: ExtendedTile): boolean {
-    return !!tile.fallowerDetails;
-  }
-
-  /**
-   * Removes fallower from player.
-   * @param room
-   * @param username
-   */
-  private removeFallowerFromPlayer(room: Room, username: string): void {
-    const playerIndex: number = room.players.findIndex((p) => p.username === username);
-    room.players[playerIndex].followers -= 1;
   }
 
   private getDefaultPaths(tile: ExtendedTile): Paths {
