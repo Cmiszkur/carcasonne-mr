@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { TranslateValue } from '@carcasonne-mr/shared-interfaces';
 
 @Component({
   selector: 'app-empty-tiles',
@@ -7,7 +8,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmptyTileComponent {
-  @Input() translate: { left: number; top: number } | null = null;
+  @Input() translate: TranslateValue | null = null;
 
   constructor() {}
 }

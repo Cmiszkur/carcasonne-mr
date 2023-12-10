@@ -1,7 +1,7 @@
-import { Position, Environment } from '@carcasonne-mr/shared-interfaces';
+import { Position, Environment, TranslateValue } from '@carcasonne-mr/shared-interfaces';
 
 export interface Pawn {
-  transformValue: string;
+  transformValue: TranslateValue;
   position: Position[];
   placement: Environment;
   selected?: boolean;

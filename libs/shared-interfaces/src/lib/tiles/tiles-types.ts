@@ -31,12 +31,12 @@ export interface ExtendedTile {
 }
 
 export type ExtendedTranslatedTile = ExtendedTile & {
-  translateValue: { left: number; top: number } | null;
+  translateValue: TranslateValue | null;
 };
 
 export type CurrentTile = Omit<ExtendedTile, 'id' | 'coordinates'> & {
   coordinates: Coordinates | null;
-  translateValue: { left: number; top: number } | null;
+  translateValue: TranslateValue | null;
 };
 
 export interface FollowerDetails {
@@ -81,4 +81,9 @@ export interface CountedTile {
   isPathCompleted: boolean;
   checkedPositions: Set<Position>;
   coordinates: Coordinates;
+}
+
+export interface TranslateValue {
+  left: number;
+  top: number;
 }

@@ -16,22 +16,21 @@
   <mat-icon class="rotate_icon" *ngIf="isCurrentTile">rotate_right</mat-icon>
 
   <ng-container *ngIf="isTilePlacementConfirmed; else alreadyPlacedPawns">
-    <button mat-icon-button 
-            *ngFor="let pawn of possiblePawnPlacements()" 
-            [style.transform]="pawn.transformValue" 
-            (click)="placePawn(pawn)">
-      <mat-icon [style.fill]="!pawn.selected ? '#5c5c5c' : loggedPlayerColor"
-                svgIcon="follower"
-                aria-hidden="false">
-      </mat-icon>
-    </button>
+    <mat-icon *ngFor="let pawn of possiblePawnPlacements()" 
+              [style.fill]="!pawn.selected ? '#5c5c5c' : loggedPlayerColor"
+              [ngStyle]="{ top: pawn.transformValue.top + 'px', left: pawn.transformValue.left + 'px' }"
+              class="possible-pawn-placement"
+              svgIcon="follower"
+              aria-hidden="false" 
+              (click)="placePawn(pawn)">
+    </mat-icon>
   </ng-container>
 
   <ng-template #alreadyPlacedPawns>
-    <mat-icon *ngIf="this.extendedTile.fallowerDetails as fallowerDetails" 
+    <mat-icon *ngIf="pawn() as pawn" 
               class="placed-pawn"
-              [style.fill]="fallowerDetails.playerColor"
-              [style.transform]="pawn()?.transformValue"
+              [style.fill]="extendedTile.fallowerDetails?.playerColor"
+              [ngStyle]="{ top: pawn.transformValue.top + 'px', left: pawn.transformValue.left + 'px' }"
               svgIcon="follower"
               aria-hidden="false">
       </mat-icon>

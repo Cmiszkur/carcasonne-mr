@@ -68,9 +68,6 @@ export class BoardService {
     const firstTilePosition = this.firstTilePosition();
     const lowestXAxis = this.getHighestAxis(tiles, 'x');
 
-    console.log('lowest x axis', lowestXAxis);
-    console.log('first tile position x axis', firstTilePosition?.x);
-
     this._boardOffsetXAxis.set(
       firstTilePosition && lowestXAxis
         ? firstTilePosition.x - (lowestXAxis + 1) * 100 - (lowestXAxis + 1) * 12 + 6

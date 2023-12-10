@@ -85,8 +85,6 @@ export class PlayingRoomComponent
     const boardOffsetYAxis = this.boardService.setBoardOffsetYAxis();
     const boardOffsetXAxis = this.boardService.setBoardOffsetXAxis();
 
-    console.log('boardOffsetXAxis after view init', boardOffsetXAxis);
-
     if (boardOffsetYAxis) this.addSpaceYAxis(boardOffsetYAxis);
     if (boardOffsetXAxis) this.addSpaceXAxis(boardOffsetXAxis);
     if (boardOffsetXAxis || boardOffsetYAxis) {

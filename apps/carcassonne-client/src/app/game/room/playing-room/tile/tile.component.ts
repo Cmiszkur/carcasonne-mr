@@ -3,7 +3,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
-import { ExtendedTile, CurrentTile } from '@carcasonne-mr/shared-interfaces';
+import { ExtendedTile, CurrentTile, TranslateValue } from '@carcasonne-mr/shared-interfaces';
 import { Pawn } from '../../../models/pawn';
 import { TileService } from './services/tile.service';
 
@@ -24,7 +24,7 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   /**
    * Translate string, which is used in template to position tile in DOM.
    */
-  @Input() public translate: { left: number; top: number } | null;
+  @Input() public translate: TranslateValue | null;
   /**
    * Indicates confirmation of tile placement. Based on this variable possible pawn placements are determined.
    */

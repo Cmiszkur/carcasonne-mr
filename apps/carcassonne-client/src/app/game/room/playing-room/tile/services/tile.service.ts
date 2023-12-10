@@ -6,12 +6,14 @@ import {
   ExtendedTile,
   Paths,
   Position,
+  TranslateValue,
 } from '@carcasonne-mr/shared-interfaces';
 import { Pawn } from '@carcassonne-client/src/app/game/models/pawn';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
 import {
   TileValuesAfterRotation,
   calculateNearestCoordinates,
+  compareArrays,
   searchForPathWithGivenCoordinates,
 } from '@shared-functions';
 
@@ -41,7 +43,7 @@ export class TileService {
 
     if (extendedTile.tile.hasChurch) {
       possiblePawnPlacements.push({
-        transformValue: 'translate(32px, 32px)',
+        transformValue: { left: 42, top: 42 },
         placement: Environment.CHURCH,
         position: [],
       });
@@ -80,7 +82,7 @@ export class TileService {
 
     if (values.length >= 2 || hasChurch) {
       return {
-        transformValue: 'translate(32px, 32px)',
+        transformValue: this.pawnTranslateValuePositionCluster(values, key),
         placement: hasChurch ? Environment.CHURCH : key,
         position: hasChurch ? [] : values,
       };
@@ -119,28 +121,48 @@ export class TileService {
     return positionClusters.filter((cluster) => {
       return !cluster.some((position) => {
         const calculatedCoordinates = calculateNearestCoordinates(position, coordinates);
-        const numberOfPathOwners = searchForPathWithGivenCoordinates(
-          calculatedCoordinates,
-          pathData,
-          position
-        )?.[1].pathOwners.length;
+        const path = searchForPathWithGivenCoordinates(calculatedCoordinates, pathData, position);
+        const numberOfPathOwners = path?.[1].pathOwners.length;
         return !!numberOfPathOwners;
       });
     });
   }
 
-  private pawnTranslateValue(position: Position): string {
+  private pawnTranslateValuePositionCluster(
+    positionCluster: Position[],
+    environment: Environment
+  ): TranslateValue {
+    if (environment === Environment.CITIES) {
+      if (compareArrays(positionCluster, ['TOP', 'RIGHT'])) {
+        return { left: 42, top: 16 };
+      }
+
+      if (compareArrays(positionCluster, ['RIGHT', 'BOTTOM'])) {
+        return { left: 42, top: 42 };
+      }
+
+      if (compareArrays(positionCluster, ['BOTTOM', 'LEFT'])) {
+        return { left: 16, top: 42 };
+      }
+
+      if (compareArrays(positionCluster, ['LEFT', 'TOP'])) {
+        return { left: 16, top: 16 };
+      }
+    }
+
+    return { left: 42, top: 42 };
+  }
+
+  private pawnTranslateValue(position: Position): TranslateValue {
     switch (position) {
-      case 'TOP':
-        return 'translate(32px, 0)';
-      case 'RIGHT':
-        return 'translate(70px, 32px)';
-      case 'BOTTOM':
-        return 'translate(32px, 70px)';
-      case 'LEFT':
-        return 'translate(0, 32px)';
-      default:
-        return '';
+      case Position.TOP:
+        return { left: 42, top: 7 };
+      case Position.RIGHT:
+        return { left: 70, top: 42 };
+      case Position.BOTTOM:
+        return { left: 42, top: 70 };
+      case Position.LEFT:
+        return { left: 7, top: 42 };
     }
   }
 
