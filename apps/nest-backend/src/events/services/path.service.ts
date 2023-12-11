@@ -3,6 +3,7 @@ import { Room } from '../schemas/room.schema';
 import * as crypto from 'crypto';
 import {
   calculateNearestCoordinates,
+  compareArrays,
   copy,
   searchForPathWithGivenCoordinates,
 } from '@shared-functions';
@@ -248,8 +249,8 @@ export class PathService {
     const searchedPathData = pathDataMap.get(pathId);
     if (!searchedPathData) return;
     newOrUpdatedPathIds.add(pathId);
-    this.updatePathOwners(searchedPathData, placedFallower);
     this.setOrUpdateCountedTile(tileId, coordinates, searchedPathData, ...positions);
+    this.updatePathOwners(tileId, searchedPathData, placedFallower);
     searchedPathData.points = this.pointCountingService.countPoints(
       searchedPathData,
       tileValuesKey,
@@ -275,10 +276,23 @@ export class PathService {
     }
   }
 
-  private updatePathOwners(searchedPathData?: PathData, placedFallower?: FollowerDetails): void {
-    const fallowerOwner = placedFallower?.username;
-    if (searchedPathData && fallowerOwner) {
-      if (searchedPathData.pathOwners.some((pathOwner) => pathOwner !== fallowerOwner)) return;
+  private updatePathOwners(
+    tileId: string,
+    searchedPathData: PathData,
+    placedFallower?: FollowerDetails
+  ): void {
+    const checkedPositions = Array.from(
+      searchedPathData.countedTiles.get(tileId)?.checkedPositions || []
+    );
+
+    if (!placedFallower || searchedPathData.pathOwners.length || !checkedPositions.length) {
+      return;
+    }
+
+    const fallowerOwner = placedFallower.username;
+    const placedFollowerPositions = placedFallower.position;
+
+    if (compareArrays(placedFollowerPositions, checkedPositions)) {
       searchedPathData.pathOwners.push(fallowerOwner);
     }
   }
