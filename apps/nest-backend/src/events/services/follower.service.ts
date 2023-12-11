@@ -1,16 +1,34 @@
-import { ExtendedTile, PathData, Player, RoomAbstract } from '@carcasonne-mr/shared-interfaces';
+import {
+  ExtendedTile,
+  PathData,
+  Player,
+  Position,
+  RoomAbstract,
+} from '@carcasonne-mr/shared-interfaces';
 import { Injectable } from '@nestjs/common';
-import { copy } from '@shared-functions';
+import { compareArrays, copy, isString } from '@shared-functions';
 
 @Injectable()
 export class FollowerService {
-  public removeFollowersFromTiles(board: ExtendedTile[], tilesId: string[]): ExtendedTile[] {
+  public removeFollowersFromTiles(
+    board: ExtendedTile[],
+    tiles: (string | { id: string; positions: Position[] })[]
+  ): ExtendedTile[] {
     return board.map((tile) => {
-      const removeTileFallower = tilesId.some((id) => id === tile.id);
+      const removeTileFollower = tiles.some((v) => {
+        if (isString(v)) {
+          return v === tile.id;
+        } else {
+          return (
+            v.id === tile.id && compareArrays(v.positions, tile.fallowerDetails?.position || [])
+          );
+        }
+      });
+
       return {
         ...tile,
-        fallowerDetails: removeTileFallower ? null : tile.fallowerDetails,
-        isFollowerPlaced: removeTileFallower ? false : tile.isFollowerPlaced,
+        fallowerDetails: removeTileFollower ? null : tile.fallowerDetails,
+        isFollowerPlaced: removeTileFollower ? false : tile.isFollowerPlaced,
       };
     });
   }
@@ -19,12 +37,14 @@ export class FollowerService {
     recentlyCompletedPaths: [string, PathData][],
     board: ExtendedTile[]
   ) {
-    const tileIds = recentlyCompletedPaths.flatMap((pathArray) => {
+    const tiles = recentlyCompletedPaths.flatMap((pathArray) => {
       const path = pathArray[1];
-      return Array.from(path.countedTiles.keys());
+      return Array.from(path.countedTiles.entries()).map((countedTile) => {
+        return { id: countedTile[0], positions: Array.from(countedTile[1].checkedPositions) };
+      });
     });
 
-    return this.removeFollowersFromTiles(board, tileIds);
+    return this.removeFollowersFromTiles(board, tiles);
   }
 
   /**

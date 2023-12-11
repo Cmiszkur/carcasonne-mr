@@ -9,7 +9,7 @@ import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHand
 import { SocketService } from '../../commons/services/socket.service';
 import { AuthService } from '@carcassonne-client/src/app/user/auth.service';
 import { Players } from '../models/Players';
-import { deserializeObj } from '@shared-functions';
+import { deserializeObj, isString } from '@shared-functions';
 import {
   CreateRoomPayload,
   CurrentTile,
@@ -246,10 +246,9 @@ export class RoomService extends SocketService {
         room: room
           ? {
               ...room,
-              paths:
-                typeof room.paths === 'string'
-                  ? deserializeObj(room.paths)
-                  : { cities: new Map(), roads: new Map() },
+              paths: isString(room.paths)
+                ? deserializeObj(room.paths)
+                : { cities: new Map(), roads: new Map() },
             }
           : null,
         tile: socketAnswerReceived.answer?.tile ?? null,
