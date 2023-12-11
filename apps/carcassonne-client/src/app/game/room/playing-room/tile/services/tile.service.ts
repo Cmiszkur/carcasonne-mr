@@ -138,7 +138,7 @@ export class TileService {
       }
 
       if (compareArrays(positionCluster, ['RIGHT', 'BOTTOM'])) {
-        return { left: 42, top: 42 };
+        return { left: 65, top: 65 };
       }
 
       if (compareArrays(positionCluster, ['BOTTOM', 'LEFT'])) {
