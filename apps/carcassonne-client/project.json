@@ -15,10 +15,7 @@
         "polyfills": "apps/carcassonne-client/src/polyfills.ts",
         "tsConfig": "apps/carcassonne-client/tsconfig.app.json",
         "inlineStyleLanguage": "sass",
-        "assets": [
-          "apps/carcassonne-client/src/favicon.ico",
-          "apps/carcassonne-client/src/assets"
-        ],
+        "assets": ["apps/carcassonne-client/src/favicon.ico", "apps/carcassonne-client/src/assets"],
         "styles": [
           {
             "input": "apps/carcassonne-client/src/dark-theme.sass",
@@ -88,10 +85,7 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "apps/carcassonne-client/**/*.ts",
-          "apps/carcassonne-client/**/*.html"
-        ]
+        "lintFilePatterns": ["apps/carcassonne-client/**/*.ts", "apps/carcassonne-client/**/*.html"]
       }
     },
     "test": {
@@ -100,6 +94,10 @@
       "options": {
         "jestConfig": "apps/carcassonne-client/jest.config.ts"
       }
+    },
+    "docker-build": {
+      "dependsOn": ["build"],
+      "command": "docker build -f apps/carcassonne-client/Dockerfile . -t carcassonne-client"
     }
   },
   "tags": []

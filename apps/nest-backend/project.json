@@ -48,6 +48,10 @@
       "options": {
         "jestConfig": "apps/nest-backend/jest.config.ts"
       }
+    },
+    "docker-build": {
+      "dependsOn": ["build"],
+      "command": "docker build -f apps/nest-backend/Dockerfile . -t nest-backend"
     }
   },
   "tags": []
