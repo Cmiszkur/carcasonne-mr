@@ -12,13 +12,13 @@ ENV PORT=3000
 WORKDIR /app
 
 RUN addgroup --system nest-backend && \
-          adduser --system -G nest-backend nest-backend
+    adduser --system -G nest-backend nest-backend
 
 COPY dist/apps/nest-backend nest-backend
 RUN chown -R nest-backend:nest-backend .
 
-# You can remove this install step if you build with `--bundle` option.
-# The bundled output will include external dependencies.
-RUN npm --prefix nest-backend --omit=dev -f install
+RUN npm install --production
 
-CMD [ "node", "nest-backend" ]
+CMD [ "npm", "run", "start:dev" ]
+
+EXPOSE ${PORT}

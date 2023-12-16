@@ -15,6 +15,7 @@
         "polyfills": "apps/carcassonne-client/src/polyfills.ts",
         "tsConfig": "apps/carcassonne-client/tsconfig.app.json",
         "inlineStyleLanguage": "sass",
+        "generatePackageJson": true,
         "assets": ["apps/carcassonne-client/src/favicon.ico", "apps/carcassonne-client/src/assets"],
         "styles": [
           {
@@ -63,6 +64,16 @@
         }
       },
       "defaultConfiguration": "production"
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run carcassonne-client:build",
+          "nx run carcassonne-client:docker-build"
+        ],
+        "parallel": false
+      }
     },
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",

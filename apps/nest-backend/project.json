@@ -13,7 +13,8 @@
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
         "assets": ["apps/nest-backend/src/assets"],
         "target": "node",
-        "compiler": "tsc"
+        "compiler": "tsc",
+        "generatePackageJson": true
       },
       "configurations": {
         "production": {
@@ -27,6 +28,16 @@
             }
           ]
         }
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run nest-backend:build",
+          "nx run nest-backend:docker-build"
+        ],
+        "parallel": false
       }
     },
     "serve": {
