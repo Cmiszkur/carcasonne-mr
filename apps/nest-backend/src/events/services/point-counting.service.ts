@@ -78,10 +78,16 @@ export class PointCountingService {
         const playerFallowers = checkedPathOwners.filter(
           (pathOwner) => pathOwner === player.username
         ).length;
+
+        const playerDominantOrEqual = this.isPlayerDominantOrEqual(
+          checkedPathOwners,
+          player.username
+        );
+
         return {
           ...player,
-          points: playerFallowers > 0 ? player.points + checkedPath.points : player.points,
-          followers: player.followers + playerFallowers,
+          points: playerDominantOrEqual ? player.points + checkedPath.points : player.points,
+          followers: playerDominantOrEqual ? player.followers + playerFallowers : player.followers,
         };
       });
     });
@@ -97,5 +103,35 @@ export class PointCountingService {
     const isCities = tileValuesKey === 'cities';
     const basePoints = isCities ? 2 : 1;
     return pathData.points + (extraPoints && isCities ? basePoints * 2 : basePoints);
+  }
+
+  private isPlayerDominantOrEqual(checkedPathOwners: string[], username: string): boolean {
+    if (checkedPathOwners.length === 0) {
+      return false;
+    }
+
+    const frequencyMap: Record<string, number> = {};
+    let maxCount = 1;
+
+    for (const el of checkedPathOwners) {
+      if (frequencyMap[el] == null) {
+        frequencyMap[el] = 1;
+      } else {
+        frequencyMap[el]++;
+      }
+
+      if (frequencyMap[el] > maxCount) {
+        maxCount = frequencyMap[el];
+      }
+    }
+    const mostFrequentOwners: string[] = [];
+
+    for (const el in frequencyMap) {
+      if (frequencyMap[el] === maxCount) {
+        mostFrequentOwners.push(el);
+      }
+    }
+
+    return mostFrequentOwners.some((owner) => owner === username);
   }
 }
