@@ -6,7 +6,7 @@
   "prefix": "carcasonne-mr",
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser-esbuild",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/carcassonne-client",

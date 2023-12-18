@@ -26,7 +26,10 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"],
-      "cache": true
+      "cache": true,
+      "options": {
+        "generatePackageJson": true
+      }
     },
     "e2e": {
       "inputs": ["default", "^production"],
