@@ -6,7 +6,7 @@
   "prefix": "carcasonne-mr",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "@angular-devkit/build-angular:browser-esbuild",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/carcassonne-client",
@@ -15,7 +15,6 @@
         "polyfills": "apps/carcassonne-client/src/polyfills.ts",
         "tsConfig": "apps/carcassonne-client/tsconfig.app.json",
         "inlineStyleLanguage": "sass",
-        "generatePackageJson": true,
         "assets": ["apps/carcassonne-client/src/favicon.ico", "apps/carcassonne-client/src/assets"],
         "styles": [
           {
@@ -69,7 +68,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "nx run carcassonne-client:build",
+          "nx run carcassonne-client:build:production",
           "nx run carcassonne-client:docker-build"
         ],
         "parallel": false
@@ -94,10 +93,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "options": {
-        "lintFilePatterns": ["apps/carcassonne-client/**/*.ts", "apps/carcassonne-client/**/*.html"]
-      }
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@nx/jest:jest",
@@ -107,7 +103,6 @@
       }
     },
     "docker-build": {
-      "dependsOn": ["build"],
       "command": "docker build -f apps/carcassonne-client/Dockerfile . -t carcassonne-client"
     }
   },

@@ -9,7 +9,7 @@ import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHand
 import { SocketService } from '../../commons/services/socket.service';
 import { AuthService } from '@carcassonne-client/src/app/user/auth.service';
 import { Players } from '../models/Players';
-import { deserializeObj, isString } from '@shared-functions';
+import { copy, deserializeObj, isString } from '@shared-functions';
 import {
   CreateRoomPayload,
   CurrentTile,
@@ -58,7 +58,7 @@ export class RoomService extends SocketService {
 
   constructor(private http: HttpClient, private authService: AuthService) {
     super();
-    this.baseUrl = 'http://localhost:3000';
+    this.baseUrl = Constants.baseUrl;
     this.availableRooms$ = new BehaviorSubject<ShortenedRoom[] | null>(null);
     this.selectedRoomId$ = new BehaviorSubject<string | null>(null);
     this.currentRoom$ = new BehaviorSubject<Room | null>(null);
@@ -293,7 +293,7 @@ export class RoomService extends SocketService {
    * @private
    */
   private getRestOfThePlayers(_players: Player[]): Player[] {
-    const players: Player[] = Constants.copy<Player[]>(_players);
+    const players: Player[] = copy<Player[]>(_players);
     players.forEach((player, index, array) => {
       if (player.username === this.authService.user?.username) delete array[index];
     });

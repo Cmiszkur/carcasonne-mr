@@ -25,12 +25,7 @@ import * as crypto from 'crypto';
 import { PlacedTilePayloadPipe } from './transformers/placed-tile-payload.pipe';
 
 //TODO: Spróbować dodać nowy gateway w celu uporządkowania kodu.
-@WebSocketGateway(80, {
-  cors: {
-    origin: 'http://localhost:4200',
-    credentials: true,
-  },
-})
+@WebSocketGateway(3001)
 @UseGuards(WsAuthenticatedGuard)
 export class EventsGateway implements OnGatewayConnection {
   @WebSocketServer()

@@ -8,15 +8,16 @@ import { UsersModule } from '../users/users.module';
 import { EventsModule } from '../events/events.module';
 import { RoomModule } from '../room/room.module';
 import { RoomController } from '../room/room.controller';
+import { environment } from '../environments/environment';
 @Module({
   imports: [
     AuthModule,
     UsersModule,
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: environment.production ? `.env.prod` : `.env.dev`,
       isGlobal: true,
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI || ''),
+    MongooseModule.forRoot(process.env.NX_MONGO_URI || ''),
     EventsModule,
     RoomModule,
   ],

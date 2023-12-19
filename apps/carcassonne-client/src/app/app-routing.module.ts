@@ -6,12 +6,12 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'game'
+    redirectTo: 'game',
   },
   {
     path: 'game',
     canActivate: [AuthGuard],
-    loadChildren: () => import('./game/game.module').then(module => module.GameModule),
+    loadChildren: () => import('./game/game.module').then((module) => module.GameModule),
   },
 ];
 

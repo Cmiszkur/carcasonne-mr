@@ -11,9 +11,9 @@ import { LoginAuthResponse } from '../../interfaces/responseInterfaces';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  usernameFormControl = new UntypedFormControl('', [Validators.required]);
-  passwordFormControl = new UntypedFormControl('', [Validators.required]);
-  LoginForm = new UntypedFormGroup({
+  public usernameFormControl = new UntypedFormControl('', [Validators.required]);
+  public passwordFormControl = new UntypedFormControl('', [Validators.required]);
+  public loginForm = new UntypedFormGroup({
     username: this.usernameFormControl,
     password: this.passwordFormControl,
   });
@@ -24,8 +24,8 @@ export class LoginComponent {
     private activatedRoute: ActivatedRoute
   ) {}
 
-  login() {
-    const userInput = this.LoginForm.value;
+  public login(): void {
+    const userInput = this.loginForm.value;
     this.authService.login(userInput).subscribe((res: LoginAuthResponse) => {
       if (res.error) {
         if (res.message === 'username') {

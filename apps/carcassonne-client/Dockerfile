@@ -4,12 +4,12 @@
 # Tip: Modify "docker-build" options in project.json to change docker build args.
 #
 # Run the container with `docker run -p 4200:4200 -t carcassonne-client`.
-FROM docker.io/node:lts-alpine
+FROM docker.io/node:lts-alpine as build
 
-ENV HOST=0.0.0.0
-ENV PORT=4200
+# ENV HOST=0.0.0.0
+ENV PORT=80
 
-WORKDIR /app
+WORKDIR /usr/local/app
 
 RUN addgroup --system carcassonne-client && \
     adduser --system -G carcassonne-client carcassonne-client
@@ -17,8 +17,13 @@ RUN addgroup --system carcassonne-client && \
 COPY dist/apps/carcassonne-client carcassonne-client
 RUN chown -R carcassonne-client:carcassonne-client .
 
-RUN npm install --production
+# Stage 2: Serve app with nginx server
 
-CMD [ "npm", "run", "build" ]
+# Use official nginx image as the base image
+FROM nginx:latest
+
+# Copy the build output to replace the default nginx contents.
+COPY apps/carcassonne-client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /usr/local/app/carcassonne-client /usr/share/nginx/html
 
 EXPOSE ${PORT}

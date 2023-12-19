@@ -1,18 +1,23 @@
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import passport = require('passport');
-import { Server, Socket } from 'socket.io';
+import { Server, Socket, ServerOptions } from 'socket.io';
 import express = require('express');
 import * as cookieParser from 'cookie-parser';
+import { ConfigService } from '@nestjs/config';
 
 export class SessionAdapter extends IoAdapter {
   private session: express.RequestHandler;
 
-  constructor(session: express.RequestHandler) {
+  constructor(session: express.RequestHandler, private configService: ConfigService) {
     super(session);
     this.session = session;
   }
 
-  createIOServer(port: number, options?: unknown): Server {
+  createIOServer(port: number, options?: ServerOptions): Server {
+    const origin = this.configService.get<string>('NX_CLIENT_CORS_ORIGIN');
+    const path = this.configService.get<string>('NX_SOCKET_PATH');
+    options.cors = { origin, credentials: true };
+    options.path = path;
     const server: Server = super.createIOServer(port, options);
 
     const wrap = (middleware) => (socket: Socket, next) => middleware(socket.request, {}, next);

@@ -13,9 +13,10 @@ export class SocketService {
   protected socket: Socket;
 
   constructor() {
-    this.socket = io('http://localhost:80', {
+    this.socket = io('http://localhost:3001', {
       withCredentials: true,
       autoConnect: false,
+      path: '/socket/',
     });
   }
 

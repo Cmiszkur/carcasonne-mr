@@ -12,14 +12,6 @@ export class Constants {
   }
 
   public static get baseUrl(): string {
-    return 'http://localhost:3000/';
-  }
-
-  /**
-   * Deep copies object in order to prevent backwards mutability(made up name).
-   * @param object
-   */
-  public static copy<T>(object: T): T {
-    return JSON.parse(JSON.stringify(object));
+    return 'http://localhost:3000/api/';
   }
 }

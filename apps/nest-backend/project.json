@@ -5,10 +5,11 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nrwl/webpack:webpack",
+      "executor": "@nx/webpack:webpack",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/nest-backend",
+        "webpackConfig": "apps/nest-backend/webpack.config.js",
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
         "assets": ["apps/nest-backend/src/assets"],
@@ -33,10 +34,7 @@
     "deploy": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": [
-          "nx run nest-backend:build",
-          "nx run nest-backend:docker-build"
-        ],
+        "commands": ["nx run nest-backend:build:production", "nx run nest-backend:docker-build"],
         "parallel": false
       }
     },
@@ -48,10 +46,7 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/nest-backend/**/*.ts"]
-      }
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",
@@ -61,7 +56,6 @@
       }
     },
     "docker-build": {
-      "dependsOn": ["build"],
       "command": "docker build -f apps/nest-backend/Dockerfile . -t nest-backend"
     }
   },
