@@ -1,10 +1,11 @@
+import { environment } from './../../environments/environment';
 import { HttpHeaders } from '@angular/common/http';
 
 export class Constants {
   public static get httpOptions() {
     return {
       headers: new HttpHeaders({
-        'Access-Control-Allow-Origin': 'http://localhost:3000/',
+        'Access-Control-Allow-Origin': `http://${environment.apiURL}/`,
         'Content-Type': 'application/json',
       }),
       withCredentials: true,
@@ -12,6 +13,6 @@ export class Constants {
   }
 
   public static get baseUrl(): string {
-    return 'http://localhost:3000/api/';
+    return `http://${environment.apiURL}/api/`;
   }
 }
