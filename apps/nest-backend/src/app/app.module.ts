@@ -14,7 +14,7 @@ import { environment } from '../environments/environment';
     AuthModule,
     UsersModule,
     ConfigModule.forRoot({
-      envFilePath: environment.production ? `.env.prod` : `.env.dev`,
+      envFilePath: `${environment.production ? 'production' : 'apps/nest-backend/development'}.env`,
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.NX_MONGO_URI || ''),

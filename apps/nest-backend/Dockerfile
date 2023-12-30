@@ -15,8 +15,8 @@ RUN addgroup --system nest-backend && \
     adduser --system -G nest-backend nest-backend
 
 COPY dist/apps/nest-backend .
-COPY apps/nest-backend/.env.prod .
-COPY apps/nest-backend/.env.dev .
+COPY apps/nest-backend/development.env .
+COPY apps/nest-backend/production.env .
 RUN chown -R nest-backend:nest-backend .
 
 # You can remove this install step if you build with `--bundle` option.

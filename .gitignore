@@ -42,6 +42,7 @@ Thumbs.db
 
 # Passwords
 .env
+apps/nest-backend/*.env
 
 # Nx cache
 .nx
