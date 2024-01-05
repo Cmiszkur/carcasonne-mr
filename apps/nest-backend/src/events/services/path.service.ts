@@ -42,7 +42,8 @@ export class PathService {
 
   public checkNewTile(room: Room, placedTile: ExtendedTile): PointCheckingAnswer {
     const copiedPlacedTile: ExtendedTile = copy(placedTile);
-    const paths = room.paths;
+    const paths = copy(room.paths);
+    const board = copy(room.board);
     const uncompletedPaths = this.filterCompletedPaths(paths);
     const uncompletedRoadsPathDataMap: PathDataMap = uncompletedPaths.roads;
     const uncompletedCitiesPathDataMap: PathDataMap = uncompletedPaths.cities;
@@ -79,8 +80,8 @@ export class PathService {
       );
     }
 
-    this.checkPathCompletion(uncompletedRoadsPathDataMap, room.board, newOrUpdatedPathIds);
-    this.checkPathCompletion(uncompletedCitiesPathDataMap, room.board, newOrUpdatedPathIds);
+    this.checkPathCompletion(uncompletedRoadsPathDataMap, board, newOrUpdatedPathIds);
+    this.checkPathCompletion(uncompletedCitiesPathDataMap, board, newOrUpdatedPathIds);
 
     const mergedPaths = {
       cities: new Map([...paths.cities, ...uncompletedCitiesPathDataMap]),

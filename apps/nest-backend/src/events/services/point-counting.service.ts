@@ -1,6 +1,12 @@
-import { ExtendedTile, PathData, Player, TileValues } from '@carcasonne-mr/shared-interfaces';
+import {
+  ExtendedTile,
+  PathData,
+  Paths,
+  Player,
+  TileValues,
+} from '@carcasonne-mr/shared-interfaces';
 import { Injectable } from '@nestjs/common';
-import { copy } from '@shared-functions';
+import { copy, extractUncompletedPathData } from '@shared-functions';
 import { TilesService } from './tiles.service';
 import { ChurchCounting } from '../interfaces';
 
@@ -17,14 +23,10 @@ export class PointCountingService {
    * * When the game is finished player gets points no matter the completion,
    * but without one point that would be given when whole set is completed
    */
-  public countChurchPoints(
-    board: ExtendedTile[],
-    placedTile: ExtendedTile,
-    gameEnded: boolean
-  ): number {
+  public countChurchPoints(board: ExtendedTile[], placedTile: ExtendedTile): number {
     const numberOfTilesAround: number = this.tilesService.numberOfTilesAround(board, placedTile);
 
-    return gameEnded && numberOfTilesAround !== 8 ? numberOfTilesAround : numberOfTilesAround + 1;
+    return numberOfTilesAround + 1;
   }
 
   public updatePlayersPointsFromChurches(
@@ -37,8 +39,8 @@ export class PointCountingService {
     const tilesWithCompletedChurches: string[] = [];
 
     tilesWithChurches.forEach((tile) => {
-      const pointsFromChurch = this.countChurchPoints(board, tile, gameEnded);
-      const churchCompleted = !gameEnded && pointsFromChurch === 9;
+      const pointsFromChurch = this.countChurchPoints(board, tile);
+      const churchCompleted = pointsFromChurch === 9;
 
       if (!pointsFromChurch || !tile.isFollowerPlaced) {
         return;
@@ -54,8 +56,9 @@ export class PointCountingService {
         return playerWasChurchOwner
           ? {
               ...player,
-              points: churchCompleted ? player.points + pointsFromChurch : player.points,
-              followers: churchCompleted ? player.followers + 1 : player.followers,
+              points:
+                churchCompleted || gameEnded ? player.points + pointsFromChurch : player.points,
+              followers: churchCompleted && !gameEnded ? player.followers + 1 : player.followers,
             }
           : player;
       });
@@ -68,31 +71,15 @@ export class PointCountingService {
     completedPaths: [string, PathData][],
     players: Player[]
   ): Player[] {
-    let copiedPlayers = copy(players);
+    const pathDataArr = completedPaths.map((v) => v[1]);
+    return this.updatePlayerPoints(pathDataArr, players, true);
+  }
 
-    completedPaths.forEach((path) => {
-      const checkedPath = path[1];
+  public updatePlayersPointsFromPaths(paths: Paths, players: Player[]): Player[] {
+    const cities = extractUncompletedPathData(paths.cities);
+    const roads = extractUncompletedPathData(paths.roads);
 
-      const checkedPathOwners = checkedPath.pathOwners || [];
-      copiedPlayers = copiedPlayers.map((player) => {
-        const playerFallowers = checkedPathOwners.filter(
-          (pathOwner) => pathOwner === player.username
-        ).length;
-
-        const playerDominantOrEqual = this.isPlayerDominantOrEqual(
-          checkedPathOwners,
-          player.username
-        );
-
-        return {
-          ...player,
-          points: playerDominantOrEqual ? player.points + checkedPath.points : player.points,
-          followers: playerDominantOrEqual ? player.followers + playerFallowers : player.followers,
-        };
-      });
-    });
-
-    return copiedPlayers;
+    return this.updatePlayerPoints([...cities, ...roads], players, false);
   }
 
   public countPoints(
@@ -133,5 +120,35 @@ export class PointCountingService {
     }
 
     return mostFrequentOwners.some((owner) => owner === username);
+  }
+
+  private updatePlayerPoints(
+    pathDataArr: PathData[],
+    players: Player[],
+    restoreFollowers: boolean
+  ): Player[] {
+    let copiedPlayers = copy(players);
+
+    pathDataArr.forEach((checkedPath) => {
+      const checkedPathOwners = checkedPath.pathOwners || [];
+      copiedPlayers = copiedPlayers.map((player) => {
+        const playerFallowers = checkedPathOwners.filter(
+          (pathOwner) => pathOwner === player.username
+        ).length;
+
+        const playerDominantOrEqual = this.isPlayerDominantOrEqual(
+          checkedPathOwners,
+          player.username
+        );
+
+        return {
+          ...player,
+          points: playerDominantOrEqual ? player.points + checkedPath.points : player.points,
+          followers: restoreFollowers ? player.followers + playerFallowers : player.followers,
+        };
+      });
+    });
+
+    return copiedPlayers;
   }
 }

@@ -33,6 +33,10 @@ export class TilesService {
     return this.extractSurroundingTiles(board, placedTile).filter((tile) => tile.tile.hasChurch);
   }
 
+  public getAllTilesWithUncompletedChurches(board: ExtendedTile[]): ExtendedTile[] {
+    return board.filter((exTile) => exTile.tile.hasChurch && !!exTile.fallowerDetails);
+  }
+
   public numberOfTilesAround(board: ExtendedTile[], placedTile: ExtendedTile): number {
     return this.extractSurroundingTiles(board, placedTile).length;
   }

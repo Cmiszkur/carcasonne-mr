@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
 import { RoomService } from '../services/room.service';
 import { BaseComponent } from '../../commons/components/base/base.component';
 import { takeUntil } from 'rxjs/operators';
@@ -11,36 +10,18 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RoomComponent extends BaseComponent implements OnDestroy {
-  /**
-   * Subscribes for game starting event.
-   * @private
-   */
-  private gameStartedSubscription: Subscription;
-
-  /**
-   * Subscribes for new player joining event.
-   * @private
-   */
-  private newPlayerJoinedSubscription: Subscription;
-
-  /**
-   * Subscribes for player leaving event.
-   * @private
-   */
-  private playerLeftSubscription: Subscription;
-
   constructor(private roomService: RoomService) {
     super();
-    this.gameStartedSubscription = this.roomService
-      .receiveGameStartedResponse()
+    this.roomService
+      .receiveOneResponseAndUpdateRoom('game_started')
       .pipe(takeUntil(this.destroyed))
       .subscribe();
-    this.newPlayerJoinedSubscription = this.roomService
-      .receiveNewPlayerJoinedResponse()
+    this.roomService
+      .receiveResponseAndUpdatePlayers('new_player_joined')
       .pipe(takeUntil(this.destroyed))
       .subscribe();
-    this.playerLeftSubscription = this.roomService
-      .receivePlayerLeftResponse()
+    this.roomService
+      .receiveResponseAndUpdatePlayers('player_left')
       .pipe(takeUntil(this.destroyed))
       .subscribe();
   }

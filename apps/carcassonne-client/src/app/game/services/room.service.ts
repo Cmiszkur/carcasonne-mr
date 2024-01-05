@@ -56,6 +56,9 @@ export class RoomService extends SocketService {
   private _players = signal<Players | null>(null);
   public players = this._players.asReadonly();
 
+  private _gameEnded = signal<boolean>(false);
+  public gameEnded = this._gameEnded.asReadonly();
+
   constructor(private http: HttpClient, private authService: AuthService) {
     super();
     this.baseUrl = Constants.baseUrl;
@@ -107,6 +110,7 @@ export class RoomService extends SocketService {
 
   public setCurrentRoom(room: RoomAbstract) {
     this.setPlayers(room.players);
+    this._gameEnded.set(room.gameEnded);
     this.currentRoom$.next(room);
   }
 
@@ -145,7 +149,7 @@ export class RoomService extends SocketService {
     const joinRoomPayload: JoinRoomPayload = { roomID: _roomID, color };
     this.connect();
     this.socket.emit('join_room', joinRoomPayload);
-    return this.receiveJoinRoomResponse();
+    return this.receiveOneResponseAndUpdateRoom('joined_room');
   }
 
   /**
@@ -182,46 +186,24 @@ export class RoomService extends SocketService {
   }
 
   /**
-   * Listens for ``joined_room`` response from socket.io backend.
+   * Listens for event response from socket.io backend.
    * If room is returned it's being set as current room.
    */
-  public receiveJoinRoomResponse(): Observable<SocketAnswer> {
-    return this.fromEventOnce<SocketAnswerReceived>('joined_room').pipe(
+  public receiveOneResponseAndUpdateRoom(event: string): Observable<SocketAnswer> {
+    this.connect();
+    return this.fromEventOnce<SocketAnswerReceived>(event).pipe(
       map((socketAnswerReceived) => this.mapSocketAnswerReceived(socketAnswerReceived)),
       tap((socketAnswer) => this.updateRoom(socketAnswer))
     );
   }
 
   /**
-   * Listens for ``game_started`` response from socket.io backend.
-   * If room is returned it's being set as current room.
-   */
-  public receiveGameStartedResponse(): Observable<SocketAnswer> {
-    this.connect();
-    return this.fromEventOnce<SocketAnswerReceived>('game_started').pipe(
-      map((socketAnswerReceived) => this.mapSocketAnswerReceived(socketAnswerReceived)),
-      tap((socketAnswer) => this.updateRoom(socketAnswer))
-    );
-  }
-
-  /**
-   * Listens for ``new_player_joined`` response from socket.io backend.
+   * Listens for event responses from socket.io backend.
    * Updates current room with returned players.
    */
-  public receiveNewPlayerJoinedResponse(): Observable<Player[]> {
+  public receiveResponseAndUpdatePlayers(event: string): Observable<Player[]> {
     this.connect();
-    return this.fromEvent<Player[]>('new_player_joined').pipe(
-      tap((players) => this.setPlayers(players))
-    );
-  }
-
-  /**
-   * Listens for ``player_left`` response from socket.io backend.
-   * Updates current room with returned players.
-   */
-  public receivePlayerLeftResponse(): Observable<Player[]> {
-    this.connect();
-    return this.fromEvent<Player[]>('player_left').pipe(tap((players) => this.setPlayers(players)));
+    return this.fromEvent<Player[]>(event).pipe(tap((players) => this.setPlayers(players)));
   }
 
   /**

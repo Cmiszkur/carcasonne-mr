@@ -1,37 +1,40 @@
+<div *ngIf="gameEnded()" class="end-game-banner">GAME HAS ENDED</div>
 <div *ngIf="tiles" #board class="tiles" id="tiles-area">
   <div class="blank" #blank>
 
     <app-tile *ngFor="let tile of tiles()"
-    [extendedTile]="tile"
-    [rotation]="tile.rotation"
-    [translate]="tile.translateValue">
+              [extendedTile]="tile"
+              [rotation]="tile.rotation"
+              [translate]="tile.translateValue">
     </app-tile>
 
     <app-tile *ngIf="currentTile() as currentTile"
-        [extendedTile]="currentTile"  
-        [translate]="currentTile.translateValue"
-        [rotation]="currentTile.rotation"
-        [isCurrentTile]="true"
-        [isTilePlacementConfirmed]="tilePlacementConfirmed()">
+              [extendedTile]="currentTile"  
+              [translate]="currentTile.translateValue"
+              [rotation]="currentTile.rotation"
+              [isCurrentTile]="true"
+              [isTilePlacementConfirmed]="tilePlacementConfirmed()">
     </app-tile>
 
-    <app-empty-tiles *ngFor="let emptyTile of emptyTiles(); trackBy: trackByIndex"
-                [style.--border-color]="clickedEmptyTileColor()?.emptyTileId === emptyTile.id ? clickedEmptyTileColor()?.borderColor : 'gray'"
-                [translate]="emptyTile.position"
-                [ngStyle]="emptyTile.position ? { top: emptyTile.position.top + 'px', left: emptyTile.position.left + 'px' } : null"
-                (click)="emptyTileSelected(emptyTile)">
-    </app-empty-tiles>
+    <ng-container *ngIf="!gameEnded()">
+      <app-empty-tiles *ngFor="let emptyTile of emptyTiles(); trackBy: trackByIndex"
+                       [style.--border-color]="clickedEmptyTileColor()?.emptyTileId === emptyTile.id ? clickedEmptyTileColor()?.borderColor : 'gray'"
+                       [translate]="emptyTile.position"
+                       [ngStyle]="emptyTile.position ? { top: emptyTile.position.top + 'px', left: emptyTile.position.left + 'px' } : null"
+                       (click)="emptyTileSelected(emptyTile)">
+      </app-empty-tiles>
+    </ng-container>
   </div>  
 </div>
   
-  <div class="button-area">
-    <button *ngIf="tilePlacementConfirmed()" 
-            mat-icon-button 
-            (click)="cancelChoice()">
-      <mat-icon>close</mat-icon>
-    </button>
-    <app-tile-and-pawn-confirmation-button  [isTilePlacedCorrectly]="isTilePlacedCorrectly()" 
-                                            [tilePlacementConfirmed]="tilePlacementConfirmed()" 
-                                            (confirmation)="confirmChoice($event)">
-    </app-tile-and-pawn-confirmation-button>
-  </div>
+<div class="button-area">
+  <button *ngIf="tilePlacementConfirmed()" 
+          mat-icon-button 
+          (click)="cancelChoice()">
+    <mat-icon>close</mat-icon>
+  </button>
+  <app-tile-and-pawn-confirmation-button  [isTilePlacedCorrectly]="isTilePlacedCorrectly()" 
+                                          [tilePlacementConfirmed]="tilePlacementConfirmed()" 
+                                          (confirmation)="confirmChoice($event)">
+  </app-tile-and-pawn-confirmation-button>
+</div>

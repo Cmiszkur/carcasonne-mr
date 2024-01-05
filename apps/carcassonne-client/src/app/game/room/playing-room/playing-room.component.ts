@@ -53,6 +53,7 @@ export class PlayingRoomComponent
   public isTilePlacedCorrectly = signal<boolean>(false);
   public username: string | null = this.authService.user?.username || null;
   public clickedEmptyTileColor = signal<{ emptyTileId: string; borderColor: string } | null>(null);
+  public gameEnded = this.roomService.gameEnded;
   @ViewChild('board', { read: ElementRef }) private boardDivElRef?: ElementRef;
   @ViewChild('blank', { read: ElementRef }) private blankDivElRef?: ElementRef;
   private previouslyClickedTileCoordinates: string = '';
@@ -145,12 +146,6 @@ export class PlayingRoomComponent
     this.setTilePlacementRelatedFields(coordinates, isTilePlacedCorrectly);
   }
 
-  private addSpaceYAxisAndUpdateVariables(_v: number): void {
-    this.addSpaceYAxis(_v);
-    this.boardService.updatedTilesTranslateValue();
-    this.emptyTilesService.updatedEmptyTilesTranslateValue();
-  }
-
   private addSpaceYAxis(boardOffset: number): void {
     const boardDivElRef = this.boardDivElRef?.nativeElement;
     const blankDivElRef = this.blankDivElRef?.nativeElement;
@@ -184,9 +179,9 @@ export class PlayingRoomComponent
    * @param tile
    * @private
    */
-  private setCurrentTile(lastChosenTile: TileAndPlayer): void {
-    const isUsersTurn: boolean = this.username === lastChosenTile.player;
-    const tile = lastChosenTile.tile;
+  private setCurrentTile(lastChosenTile?: TileAndPlayer | null): void {
+    const isUsersTurn: boolean = this.username === lastChosenTile?.player;
+    const tile = lastChosenTile?.tile;
 
     this.boardService.setCurrentTile(tile && isUsersTurn ? tile : null);
     this.emptyTilesService.setCurrentTileEnvironments(this.currentTile());
@@ -224,8 +219,9 @@ export class PlayingRoomComponent
   private updatePlayingRoom(room?: RoomAbstract | null): void {
     const lastChosenTile = room?.lastChosenTile;
     const tiles = room?.board;
+
     if (tiles) this.setTiles(tiles);
-    if (lastChosenTile) this.setCurrentTile(lastChosenTile);
+    this.setCurrentTile(lastChosenTile);
   }
 
   private initFirstTilePosition(): void {
