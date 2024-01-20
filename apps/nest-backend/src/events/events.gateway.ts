@@ -1,5 +1,4 @@
 import { GameService } from './services/game.service';
-import { UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,7 +8,6 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { WsAuthenticatedGuard } from '@nest-backend/src/auth/guards/ws.authenticated.guard';
 import RoomService from './services/room.service';
 import {
   CreateRoomPayload,
@@ -24,9 +22,7 @@ import {
 import * as crypto from 'crypto';
 import { PlacedTilePayloadPipe } from './transformers/placed-tile-payload.pipe';
 
-//TODO: Spróbować dodać nowy gateway w celu uporządkowania kodu.
 @WebSocketGateway(3001)
-@UseGuards(WsAuthenticatedGuard)
 export class EventsGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
@@ -112,13 +108,7 @@ export class EventsGateway implements OnGatewayConnection {
   }
 
   handleConnection(client: ExtendedSocket): void {
-    if (!client.request.isAuthenticated()) {
-      client.disconnect();
-    } else {
-      const username = client.request.user.username;
-      client.username = username;
-      console.log(client.username, ' connected');
-    }
+    console.log(client.username, ' connected');
   }
 
   handleDisconnect(client: ExtendedSocket): void {

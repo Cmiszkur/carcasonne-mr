@@ -1,13 +1,27 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request, Post } from '@nestjs/common';
 import { AuthenticatedGuard } from '@nest-backend/src/auth/guards/authenticated.guard';
-import { AppResponse, ExtendedRequest } from '@nest-backend/src/interfaces';
+import { ExtendedRequest } from '@nest-backend/src/interfaces';
+import { AuthService } from '@nest-backend/src/auth/auth.service';
+import { AuthGuard } from '@nestjs/passport';
+import { RequestUser, AccessToken, AppResponse } from '@carcasonne-mr/shared-interfaces';
+import { JwtAuthGuard } from '../auth/guards/guest-jwt.guard';
+import { UseAnyGuard } from '@nest-backend/core/decorators';
 
 @Controller()
 export class AppController {
-  @UseGuards(AuthenticatedGuard)
+  constructor(private authService: AuthService) {}
+
+  @UseAnyGuard(AuthenticatedGuard, JwtAuthGuard)
   @Get('/restricted')
-  check(@Request() req: ExtendedRequest): AppResponse {
+  check(@Request() req: ExtendedRequest): AppResponse<RequestUser> {
     console.log('restrcited path is authorized');
     return { message: req.user };
+  }
+
+  @UseGuards(AuthGuard('guest'))
+  @Post('/login-guest')
+  loginGuest(@Request() req: ExtendedRequest): AppResponse<AccessToken> {
+    const accessToken = this.authService.loginGuest(req.user);
+    return { message: accessToken };
   }
 }

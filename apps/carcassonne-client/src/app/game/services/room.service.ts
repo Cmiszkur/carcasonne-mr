@@ -7,7 +7,7 @@ import { map, tap } from 'rxjs/operators';
 import { RoomError } from '../models/socket';
 import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHandler';
 import { SocketService } from '../../commons/services/socket.service';
-import { AuthService } from '@carcassonne-client/src/app/user/auth.service';
+import { AuthService } from '@carcassonne-client/src/app/user/services/auth.service';
 import { Players } from '../models/Players';
 import { copy, deserializeObj, isString } from '@shared-functions';
 import {
@@ -22,6 +22,7 @@ import {
   SocketAnswerReceived,
   StartGamePayload,
 } from '@carcasonne-mr/shared-interfaces';
+import { JwtService } from '../../user/services/jwt.service';
 
 @Injectable({
   providedIn: 'root',
@@ -59,8 +60,8 @@ export class RoomService extends SocketService {
   private _gameEnded = signal<boolean>(false);
   public gameEnded = this._gameEnded.asReadonly();
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-    super();
+  constructor(private http: HttpClient, private authService: AuthService, jwtService: JwtService) {
+    super(jwtService);
     this.baseUrl = Constants.baseUrl;
     this.availableRooms$ = new BehaviorSubject<ShortenedRoom[] | null>(null);
     this.selectedRoomId$ = new BehaviorSubject<string | null>(null);

@@ -1,3 +1,4 @@
+import { JwtService } from './../../user/services/jwt.service';
 import { environment } from './../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
@@ -13,12 +14,18 @@ export class SocketService {
    */
   protected socket: Socket;
 
-  constructor() {
+  constructor(protected jwtService: JwtService) {
     this.socket = io(`http://${environment.socketURL}`, {
       withCredentials: true,
       autoConnect: false,
       path: '/socket/',
+      auth: { jwt: this.jwtService.getToken() },
     });
+
+    //TODO: Add better error handling
+    this.socket.on('connect_error', (err) => console.error(err));
+    this.socket.on('connect_failed', (err) => console.error(err));
+    this.socket.on('disconnect', (err) => console.error(err));
   }
 
   /**

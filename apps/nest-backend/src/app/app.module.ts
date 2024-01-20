@@ -1,3 +1,4 @@
+import { CoreModule } from './../core/core.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,15 +12,16 @@ import { RoomController } from '../room/room.controller';
 import { environment } from '../environments/environment';
 @Module({
   imports: [
-    AuthModule,
-    UsersModule,
     ConfigModule.forRoot({
       envFilePath: `${environment.production ? 'production' : 'apps/nest-backend/development'}.env`,
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.NX_MONGO_URI || ''),
+    AuthModule,
+    UsersModule,
     EventsModule,
     RoomModule,
+    CoreModule,
   ],
   controllers: [AppController, RoomController],
   providers: [AppService],

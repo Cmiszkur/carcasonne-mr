@@ -10,7 +10,8 @@ import {
 } from '@nestjs/common';
 import { User } from './schemas/user.schema';
 import { LocalAuthGuard } from '@nest-backend/src/auth/guards/local-auth.guard';
-import { AppResponse, ExtendedRequest } from '@nest-backend/src/interfaces';
+import { ExtendedRequest } from '@nest-backend/src/interfaces';
+import { RequestUser, AppResponse } from '@carcasonne-mr/shared-interfaces';
 
 @Controller('users')
 export class UsersController {
@@ -18,7 +19,7 @@ export class UsersController {
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  login(@Request() req: ExtendedRequest): AppResponse {
+  login(@Request() req: ExtendedRequest): AppResponse<RequestUser> {
     return { message: req.user };
   }
 

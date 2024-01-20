@@ -8,7 +8,6 @@ export class PlacedTilePayloadPipe implements PipeTransform<PlacedTilePayload> {
 
   transform(value: PlacedTilePayload) {
     const { roomID, extendedTile } = value;
-    console.log(extendedTile, roomID);
     return {
       roomID,
       extendedTile: {

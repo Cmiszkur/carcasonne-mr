@@ -3,7 +3,7 @@ export interface AuthResponse {
   message: UserResponse;
 }
 
-export interface loginUser {
+export interface LoginUser {
   username: string;
   password: string;
 }

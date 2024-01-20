@@ -14,7 +14,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { RoomService } from '../../services/room.service';
-import { AuthService } from '../../../user/auth.service';
+import { AuthService } from '../../../user/services/auth.service';
 import { filter, takeUntil } from 'rxjs/operators';
 import { BaseComponent } from '@carcassonne-client/src/app/commons/components/base/base.component';
 import {

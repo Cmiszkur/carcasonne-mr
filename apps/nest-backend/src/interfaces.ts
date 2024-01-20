@@ -1,3 +1,4 @@
+import { RequestUser } from '@carcasonne-mr/shared-interfaces';
 import { User } from './users/schemas/user.schema';
 import { Request } from 'express';
 
@@ -8,14 +9,16 @@ export class RegisterResponse {
 
 export class LoginResponse {
   error: string | null;
-  user: Omit<User, 'password'> | null;
+  user: RequestUser | null;
 }
 
+export type LeanUser = User & { _id: string };
+
 export interface ExtendedRequest extends Request {
-  user: string;
+  user: RequestUser;
   isAuthenticated(): boolean;
 }
 
-export interface AppResponse {
-  message: string;
+export interface AppResponse<T> {
+  message: T;
 }

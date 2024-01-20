@@ -7,6 +7,7 @@ export class Constants {
       headers: new HttpHeaders({
         'Access-Control-Allow-Origin': `http://${environment.apiURL}/`,
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('jwtToken')}`,
       }),
       withCredentials: true,
     };

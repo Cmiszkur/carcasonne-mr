@@ -174,7 +174,9 @@ export default class RoomService extends BasicService {
    * @private
    */
   private async deletePreviousRoom(roomId: string): Promise<RoomDocument | null> {
-    return this.roomModel.findOneAndDelete({ roomId: roomId });
+    return this.roomModel.findOneAndDelete({
+      roomId: roomId,
+    }) as unknown as Promise<RoomDocument | null>;
   }
 
   /**

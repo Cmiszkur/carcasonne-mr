@@ -5,9 +5,10 @@ import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonsModule } from '../commons/commons.module';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [RegisterComponent, LoginComponent],
-  imports: [CommonModule, CommonsModule, UserRoutingModule, HttpClientModule],
+  imports: [CommonModule, CommonsModule, UserRoutingModule, HttpClientModule, FormsModule],
 })
 export class UserModule {}

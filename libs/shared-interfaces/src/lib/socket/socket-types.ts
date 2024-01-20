@@ -31,9 +31,22 @@ export interface ExtendedIncomingMessage extends IncomingMessage {
 }
 
 export interface RequestUser {
-  name: string;
-  email: string;
+  _id?: string;
+  /**
+   * token issue date
+   */
+  iat?: number;
+  /**
+   * token expire date
+   */
+  exp?: number;
   username: string;
+  type: UserTypes;
+}
+
+export enum UserTypes {
+  REGISTERED = 'r',
+  GUEST = 'g',
 }
 
 export interface JoinRoomPayload extends BasePayload {

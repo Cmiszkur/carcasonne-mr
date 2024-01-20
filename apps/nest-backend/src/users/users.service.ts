@@ -1,4 +1,4 @@
-import { RegisterResponse } from '@nest-backend/src/interfaces';
+import { LeanUser, RegisterResponse } from '@nest-backend/src/interfaces';
 import { User, UserDocument } from './schemas/user.schema';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -30,10 +30,7 @@ export class UsersService {
           !createUser.password ||
           !createUser.username
         ) {
-          throw new HttpException(
-            'Invalid credentials',
-            HttpStatus.BAD_REQUEST
-          );
+          throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
         }
         bcrypt.genSalt(this.saltRounds, (err, salt) => {
           if (err) throw new Error(err.message);
@@ -43,10 +40,7 @@ export class UsersService {
             const createdUser = new this.userModel(createUser);
             createdUser.save().then((err) => {
               if (err) {
-                throw new HttpException(
-                  'Database error',
-                  HttpStatus.INTERNAL_SERVER_ERROR
-                );
+                throw new HttpException('Database error', HttpStatus.INTERNAL_SERVER_ERROR);
               }
             });
           });
@@ -56,7 +50,7 @@ export class UsersService {
     return new User(createUser);
   }
 
-  async findOne(username: string): Promise<User> {
+  async findOne(username: string): Promise<LeanUser> {
     return this.userModel.findOne({ username: username }).select('-__v').lean();
   }
 
@@ -65,13 +59,10 @@ export class UsersService {
   }
 
   async checkIfRoomCreatedByUser(username: string): Promise<string | null> {
-    return (await this.findOne(username)).lastCreatedRoom || null;
+    return (await this.findOne(username))?.lastCreatedRoom || null;
   }
 
-  async updateUser(
-    username: string,
-    userPayload: Partial<User>
-  ): Promise<UpdateWriteOpResult> {
+  async updateUser(username: string, userPayload: Partial<User>): Promise<UpdateWriteOpResult> {
     return this.userModel.updateOne({ username: username }, userPayload);
   }
 }

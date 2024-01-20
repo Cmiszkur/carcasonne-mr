@@ -4,11 +4,17 @@ import { Server, Socket, ServerOptions } from 'socket.io';
 import express = require('express');
 import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
+import { WSAuthMiddleware } from './middleware/ws-auth.middleware';
+import { JwtService } from '@nestjs/jwt';
 
 export class SessionAdapter extends IoAdapter {
   private session: express.RequestHandler;
 
-  constructor(session: express.RequestHandler, private configService: ConfigService) {
+  constructor(
+    session: express.RequestHandler,
+    private configService: ConfigService,
+    private jwtService: JwtService
+  ) {
     super(session);
     this.session = session;
   }
@@ -26,6 +32,7 @@ export class SessionAdapter extends IoAdapter {
     server.use(wrap(passport.initialize()));
     server.use(wrap(passport.session()));
     server.use(wrap(cookieParser()));
+    server.use(WSAuthMiddleware(this.jwtService));
     return server;
   }
 }

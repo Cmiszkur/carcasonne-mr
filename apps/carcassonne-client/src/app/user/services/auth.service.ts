@@ -1,14 +1,16 @@
-import { Constants } from '../constants/httpOptions';
+import { Constants } from '../../constants/httpOptions';
 import {
   AuthResponse,
   LoginAuthResponse,
-  loginUser,
+  LoginUser,
   UserResponse,
-} from '../interfaces/responseInterfaces';
+} from '../../interfaces/responseInterfaces';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
+import { AccessToken, AppResponse } from '@carcasonne-mr/shared-interfaces';
+import { JwtService } from './jwt.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,14 +26,13 @@ export class AuthService {
    * It's later used to redirect back.
    */
   public redirectUrl: string | null;
-  private authUrl: string;
-  private loginUrl: string;
+  private authUrl: string = Constants.baseUrl + 'restricted';
+  private loginUrl: string = Constants.baseUrl + 'users/login';
+  private guestLoginUrl: string = Constants.baseUrl + 'login-guest';
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private jwtService: JwtService) {
     this.redirectUrl = null;
     this.user$ = new BehaviorSubject<UserResponse | null>(null);
-    this.authUrl = Constants.baseUrl + 'restricted';
-    this.loginUrl = Constants.baseUrl + 'users/login';
   }
 
   public async auth(): Promise<boolean> {
@@ -43,16 +44,25 @@ export class AuthService {
           this.saveUser(response?.message || null);
           return true;
         },
-        (e) => {
+        () => {
           return false;
         }
       );
   }
 
-  public login(loginUser: loginUser): Observable<LoginAuthResponse> {
+  public login(loginUser: LoginUser): Observable<LoginAuthResponse> {
     return this.http
       .post<LoginAuthResponse>(this.loginUrl, loginUser, Constants.httpOptions)
       .pipe(catchError(this.handleError<LoginAuthResponse>()));
+  }
+
+  public guestLogin(username: string): Observable<AppResponse<AccessToken>> {
+    return this.http
+      .post<AppResponse<AccessToken>>(this.guestLoginUrl, { username }, Constants.httpOptions)
+      .pipe(
+        catchError(this.handleError<AppResponse<AccessToken>>()),
+        tap((answer) => this.jwtService.setToken(answer.message.access_token))
+      );
   }
 
   public get user(): UserResponse | null {

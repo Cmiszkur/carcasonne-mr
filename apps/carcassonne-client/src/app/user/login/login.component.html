@@ -1,9 +1,17 @@
 <div class="login-wrapper">
     <div class="title-area">
         <h2>Sign in</h2>
+        <mat-radio-group class="login-radio" 
+                         aria-label="Login" 
+                         [ngModel]="selectedOption"
+                         (ngModelChange)="changeLoginOption($event)">
+            <mat-radio-button *ngFor="let option of loginOptions; index as i" [value]="option.value">
+                {{ option.text }}
+            </mat-radio-button>
+        </mat-radio-group>
     </div>
     <div class="form-area">
-        <form [formGroup]='loginForm' (ngSubmit)='login()'>
+        <form [formGroup]='registeredUser() ? loginForm : guestLoginForm' (ngSubmit)='login()'>
             <mat-form-field class="example-full-width" appearance="fill">
                 <mat-label>Username</mat-label>
                 <input
@@ -18,20 +26,22 @@
                     Username is <b>required</b>
                 </mat-error>
             </mat-form-field>
-            <mat-form-field class="example-full-width" appearance="fill">
-                <mat-label>Password</mat-label>
-                <input
-                    type="password"
-                    formControlName='password'
-                    matInput
-                >
-                <mat-error *ngIf='passwordFormControl.hasError("passwordHasError")'>
-                  Wrong password!
-                </mat-error>
-                <mat-error *ngIf='passwordFormControl.hasError("required")'>
-                  Password is <b>required</b>
-                </mat-error>
-            </mat-form-field>
+            @if (registeredUser()) { 
+                <mat-form-field class="example-full-width" appearance="fill">
+                    <mat-label>Password</mat-label>
+                    <input
+                        type="password"
+                        formControlName='password'
+                        matInput
+                    >
+                    <mat-error *ngIf='passwordFormControl.hasError("passwordHasError")'>
+                      Wrong password!
+                    </mat-error>
+                    <mat-error *ngIf='passwordFormControl.hasError("required")'>
+                      Password is <b>required</b>
+                    </mat-error>
+                </mat-form-field>
+            }
             <div class="sign-area">
                 <button mat-raised-button color='accent'>Sign in</button>
                 <div class="sign-in">
@@ -41,3 +51,20 @@
         </form>
     </div>
 </div>
+
+<ng-template #usernameFormField>
+    <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Username</mat-label>
+        <input
+            type='text'
+            formControlName='username'
+            matInput
+        >
+        <mat-error *ngIf='usernameFormControl.hasError("usernameHasError")'>
+            No user with provided username exists
+        </mat-error>
+        <mat-error *ngIf='usernameFormControl.hasError("required")'>
+            Username is <b>required</b>
+        </mat-error>
+    </mat-form-field>
+</ng-template>

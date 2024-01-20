@@ -2,14 +2,15 @@ import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LoginResponse } from '@nest-backend/src/interfaces';
-import { User } from '@nest-backend/src/users/schemas/user.schema';
+import { JwtService } from '@nestjs/jwt';
+import { RequestUser, UserTypes, AccessToken } from '@carcasonne-mr/shared-interfaces';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private jwtService: JwtService) {}
 
-  async validateUser(username: string, pass: string): Promise<LoginResponse> {
-    const user: User = await this.usersService.findOne(username);
+  public async validateUser(username: string, pass: string): Promise<LoginResponse> {
+    const user = await this.usersService.findOne(username);
     if (!user) {
       console.log('nie ma takiego użytkownika');
       return {
@@ -19,12 +20,20 @@ export class AuthService {
     }
     const isMatch: boolean = await bcrypt.compare(pass, user.password);
     if (isMatch) {
-      const { password, ...rest } = user;
-      console.log(rest);
-      return { error: null, user: rest };
+      return {
+        error: null,
+        user: { _id: user._id, type: UserTypes.REGISTERED, username: user.username },
+      };
     } else {
       console.log('hasła się nie zgadzają');
       return { error: 'password', user: null };
     }
+  }
+
+  public loginGuest(user: RequestUser): AccessToken {
+    return {
+      access_token: this.jwtService.sign(user),
+      username: user.username,
+    };
   }
 }

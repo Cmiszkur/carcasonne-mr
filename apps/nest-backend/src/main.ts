@@ -1,4 +1,3 @@
-import { environment } from './environments/environment.prod';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import MongoStore = require('connect-mongo');
@@ -8,10 +7,12 @@ import passport = require('passport');
 import { AppModule } from './app/app.module';
 import { SessionAdapter } from './events/events.adapter';
 import { CustomLoggerService } from './custom-logger/custom-logger.service';
+import { JwtService } from '@nestjs/jwt';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const configService = app.get(ConfigService);
+  const jwtService = app.get(JwtService);
   const sessionSecret = configService.get('NX_SESSION_SECRET');
   const MongoUri = configService.get('NX_MONGO_URI');
   const sessionMiddleware = session({
@@ -33,7 +34,7 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(cookieParser());
-  app.useWebSocketAdapter(new SessionAdapter(sessionMiddleware, configService));
+  app.useWebSocketAdapter(new SessionAdapter(sessionMiddleware, configService, jwtService));
   await app.listen(3000);
 }
 bootstrap();

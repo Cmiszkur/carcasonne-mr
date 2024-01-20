@@ -1,9 +1,7 @@
 import { UsersService } from './../../users/users.service';
-import { UserDocument } from './../../users/schemas/user.schema';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
-import { RequestUser } from '@carcasonne-mr/shared-interfaces';
-import { User } from '@nest-backend/src/users/schemas/user.schema';
+import { RequestUser, UserTypes } from '@carcasonne-mr/shared-interfaces';
 
 @Injectable()
 export class SessionSerializer extends PassportSerializer {
@@ -11,29 +9,22 @@ export class SessionSerializer extends PassportSerializer {
     super();
   }
 
-  serializeUser(
-    user: UserDocument,
-    done: (err: Error, user: unknown) => void
-  ): void {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
+  serializeUser(user: RequestUser, done: (err: Error, user: unknown) => void): void {
+    if (!user._id) {
+      throw new UnauthorizedException('User id was not specified');
+    }
+
     done(null, user._id);
   }
-  deserializeUser(
-    id: string,
-    done: (err: Error | null, payload?: RequestUser) => void
-  ): void {
+
+  deserializeUser(id: string, done: (err: Error | null, payload?: RequestUser) => void): void {
     void this.userService
       .findById(id)
       .catch((err) => done(err))
       .then((user) => {
         console.log('desarializing user...');
         const returnedUser: RequestUser = user
-          ? {
-              username: user.username,
-              email: user.email,
-              name: user.name,
-            }
+          ? { username: user.username, type: UserTypes.REGISTERED }
           : undefined;
         done(null, returnedUser);
       });
