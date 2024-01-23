@@ -22,7 +22,7 @@ import { JwtAuthGuard } from './guards/guest-jwt.guard';
       useFactory: async (configService: ConfigService) => {
         return {
           secret: configService.get<string>('NX_JWT_SECRET'),
-          signOptions: { expiresIn: '60s' },
+          signOptions: { expiresIn: '4h' },
         };
       },
       inject: [ConfigService],

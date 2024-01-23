@@ -68,6 +68,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
+          "git pull", 
           "nx run carcassonne-client:build:production",
           "nx run carcassonne-client:docker-build"
         ],

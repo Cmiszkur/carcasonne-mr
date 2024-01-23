@@ -34,7 +34,7 @@
     "deploy": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["nx run nest-backend:build:production", "nx run nest-backend:docker-build"],
+        "commands": ["git pull", "nx run nest-backend:build:production", "nx run nest-backend:docker-build"],
         "parallel": false
       }
     },
