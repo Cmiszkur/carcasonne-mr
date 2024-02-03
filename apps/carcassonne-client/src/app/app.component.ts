@@ -8,11 +8,13 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  private clientsTheme = localStorage.getItem('theme') || 'light-mode';
-
   constructor(private themesService: ThemesService) {}
 
   ngOnInit() {
-    this.themesService.loadStyle(this.clientsTheme);
+    this.loadCurrentStyle();
+  }
+
+  private loadCurrentStyle(): void {
+    this.themesService.loadStyle(this.themesService.currentTheme());
   }
 }

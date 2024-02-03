@@ -1,31 +1,26 @@
-import { Inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Inject, Injectable, signal } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemesService {
-  private currentThemeSubject = new BehaviorSubject(
-    localStorage.getItem('theme') || 'light-theme'
-  );
-  currentTheme$: Observable<string> = this.currentThemeSubject.asObservable();
+  private _currentTheme = signal(localStorage.getItem('theme') || 'light-theme');
+  public currentTheme = this._currentTheme.asReadonly();
 
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
   changeTheme(theme: string) {
-    this.currentThemeSubject.next(theme);
+    this._currentTheme.set(theme);
   }
 
   getTheme() {
-    return this.currentTheme$;
+    return this.currentTheme;
   }
 
   loadStyle(styleName: string) {
     const head = this.document.getElementsByTagName('head')[0];
-    let themeLink = this.document.getElementById(
-      'client-theme'
-    ) as HTMLLinkElement;
+    const themeLink = this.document.getElementById('client-theme') as HTMLLinkElement;
     const fileName = styleName + '.css';
 
     if (themeLink) {

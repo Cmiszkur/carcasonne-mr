@@ -4,7 +4,7 @@
     <button
         mat-icon-button
         (click)='changeTheme("dark-theme")'
-        *ngIf="(themeService.getTheme() | async) == 'light-theme'; else darkTemplate"
+        *ngIf="themeService.currentTheme() === 'light-theme'; else darkTemplate"
     ><mat-icon svgIcon='moon' aria-hidden="false"></mat-icon>
     </button>
 
