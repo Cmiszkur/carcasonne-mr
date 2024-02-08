@@ -4,8 +4,10 @@ services:
   nest-backend:
     image: nest-backend
     ports:
-      - 80:80
-      - 8080:8080
+      - 2053:2053
+      - 2083:2083
+    volumes:
+      - /etc/ssl/server-cert-key:/etc/ssl/server-cert-key
 
   carcassonne-client:
     image: carcassonne-client

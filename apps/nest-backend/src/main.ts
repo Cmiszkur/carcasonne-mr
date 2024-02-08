@@ -1,3 +1,4 @@
+import { environment } from './environments/environment.prod';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import MongoStore = require('connect-mongo');
@@ -8,9 +9,19 @@ import { AppModule } from './app/app.module';
 import { SessionAdapter } from './events/events.adapter';
 import { CustomLoggerService } from './custom-logger/custom-logger.service';
 import { JwtService } from '@nestjs/jwt';
+import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+    httpsOptions: environment.production
+      ? {
+          ca: fs.readFileSync('/etc/ssl/server-cert-key/cloudflare.crt'),
+          key: fs.readFileSync('/etc/ssl/server-cert-key/key.pem'),
+          cert: fs.readFileSync('/etc/ssl/server-cert-key/cert.pem'),
+        }
+      : undefined,
+  });
   const configService = app.get(ConfigService);
   const jwtService = app.get(JwtService);
   const sessionSecret = configService.get('NX_SESSION_SECRET');

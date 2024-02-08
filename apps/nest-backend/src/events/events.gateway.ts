@@ -23,7 +23,7 @@ import {
 import * as crypto from 'crypto';
 import { PlacedTilePayloadPipe } from './transformers/placed-tile-payload.pipe';
 
-@WebSocketGateway(environment.production ? 8080 : 3001)
+@WebSocketGateway(environment.production ? 2083 : 3001)
 export class EventsGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;
