@@ -15,7 +15,7 @@ export class SocketService {
   protected socket: Socket;
 
   constructor(protected jwtService: JwtService) {
-    this.socket = io(`http://${environment.socketURL}`, {
+    this.socket = io(`${environment.socketURL}`, {
       withCredentials: true,
       autoConnect: false,
       path: '/socket/',

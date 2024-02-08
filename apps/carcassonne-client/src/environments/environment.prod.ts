@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiURL: 'realm-architect',
-  socketURL: 'realm-architect',
+  apiURL: 'https://realm-architect',
+  socketURL: 'https://realm-architect',
 };

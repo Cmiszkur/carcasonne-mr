@@ -5,7 +5,7 @@ export class Constants {
   public static get httpOptions() {
     return {
       headers: new HttpHeaders({
-        'Access-Control-Allow-Origin': `http://${environment.apiURL}/`,
+        'Access-Control-Allow-Origin': `${environment.apiURL}/`,
         'Content-Type': 'application/json',
         Authorization: `Bearer ${sessionStorage.getItem('jwtToken')}`,
       }),
@@ -14,6 +14,6 @@ export class Constants {
   }
 
   public static get baseUrl(): string {
-    return `http://${environment.apiURL}/api/`;
+    return `${environment.apiURL}/api/`;
   }
 }
