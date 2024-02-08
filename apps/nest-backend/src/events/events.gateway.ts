@@ -1,3 +1,4 @@
+import { environment } from '@nest-backend/src/environments/environment.prod';
 import { GameService } from './services/game.service';
 import {
   ConnectedSocket,
@@ -22,7 +23,7 @@ import {
 import * as crypto from 'crypto';
 import { PlacedTilePayloadPipe } from './transformers/placed-tile-payload.pipe';
 
-@WebSocketGateway(3001)
+@WebSocketGateway(environment.production ? 8080 : 3001)
 export class EventsGateway implements OnGatewayConnection {
   @WebSocketServer()
   server: Server;

@@ -7,7 +7,7 @@
 FROM docker.io/node:lts-alpine
 
 ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV PORT=80
 
 WORKDIR /app
 
@@ -23,6 +23,6 @@ RUN chown -R nest-backend:nest-backend .
 # The bundled output will include external dependencies.
 RUN npm --omit=dev -f install
 
-EXPOSE ${PORT} 3001
+EXPOSE ${PORT} 8080
 
 CMD ["node", "main.js"]

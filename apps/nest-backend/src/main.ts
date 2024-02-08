@@ -35,6 +35,6 @@ async function bootstrap() {
   app.use(passport.session());
   app.use(cookieParser());
   app.useWebSocketAdapter(new SessionAdapter(sessionMiddleware, configService, jwtService));
-  await app.listen(3000);
+  await app.listen(configService.get('NX_NEST_PORT'));
 }
 bootstrap();

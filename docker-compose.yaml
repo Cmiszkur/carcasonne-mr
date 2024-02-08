@@ -4,8 +4,8 @@ services:
   nest-backend:
     image: nest-backend
     ports:
-      - 3000:3000
-      - 3001:3001
+      - 80:80
+      - 8080:8080
 
   carcassonne-client:
     image: carcassonne-client
