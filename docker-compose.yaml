@@ -10,4 +10,4 @@ services:
   carcassonne-client:
     image: carcassonne-client
     ports:
-      - 80:80
+      - 443:443

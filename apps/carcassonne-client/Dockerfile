@@ -7,7 +7,7 @@
 FROM docker.io/node:lts-alpine as build
 
 # ENV HOST=0.0.0.0
-ENV PORT=80
+ENV PORT=443
 
 WORKDIR /usr/local/app
 
@@ -24,6 +24,6 @@ FROM nginx:latest
 
 # Copy the build output to replace the default nginx contents.
 COPY apps/carcassonne-client/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /usr/local/app/carcassonne-client /usr/share/nginx/html
+COPY --from=build /usr/local/app/carcassonne-client /var/www/realm-architect/html
 
 EXPOSE ${PORT}
