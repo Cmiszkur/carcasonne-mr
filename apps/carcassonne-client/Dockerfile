@@ -24,9 +24,6 @@ FROM nginx:latest
 
 # Copy the build output to replace the default nginx contents.
 COPY apps/carcassonne-client/nginx.conf /etc/nginx/conf.d/default.conf
-COPY /etc/ssl/cert.pem /etc/ssl/cert.pem
-COPY /etc/ssl/key.pem /etc/ssl/key.pem
-COPY /etc/ssl/cloudflare.crt /etc/ssl/cloudflare.crt
 COPY --from=build /usr/local/app/carcassonne-client /usr/share/nginx/html
 
 EXPOSE ${PORT}
