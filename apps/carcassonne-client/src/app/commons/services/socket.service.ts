@@ -20,6 +20,7 @@ export class SocketService {
       autoConnect: false,
       path: '/socket/',
       auth: { jwt: this.jwtService.getToken() },
+      secure: true,
     });
 
     //TODO: Add better error handling
