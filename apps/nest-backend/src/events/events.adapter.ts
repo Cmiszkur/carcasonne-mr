@@ -1,4 +1,5 @@
-import { environment } from '@nest-backend/src/environments/environment.prod';
+import { customOrigin } from '@nest-backend/core/functions/customOrigin';
+import { environment } from '@nest-backend/src/environments/environment';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import passport = require('passport');
 import { Server, Socket, ServerOptions } from 'socket.io';
@@ -23,8 +24,7 @@ export class SessionAdapter extends IoAdapter {
   }
 
   createIOServer(port: number, options?: ServerOptions): Server {
-    const origin = this.configService.get<string>('NX_CLIENT_CORS_ORIGIN');
-    const cors = { origin, credentials: true };
+    const cors = { origin: customOrigin, credentials: true };
     const path = this.configService.get<string>('NX_SOCKET_PATH');
     options.cors = cors;
     options.path = path;
@@ -41,21 +41,6 @@ export class SessionAdapter extends IoAdapter {
     server.use(WSAuthMiddleware(this.jwtService));
     return server;
   }
-
-  // create(
-  //   port: number,
-  //   options?: ServerOptions & { namespace?: string; server?: unknown }
-  // ): Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, unknown> {
-  //   const httpsServer = createServer({
-  //     ca: fs.readFileSync('/etc/ssl/server-cert-key/cloudflare.crt'),
-  //     key: fs.readFileSync('/etc/ssl/server-cert-key/key.pem'),
-  //     cert: fs.readFileSync('/etc/ssl/server-cert-key/cert.pem'),
-  //   }).listen(port);
-
-  //   const ioServer = new Server(httpsServer, options);
-
-  //   return super.create(port, environment.production ? { ...options, server: ioServer } : options);
-  // }
 
   createSecureIOServer(port: number, options?: ServerOptions): Server {
     const httpsServer = createServer({

@@ -1,4 +1,4 @@
-import { environment } from '@nest-backend/src/environments/environment.prod';
+import { environment } from '@nest-backend/src/environments/environment';
 import { GameService } from './services/game.service';
 import {
   ConnectedSocket,

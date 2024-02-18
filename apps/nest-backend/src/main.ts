@@ -1,4 +1,4 @@
-import { environment } from './environments/environment.prod';
+import { environment } from '@nest-backend/src/environments/environment';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import MongoStore = require('connect-mongo');
@@ -10,6 +10,7 @@ import { SessionAdapter } from './events/events.adapter';
 import { CustomLoggerService } from './custom-logger/custom-logger.service';
 import { JwtService } from '@nestjs/jwt';
 import * as fs from 'fs';
+import { customOrigin } from '@nest-backend/core/functions/customOrigin';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -36,7 +37,7 @@ async function bootstrap() {
     },
   });
   app.enableCors({
-    origin: configService.get('NX_CLIENT_CORS_ORIGIN'),
+    origin: customOrigin,
     credentials: true,
   });
   app.setGlobalPrefix('api', { exclude: ['socket'] });
