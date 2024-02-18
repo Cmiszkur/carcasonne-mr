@@ -1,4 +1,3 @@
-import { customOrigin } from '@nest-backend/core/functions/customOrigin';
 import { environment } from '@nest-backend/src/environments/environment';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import passport = require('passport');
@@ -24,7 +23,7 @@ export class SessionAdapter extends IoAdapter {
   }
 
   createIOServer(port: number, options?: ServerOptions): Server {
-    const cors = { origin: customOrigin, credentials: true };
+    const cors = environment.production ? undefined : { origin: true, credentials: true };
     const path = this.configService.get<string>('NX_SOCKET_PATH');
     options.cors = cors;
     options.path = path;

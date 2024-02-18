@@ -10,7 +10,6 @@ import { SessionAdapter } from './events/events.adapter';
 import { CustomLoggerService } from './custom-logger/custom-logger.service';
 import { JwtService } from '@nestjs/jwt';
 import * as fs from 'fs';
-import { customOrigin } from '@nest-backend/core/functions/customOrigin';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -22,6 +21,7 @@ async function bootstrap() {
           cert: fs.readFileSync('/etc/ssl/server-cert-key/cert.pem'),
         }
       : undefined,
+    cors: environment.production ? undefined : { origin: true, credentials: true },
   });
   const configService = app.get(ConfigService);
   const jwtService = app.get(JwtService);
@@ -35,10 +35,6 @@ async function bootstrap() {
     cookie: {
       maxAge: 60 * 1000 * 60 * 24 * 14,
     },
-  });
-  app.enableCors({
-    origin: customOrigin,
-    credentials: true,
   });
   app.setGlobalPrefix('api', { exclude: ['socket'] });
   app.useLogger(app.get(CustomLoggerService));
