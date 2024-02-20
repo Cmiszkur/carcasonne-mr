@@ -1,4 +1,11 @@
-import { Controller, Get, UseGuards, Request, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Request,
+  Post,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { AuthenticatedGuard } from '@nest-backend/src/auth/guards/authenticated.guard';
 import { ExtendedRequest } from '@nest-backend/src/interfaces';
 import { AuthService } from '@nest-backend/src/auth/auth.service';
@@ -23,5 +30,13 @@ export class AppController {
   loginGuest(@Request() req: ExtendedRequest): AppResponse<AccessToken> {
     const accessToken = this.authService.loginGuest(req.user);
     return { message: accessToken };
+  }
+
+  @Post('/logout')
+  async logout(@Request() req: ExtendedRequest): Promise<AppResponse<null>> {
+    await req.logout(undefined, (err) => {
+      if (err) return new InternalServerErrorException(err);
+    });
+    return { message: null };
   }
 }

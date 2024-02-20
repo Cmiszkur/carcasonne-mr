@@ -1,6 +1,9 @@
+import { Observable } from 'rxjs/internal/Observable';
 import { AuthService } from './services/auth.service';
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { RequestUser } from '@carcasonne-mr/shared-interfaces';
+import { of, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,19 +14,14 @@ export class AuthGuard {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
-  ): Promise<boolean | UrlTree> {
+  ): Observable<RequestUser | UrlTree> {
     return this.checkAuth(state.url);
   }
 
-  async checkAuth(url: string): Promise<boolean | UrlTree> {
+  checkAuth(url: string): Observable<RequestUser | UrlTree> {
     this.authService.redirectUrl = url;
-    const response = await this.authService.auth();
-    if (response) {
-      console.log('autoryzacja się powiodła');
-      return true;
-    }
-
-    console.log('autoryzacja się nie powiodła');
-    return this.router.parseUrl('/login');
+    return this.authService
+      .auth()
+      .pipe(switchMap((res) => of(res ? res : this.router.parseUrl('/login'))));
   }
 }

@@ -1,12 +1,13 @@
 import { AuthService } from '../services/auth.service';
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
-  LoginAuthResponse,
   LoginUser,
+  UnauthorizedExceptionGUI,
 } from '@carcassonne-client/src/app/interfaces/responseInterfaces';
 import { LoginOptions } from '@carcassonne-client/src/app/interfaces/login-options';
+import { AppResponse, RequestUser } from '@carcasonne-mr/shared-interfaces';
 
 export interface LoginForm {
   username: string | null;
@@ -43,11 +44,7 @@ export class LoginComponent {
   public loginOptionsEnum: typeof LoginOptions = LoginOptions;
   public registeredUser = signal(true);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private activatedRoute: ActivatedRoute
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   public login(): void {
     const userInput = this.loginForm.value;
@@ -60,18 +57,20 @@ export class LoginComponent {
       return;
     }
 
-    this.authService.login(userInput).subscribe((res: LoginAuthResponse) => {
-      if (res.error) {
-        if (res.message === 'username') {
-          this.usernameFormControl.setErrors({ usernameHasError: true });
+    this.authService
+      .login(userInput)
+      .subscribe((res: AppResponse<RequestUser> | UnauthorizedExceptionGUI) => {
+        if ('error' in res) {
+          if (res.message === 'username') {
+            this.usernameFormControl.setErrors({ usernameHasError: true });
+          }
+          if (res.message === 'password') {
+            this.passwordFormControl.setErrors({ passwordHasError: true });
+          }
+        } else {
+          this.navigateFromLoginPage();
         }
-        if (res.message === 'password') {
-          this.passwordFormControl.setErrors({ passwordHasError: true });
-        }
-      } else {
-        this.navigateFromLoginPage();
-      }
-    });
+      });
   }
 
   public guestLogin(): void {
@@ -95,8 +94,6 @@ export class LoginComponent {
   }
 
   private navigateFromLoginPage(): void {
-    this.router.navigate([this.authService.redirectUrl || '/'], {
-      relativeTo: this.activatedRoute,
-    });
+    this.router.navigateByUrl(this.authService.redirectUrl || '/');
   }
 }

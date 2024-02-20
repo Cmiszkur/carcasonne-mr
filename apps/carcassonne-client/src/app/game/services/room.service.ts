@@ -139,14 +139,11 @@ export class RoomService extends SocketService {
    */
   public joinRoom(color?: string, roomID?: string): Observable<SocketAnswer> {
     const _roomID: string | undefined = this.selectedRoomId || roomID;
+
     if (!_roomID) {
       throw new CustomError(RoomError.ROOM_ID_NOT_SPECIFIED, 'Choose room which you want to join');
     }
-    //TODO: Zastanowić się nad obłsugą tego błedu lub rezygnacją ze sprawdzania tego na froncie.
-    // if (!color && !this.currentRoomValue?.gameStarted) {
-    //   console.log(this.currentRoomValue);
-    //   throw new CustomError(RoomError.MEEPLE_COLOR_NOT_SPECIFIED, 'Choose your meeple color');
-    // }
+
     const joinRoomPayload: JoinRoomPayload = { roomID: _roomID, color };
     this.connect();
     this.socket.emit('join_room', joinRoomPayload);

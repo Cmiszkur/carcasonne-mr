@@ -33,7 +33,7 @@ export class AuthService {
   public loginGuest(user: RequestUser): AccessToken {
     return {
       access_token: this.jwtService.sign(user),
-      username: user.username,
+      user: user,
     };
   }
 }

@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { RoomResolver } from './resolvers/room.resolver';
 import { StartingRoomComponent } from './starting-room/starting-room.component';
-import { GameComponent } from "./game.component";
+import { GameComponent } from './game.component';
+import { AuthGuard } from '../user/auth.guard';
 
 const routes: Routes = [
   {
@@ -18,9 +19,10 @@ const routes: Routes = [
       },
       {
         path: 'room',
-        loadChildren: () => import('./room/room.module').then(m => m.RoomModule)
-      }
-    ]
+        canActivate: [AuthGuard],
+        loadChildren: () => import('./room/room.module').then((m) => m.RoomModule),
+      },
+    ],
   },
 ];
 

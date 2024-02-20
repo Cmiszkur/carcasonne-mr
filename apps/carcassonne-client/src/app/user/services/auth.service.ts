@@ -1,15 +1,10 @@
 import { Constants } from '../../constants/httpOptions';
-import {
-  AuthResponse,
-  LoginAuthResponse,
-  LoginUser,
-  UserResponse,
-} from '../../interfaces/responseInterfaces';
+import { LoginUser, UnauthorizedExceptionGUI } from '../../interfaces/responseInterfaces';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
-import { AccessToken, AppResponse } from '@carcasonne-mr/shared-interfaces';
+import { BehaviorSubject, of, Observable } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { AccessToken, AppResponse, RequestUser, UserTypes } from '@carcasonne-mr/shared-interfaces';
 import { JwtService } from './jwt.service';
 
 @Injectable({
@@ -20,7 +15,7 @@ export class AuthService {
    * User returned from authentication process.
    * @private
    */
-  private user$: BehaviorSubject<UserResponse | null>;
+  private user$: BehaviorSubject<RequestUser | null>;
   /**
    * Url used to save url from where application redirected to login page.
    * It's later used to redirect back.
@@ -28,32 +23,53 @@ export class AuthService {
   public redirectUrl: string | null;
   private authUrl: string = Constants.baseUrl + 'restricted';
   private loginUrl: string = Constants.baseUrl + 'users/login';
+  private logoutUrl: string = Constants.baseUrl + 'logout';
   private guestLoginUrl: string = Constants.baseUrl + 'login-guest';
 
   constructor(private http: HttpClient, private jwtService: JwtService) {
     this.redirectUrl = null;
-    this.user$ = new BehaviorSubject<UserResponse | null>(null);
+    this.user$ = new BehaviorSubject<RequestUser | null>(null);
   }
 
-  public async auth(): Promise<boolean> {
+  public auth(): Observable<RequestUser | null> {
+    return this.user
+      ? of(this.user)
+      : this.http.get<AppResponse<RequestUser>>(this.authUrl, Constants.httpOptions).pipe(
+          catchError(() => of(null)),
+          map((res) => res?.message || null),
+          tap((response) => this.saveUser(response))
+        );
+  }
+
+  public login(
+    loginUser: LoginUser
+  ): Observable<AppResponse<RequestUser> | UnauthorizedExceptionGUI> {
     return this.http
-      .get<AuthResponse>(this.authUrl, Constants.httpOptions)
-      .toPromise()
-      .then(
-        (response) => {
-          this.saveUser(response?.message || null);
-          return true;
-        },
-        () => {
-          return false;
-        }
+      .post<AppResponse<RequestUser>>(this.loginUrl, loginUser, Constants.httpOptions)
+      .pipe(
+        catchError(this.handleError<UnauthorizedExceptionGUI>()),
+        tap((res) => {
+          if (this.isUser(res.message)) this.saveUser(res.message);
+        })
       );
   }
 
-  public login(loginUser: LoginUser): Observable<LoginAuthResponse> {
-    return this.http
-      .post<LoginAuthResponse>(this.loginUrl, loginUser, Constants.httpOptions)
-      .pipe(catchError(this.handleError<LoginAuthResponse>()));
+  public logout(): Observable<null> {
+    if (this.user?.type === UserTypes.GUEST) {
+      this.jwtService.removeToken();
+      this.saveUser(null);
+      return of(null);
+    } else {
+      return this.logoutRegistered();
+    }
+  }
+
+  public logoutRegistered(): Observable<null> {
+    return this.http.post<AppResponse<null>>(this.logoutUrl, undefined, Constants.httpOptions).pipe(
+      catchError(this.handleError<AppResponse<null>>()),
+      map((res) => res.message),
+      tap(() => this.saveUser(null))
+    );
   }
 
   public guestLogin(username: string): Observable<AppResponse<AccessToken>> {
@@ -61,15 +77,22 @@ export class AuthService {
       .post<AppResponse<AccessToken>>(this.guestLoginUrl, { username }, Constants.httpOptions)
       .pipe(
         catchError(this.handleError<AppResponse<AccessToken>>()),
-        tap((answer) => this.jwtService.setToken(answer.message.access_token))
+        tap((answer) => {
+          this.jwtService.setToken(answer.message.access_token);
+          this.saveUser(answer.message.user);
+        })
       );
   }
 
-  public get user(): UserResponse | null {
+  public get user(): RequestUser | null {
     return this.user$.value;
   }
 
-  private saveUser(user: UserResponse | null) {
+  public get userObservable(): Observable<RequestUser | null> {
+    return this.user$.asObservable();
+  }
+
+  private saveUser(user: RequestUser | null) {
     this.user$.next(user);
   }
 
@@ -79,5 +102,9 @@ export class AuthService {
       const errorMessage = error.error;
       return of(errorMessage as T);
     };
+  }
+
+  private isUser(item: string | RequestUser): item is RequestUser {
+    return !(typeof item === 'string');
   }
 }

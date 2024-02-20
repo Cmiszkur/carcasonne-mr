@@ -12,6 +12,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BaseComponent } from './components/base/base.component';
+import { MatMenuModule } from '@angular/material/menu';
 
 const allModules = [
   MatButtonModule,
@@ -28,6 +29,7 @@ const allModules = [
   MatButtonModule,
   MatRadioModule,
   MatSnackBarModule,
+  MatMenuModule,
 ];
 
 @NgModule({

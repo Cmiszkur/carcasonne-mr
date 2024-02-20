@@ -19,12 +19,14 @@ export class SocketService {
       withCredentials: true,
       autoConnect: false,
       path: '/socket/',
-      auth: { jwt: this.jwtService.getToken() },
+      auth: (cb) => cb({ jwt: this.jwtService.getToken() }),
       secure: environment.production,
     });
 
     //TODO: Add better error handling
-    this.socket.on('connect_error', (err) => console.error(err));
+    this.socket.on('connect_error', (err) => {
+      console.error(err);
+    });
     this.socket.on('connect_failed', (err) => console.error(err));
     this.socket.on('disconnect', (err) => console.error(err));
   }
