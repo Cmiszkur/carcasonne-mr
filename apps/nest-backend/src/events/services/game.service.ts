@@ -22,7 +22,7 @@ import {
 import { CheckTilesService } from './check-tiles.service';
 import * as crypto from 'crypto';
 import { PathService } from './path.service';
-import { copy } from '@shared-functions';
+import { copy, shuffleArray } from '@shared-functions';
 import { TilesService } from './tiles.service';
 import { PointCountingService } from './point-counting.service';
 
@@ -221,19 +221,19 @@ export class GameService extends BasicService {
       return Array(tiles.numberOfTiles).fill(tiles.id, 0, tiles.numberOfTiles) as string[];
     });
     const randomNumber: number = Math.floor(Math.random() * tilesLeft.length);
-    return tilesDispersed[randomNumber];
+    return shuffleArray(tilesDispersed)[randomNumber];
   }
 
   private deletePickedTile(tilesLeft: Tiles[], tilesId: string): Tiles[] {
-    const indexOfElementToDelete: number = tilesLeft.findIndex((tiles) => tiles.id === tilesId);
-    tilesLeft[indexOfElementToDelete].numberOfTiles -= 1;
-    if (tilesLeft[indexOfElementToDelete].numberOfTiles === 0) {
-      if (tilesLeft.length === 1) {
-        return [];
-      }
-      delete tilesLeft[indexOfElementToDelete];
+    const tilesLeftCopied = copy(tilesLeft);
+    const indexOfElementToDelete: number = tilesLeftCopied.findIndex(
+      (tiles) => tiles.id === tilesId
+    );
+    tilesLeftCopied[indexOfElementToDelete].numberOfTiles -= 1;
+    if (tilesLeftCopied[indexOfElementToDelete].numberOfTiles === 0) {
+      tilesLeftCopied.splice(indexOfElementToDelete, 1);
     }
-    return tilesLeft;
+    return tilesLeftCopied;
   }
 
   /**
