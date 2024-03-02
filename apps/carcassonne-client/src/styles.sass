@@ -16,9 +16,21 @@ body, html, app-root
   .draggable
     z-index: 2
 
-  snack-bar-container
-    background-color: red !important
-    color: white !important
+  .error-snackbar.mat-mdc-snack-bar-container 
+    .mdc-snackbar__surface 
+      background: red
+
+      .mat-mdc-button 
+        color: white !important
+      
+    
+
+    .mat-mdc-snack-bar-label.mdc-snackbar__label 
+      color: white
+      font-weight: 500
+      white-space: pre-wrap
+  
+
 
   .form-wrapper
     padding: 2rem
@@ -46,10 +58,17 @@ body, html, app-root
         align-items: center
         font-size: 1.1em
 
+        button
+          min-width: fit-content
+
+        div
+          text-align: right
+
         a
           margin-left: 0.3em
           font-weight: 600
           letter-spacing: 1px
+          display: inline-block
 
 
 *
