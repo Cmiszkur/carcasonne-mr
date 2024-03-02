@@ -1,1 +1,52 @@
-<p>register works!</p>
+<div class="form-wrapper">
+    <div class="title-area">
+        <h2>Sign up</h2>
+    </div>
+    <div class="form-area">
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <mat-form-field appearance="fill">
+              <mat-label>Username:</mat-label>
+              <input type="text" matInput formControlName="username" required>
+              <mat-error *ngIf="registerForm.get('username')?.hasError('required') && registerForm.get('username')?.touched">
+                Username is required.
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Email:</mat-label>
+              <input type="email" matInput formControlName="email" required>
+              <mat-error *ngIf="registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched">
+                Email is required.
+              </mat-error>
+              <mat-error *ngIf="registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched">
+                Invalid email format.
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Password:</mat-label>
+              <input type="password" matInput formControlName="password" required>
+              <mat-error *ngIf="registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched">
+                Password is required.
+              </mat-error>
+              <mat-error *ngIf="registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched">
+                Password must be at least 8 characters long.
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>Confirm Password:</mat-label>
+              <input type="password" matInput formControlName="confirmPassword" required>
+              <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('required') && registerForm.get('confirmPassword')?.touched">
+                Confirm password is required.
+              </mat-error>
+              <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('passwordMatch') && registerForm.get('confirmPassword')?.dirty">
+                Passwords do not match.
+              </mat-error>
+            </mat-form-field>
+            <div class="sign-area">
+              <button type="submit" color='accent' mat-raised-button [disabled]="registerForm.invalid">Register</button>
+              <div class="sign-in">
+                  Do you have an account already?<a routerLink="/login">SIGN IN</a>
+              </div>
+            </div>
+        </form>
+    </div>
+</div>

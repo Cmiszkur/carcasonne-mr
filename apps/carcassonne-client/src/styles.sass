@@ -1,24 +1,56 @@
 body, html, app-root
-    margin: 0
-    padding: 0
-    height: 100%
-    width: 100%
-    box-sizing: border-box
-    display: block
+  margin: 0
+  padding: 0
+  height: 100%
+  width: 100%
+  box-sizing: border-box
+  display: block
 
-    .tile
-      position: absolute
-      padding: 6px
+  .tile
+    position: absolute
+    padding: 6px
 
-      img
-        display: block
+    img
+      display: block
 
-    .draggable
-      z-index: 2
+  .draggable
+    z-index: 2
 
-    snack-bar-container
-      background-color: red !important
-      color: white !important
+  snack-bar-container
+    background-color: red !important
+    color: white !important
+
+  .form-wrapper
+    padding: 2rem
+    margin: 10rem auto 0
+    max-width: 500px
+    border-radius: 30px
+    box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.4)
+
+    .example-full-width
+      color: blue
+
+    .title-area
+      display: flex
+      flex-direction: row
+      align-items: center
+    
+    form
+      display: flex
+      flex-direction: column
+
+      .sign-area
+        display: flex
+        flex-direction: row
+        justify-content: space-between
+        align-items: center
+        font-size: 1.1em
+
+        a
+          margin-left: 0.3em
+          font-weight: 600
+          letter-spacing: 1px
+
 
 *
   font-family: Roboto

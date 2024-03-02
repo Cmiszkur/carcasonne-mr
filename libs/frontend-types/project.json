@@ -1,0 +1,30 @@
+{
+  "name": "frontend-types",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/frontend-types/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/frontend-types",
+        "main": "libs/frontend-types/src/index.ts",
+        "tsConfig": "libs/frontend-types/tsconfig.lib.json",
+        "assets": ["libs/frontend-types/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/frontend-types/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}

@@ -8,17 +8,7 @@ import {
 } from '@carcassonne-client/src/app/interfaces/responseInterfaces';
 import { LoginOptions } from '@carcassonne-client/src/app/interfaces/login-options';
 import { AppResponse, RequestUser } from '@carcasonne-mr/shared-interfaces';
-
-export interface LoginForm {
-  username: string | null;
-  password: string | null;
-}
-
-export type GuestLoginForm = Pick<LoginForm, 'username'>;
-
-export type FormInit<T extends object> = {
-  [P in keyof T]: FormControl<T[P]>;
-};
+import { FormInit, GuestLoginForm, LoginForm } from '@frontend-types';
 
 @Component({
   selector: 'app-login',

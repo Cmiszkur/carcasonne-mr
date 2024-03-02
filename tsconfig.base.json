@@ -19,7 +19,8 @@
       "@carcassonne-client/*": ["apps/carcassonne-client/*"],
       "@nest-backend/*": ["apps/nest-backend/*"],
       "@nest-backend/core/*": ["apps/nest-backend/src/core/*"],
-      "@shared-functions": ["libs/shared-methods/src/index.ts"]
+      "@shared-functions": ["libs/shared-methods/src/index.ts"],
+      "@frontend-types": ["libs/frontend-types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
