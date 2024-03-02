@@ -1,7 +1,7 @@
 import { FormControl } from '@angular/forms';
 
 export type FormInit<T extends object> = {
-  [P in keyof T]: FormControl<T[P]>;
+  [P in keyof T]: FormControl<T[P] | null>;
 };
 
 export interface LoginForm {
@@ -12,8 +12,8 @@ export interface LoginForm {
 export type GuestLoginForm = Pick<LoginForm, 'username'>;
 
 export interface RegiserFormData {
-  username: string | null;
-  email: string | null;
-  password: string | null;
-  confirmPassword: string | null;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 }

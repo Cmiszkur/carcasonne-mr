@@ -4,8 +4,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, of, Observable } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
-import { AccessToken, AppResponse, RequestUser, UserTypes } from '@carcasonne-mr/shared-interfaces';
+import {
+  AccessToken,
+  AppResponse,
+  RequestUser,
+  SafeUser,
+  UserAbstract,
+  UserTypes,
+} from '@carcasonne-mr/shared-interfaces';
 import { JwtService } from './jwt.service';
+import { AlertService } from '../../commons/services/alert.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,8 +33,13 @@ export class AuthService {
   private loginUrl: string = Constants.baseUrl + 'users/login';
   private logoutUrl: string = Constants.baseUrl + 'logout';
   private guestLoginUrl: string = Constants.baseUrl + 'login-guest';
+  private registerUrl = Constants.baseUrl + 'users/register';
 
-  constructor(private http: HttpClient, private jwtService: JwtService) {
+  constructor(
+    private http: HttpClient,
+    private jwtService: JwtService,
+    private alert: AlertService
+  ) {
     this.redirectUrl = null;
     this.user$ = new BehaviorSubject<RequestUser | null>(null);
   }
@@ -82,6 +95,15 @@ export class AuthService {
           this.saveUser(answer.message.user);
         })
       );
+  }
+
+  public register(user: UserAbstract): Observable<SafeUser | null> {
+    return this.http.post<SafeUser>(this.registerUrl, user).pipe(
+      catchError((err: HttpErrorResponse) => {
+        this.alert.openNewAlert(err.error.message);
+        return of(null);
+      })
+    );
   }
 
   public get user(): RequestUser | null {

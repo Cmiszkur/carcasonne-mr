@@ -15,38 +15,37 @@ export class UsersService {
   async create(createUser: User): Promise<User> {
     const plainPassword = createUser.password;
     const username = createUser.username;
-    await this.userModel.findOne({ username: username }).then((user) => {
-      if (user) {
-        this.response = { ...this.response, error: 'Username already taken' };
-        throw new HttpException('User already exist', HttpStatus.CONFLICT);
-      } else {
-        if (
-          createUser.email.length > 30 ||
-          createUser.name.length > 15 ||
-          createUser.password.length > 30 ||
-          createUser.username.length > 15 ||
-          !createUser.email ||
-          !createUser.name ||
-          !createUser.password ||
-          !createUser.username
-        ) {
-          throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
-        }
-        bcrypt.genSalt(this.saltRounds, (err, salt) => {
-          if (err) throw new Error(err.message);
-          bcrypt.hash(plainPassword, salt, (err, hash: string) => {
-            if (err) throw new Error(err.message);
-            createUser.password = hash;
-            const createdUser = new this.userModel(createUser);
-            createdUser.save().then((err) => {
-              if (err) {
-                throw new HttpException('Database error', HttpStatus.INTERNAL_SERVER_ERROR);
-              }
-            });
-          });
-        });
-      }
+    const user = await this.userModel.findOne({ username: username });
+
+    if (user) {
+      this.response = { ...this.response, error: 'Username already taken' };
+      throw new HttpException('User already exist', HttpStatus.CONFLICT);
+    }
+
+    if (
+      createUser.email.length > 30 ||
+      plainPassword.length > 30 ||
+      username.length > 15 ||
+      !createUser.email ||
+      !plainPassword ||
+      !username
+    ) {
+      throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
+    }
+
+    const salt = await bcrypt.genSalt(this.saltRounds).catch((err: Error) => {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
     });
+    const hash = await bcrypt.hash(plainPassword, salt).catch((err: Error) => {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+    createUser.password = hash;
+    const createdUser = await new this.userModel(createUser).save().catch((err: Error) => {
+      throw new HttpException(err.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+
+    console.log(createdUser, new User(createUser));
+
     return new User(createUser);
   }
 

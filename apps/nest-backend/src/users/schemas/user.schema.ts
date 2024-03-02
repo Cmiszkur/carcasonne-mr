@@ -1,14 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Exclude } from 'class-transformer';
+import { UserAbstract } from '@carcasonne-mr/shared-interfaces';
 
 export type UserDocument = User & Document;
 
 @Schema()
-export class User {
-  @Prop()
-  name: string;
-
+export class User implements UserAbstract {
   @Prop()
   email: string;
 
