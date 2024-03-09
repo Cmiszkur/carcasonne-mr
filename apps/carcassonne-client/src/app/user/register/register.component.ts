@@ -3,6 +3,7 @@ import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormInit, RegiserFormData } from '@frontend-types';
 import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -13,7 +14,7 @@ import { AuthService } from '../services/auth.service';
 export class RegisterComponent {
   registerForm: FormGroup<FormInit<RegiserFormData>>;
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService, private router: Router) {
     this.registerForm = new FormGroup<FormInit<RegiserFormData>>({
       username: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.required, Validators.email]),
@@ -28,7 +29,11 @@ export class RegisterComponent {
     if (this.registerForm.valid && this.isRegiserFormData(data)) {
       this.authService
         .register({ email: data.email, password: data.password, username: data.username })
-        .subscribe(console.log);
+        .subscribe((user) => {
+          if (user) {
+            this.router.navigate(['/registration-success', user.emailConfirmationId]);
+          }
+        });
     }
   }
 

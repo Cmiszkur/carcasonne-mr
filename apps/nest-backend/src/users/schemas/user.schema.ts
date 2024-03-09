@@ -20,6 +20,9 @@ export class User implements UserAbstract {
   @Prop()
   lastCreatedRoom?: string;
 
+  @Prop()
+  emailPendingConfirmation?: string;
+
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
   }

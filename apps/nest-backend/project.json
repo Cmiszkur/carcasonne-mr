@@ -12,7 +12,7 @@
         "webpackConfig": "apps/nest-backend/webpack.config.js",
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
-        "assets": ["apps/nest-backend/src/assets"],
+        "assets": ["apps/nest-backend/src/assets", "apps/nest-backend/src/mail/templates"],
         "target": "node",
         "compiler": "tsc",
         "generatePackageJson": true

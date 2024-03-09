@@ -1,21 +1,21 @@
-:host
+\:host
+  display: flex
+  flex-direction: row
+  align-items: center
+  justify-content: center
+  padding: 0.5em
+
+.snackbar-textarea
     display: flex
-    flex-direction: row
+    flex-direction: column
     align-items: center
-    justify-content: center
-    font-size: 1.3em
-    padding: 0.5em
-    
-    .error-messages
+
+
+    .snackbar-title
         display: flex
-        flex-direction: column
+        flex-direction: row
         align-items: center
-        
 
-        .error-abstract
-            display: flex
-            flex-direction: row
-            align-items: center
-
-            mat-icon
-                margin-right: 0.3em
+        mat-icon
+            margin-right: 0.3em
+            min-width: 24px

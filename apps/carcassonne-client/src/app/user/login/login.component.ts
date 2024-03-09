@@ -9,6 +9,7 @@ import {
 import { LoginOptions } from '@carcassonne-client/src/app/interfaces/login-options';
 import { AppResponse, RequestUser } from '@carcasonne-mr/shared-interfaces';
 import { FormInit, GuestLoginForm, LoginForm } from '@frontend-types';
+import { AlertService } from '@carcassonne-client/src/app/commons/services/alert.service';
 
 @Component({
   selector: 'app-login',
@@ -34,7 +35,11 @@ export class LoginComponent {
   public loginOptionsEnum: typeof LoginOptions = LoginOptions;
   public registeredUser = signal(true);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private alertService: AlertService
+  ) {}
 
   public login(): void {
     const userInput = this.loginForm.value;
@@ -56,6 +61,9 @@ export class LoginComponent {
           }
           if (res.message === 'password') {
             this.passwordFormControl.setErrors({ passwordHasError: true });
+          }
+          if (res.message === 'email_pending_confirmation') {
+            this.alertService.openNewAlert('Email is pending confirmation');
           }
         } else {
           this.navigateFromLoginPage();

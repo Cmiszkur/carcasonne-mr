@@ -72,7 +72,6 @@ export class SocketService {
     return new Observable((subscriber) => {
       this.socket.on(eventName, (response) => {
         if (!subscriber.closed) {
-          console.log('Im in a subscriber ', eventName, response);
           subscriber.next(response);
         }
       });

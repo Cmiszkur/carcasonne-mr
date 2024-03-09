@@ -1,3 +1,4 @@
+import { UsersModule } from './../users/users.module';
 import { FollowerService } from './services/follower.service';
 import { BasicService } from './services/basic.service';
 import { GameService } from './services/game.service';
@@ -35,6 +36,7 @@ import { CustomLoggerModule } from '../custom-logger/custom-logger.module';
       { name: User.name, schema: UserSchema },
     ]),
     CustomLoggerModule,
+    UsersModule,
   ],
   exports: [RoomService],
 })

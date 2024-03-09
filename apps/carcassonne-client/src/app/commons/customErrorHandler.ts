@@ -20,10 +20,7 @@ export class CustomErrorHandler extends ErrorHandler {
   override handleError(err: UncaughtPromiseError) {
     const error = err.rejection ? err.rejection : err;
     if (error instanceof CustomError) {
-      this.alertService.openNewAlert(
-        error.message as RoomError,
-        error.additionalErrorMessage
-      );
+      this.alertService.openNewAlert(error.message, error.additionalErrorMessage);
     }
     super.handleError(error);
   }

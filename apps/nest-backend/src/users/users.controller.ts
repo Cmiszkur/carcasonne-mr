@@ -3,6 +3,10 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -11,7 +15,12 @@ import {
 import { User } from './schemas/user.schema';
 import { LocalAuthGuard } from '@nest-backend/src/auth/guards/local-auth.guard';
 import { ExtendedRequest } from '@nest-backend/src/interfaces';
-import { RequestUser, AppResponse } from '@carcasonne-mr/shared-interfaces';
+import {
+  RequestUser,
+  AppResponse,
+  SafeUser,
+  RegistrationResponse,
+} from '@carcasonne-mr/shared-interfaces';
 
 @Controller('users')
 export class UsersController {
@@ -25,7 +34,16 @@ export class UsersController {
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('/register')
-  register(@Body() newUser: User): Promise<User> {
+  register(@Body() newUser: User): Promise<RegistrationResponse> {
     return this.usersService.create(newUser);
+  }
+
+  @Get('/confirm-email/:token')
+  confirmEmail(@Param('token') token: string | undefined): Promise<SafeUser> {
+    if (!token) {
+      throw new HttpException('Token is required', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.usersService.confirmUsersEmail(token);
   }
 }

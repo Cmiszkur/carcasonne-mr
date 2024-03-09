@@ -16,7 +16,6 @@ import { JwtAuthGuard } from './guards/guest-jwt.guard';
 @Module({
   imports: [
     PassportModule.register({ session: true }),
-    UsersModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
@@ -27,6 +26,7 @@ import { JwtAuthGuard } from './guards/guest-jwt.guard';
       },
       inject: [ConfigService],
     }),
+    UsersModule,
   ],
   exports: [AuthService],
   providers: [

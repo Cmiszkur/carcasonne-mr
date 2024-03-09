@@ -3,4 +3,5 @@ export abstract class UserAbstract {
   abstract username: string;
   abstract password: string;
   abstract lastCreatedRoom?: string;
+  abstract emailPendingConfirmation?: string;
 }

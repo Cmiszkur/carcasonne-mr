@@ -7,6 +7,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import {
   AccessToken,
   AppResponse,
+  RegistrationResponse,
   RequestUser,
   SafeUser,
   UserAbstract,
@@ -97,8 +98,8 @@ export class AuthService {
       );
   }
 
-  public register(user: UserAbstract): Observable<SafeUser | null> {
-    return this.http.post<SafeUser>(this.registerUrl, user).pipe(
+  public register(user: UserAbstract): Observable<RegistrationResponse | null> {
+    return this.http.post<RegistrationResponse>(this.registerUrl, user).pipe(
       catchError((err: HttpErrorResponse) => {
         this.alert.openNewAlert(err.error.message);
         return of(null);
@@ -120,7 +121,6 @@ export class AuthService {
 
   private handleError<T>() {
     return (error: HttpErrorResponse): Observable<T> => {
-      console.log(error);
       const errorMessage = error.error;
       return of(errorMessage as T);
     };

@@ -16,8 +16,3 @@ export enum PlayersColors {
   YELLOW = 'yellow',
   RED = 'red',
 }
-
-export interface SnackBarError {
-  error: RoomError;
-  errorMessage?: string;
-}

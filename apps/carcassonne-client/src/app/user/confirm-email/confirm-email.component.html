@@ -1,0 +1,11 @@
+@if (showSpinner()) {
+  <h1>You are nearly there. Please wait</h1>
+  <mat-spinner></mat-spinner>
+} @else {
+  @if (userConfirmation) {
+    <app-success-svg/>
+    <h1>{{message}}</h1>
+  } @else {
+    <h1>{{message}}</h1>
+  }
+}

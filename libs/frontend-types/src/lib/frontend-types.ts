@@ -1,4 +1,5 @@
 import { FormControl } from '@angular/forms';
+import { RoomError } from '@carcassonne-client/src/app/game/models/socket';
 
 export type FormInit<T extends object> = {
   [P in keyof T]: FormControl<T[P] | null>;
@@ -16,4 +17,9 @@ export interface RegiserFormData {
   email: string;
   password: string;
   confirmPassword: string;
+}
+
+export interface SnackBarData {
+  title: string;
+  text?: string;
 }

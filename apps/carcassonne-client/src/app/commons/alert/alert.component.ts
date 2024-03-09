@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MatSnackBarRef, MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
-import { SnackBarError } from '../../game/models/Room';
+import { SnackBarData } from '@frontend-types';
 
 @Component({
   selector: 'app-alert',
@@ -10,8 +10,8 @@ import { SnackBarError } from '../../game/models/Room';
 })
 export class AlertComponent {
   constructor(
-    @Inject(MAT_SNACK_BAR_DATA) public data: SnackBarError,
-    private snackBarRef: MatSnackBarRef<SnackBarError>
+    @Inject(MAT_SNACK_BAR_DATA) public data: SnackBarData,
+    private snackBarRef: MatSnackBarRef<SnackBarData>
   ) {}
 
   closeDialog() {

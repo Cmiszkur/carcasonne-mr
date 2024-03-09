@@ -18,6 +18,11 @@ export class AuthService {
         user: null,
       };
     }
+
+    if (user.emailPendingConfirmation) {
+      return { error: 'email_pending_confirmation', user: null };
+    }
+
     const isMatch: boolean = await bcrypt.compare(pass, user.password);
     if (isMatch) {
       return {

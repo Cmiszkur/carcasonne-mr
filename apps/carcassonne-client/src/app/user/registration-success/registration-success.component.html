@@ -1,0 +1,7 @@
+<div *ngIf="successMessage()" class="container">
+  <h2 class="success-message">{{ successMessage() }}</h2>
+  <div class="resend-container">
+    <p>Didn't receive the email? You can resend it in {{ countdown() | countdown }} minutes.</p>
+    <button mat-raised-button color="primary" [disabled]="!!countdown()" (click)="resendEmail()">Resend Email</button>
+  </div>
+</div>
