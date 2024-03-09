@@ -7,9 +7,11 @@
     <span class="no-rooms-notification">No rooms available? Create one yourself</span>
   </ng-template>
   <div class="room-buttons">
-    <app-player-options-dialog-button [text]="'Join room'"
-                                      (playerOptions)="joinRoom($event)">
-    </app-player-options-dialog-button>
+    @if (availableRooms.length) {
+      <app-player-options-dialog-button [text]="'Join room'"
+                                        (playerOptions)="joinRoom($event)">
+      </app-player-options-dialog-button>
+    }
     <app-player-options-dialog-button [text]="'Create room'"
                                       (playerOptions)="createRoom($event)">
     </app-player-options-dialog-button>
