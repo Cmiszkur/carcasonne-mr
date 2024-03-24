@@ -9,7 +9,7 @@ import {
 } from '@carcasonne-mr/shared-interfaces';
 import { TileEnvironments } from '@carcassonne-client/src/app/game/models/Tile';
 import { Emptytile } from '@carcassonne-client/src/app/game/models/emptytile';
-import { TileValuesAfterRotation, getUUID, serializeObj } from '@shared-functions';
+import { getUUID, serializeObj, TileValuesAfterRotation } from '@shared-functions';
 import { BoardService } from './board.service';
 
 @Injectable({
@@ -111,23 +111,26 @@ export class EmptyTilesService {
     return tileEnvironments;
   }
 
-  public checkCurrentTilePlacement(clickedEmptyTile: Emptytile): boolean {
-    if (this.currentTileEnvironments) {
+  public checkCurrentTilePlacement(
+    clickedEmptyTile: Emptytile,
+    tileEnvironments: TileEnvironments = this.currentTileEnvironments()
+  ): boolean {
+    if (tileEnvironments) {
       let checker = true;
 
       for (const [key, value] of Object.entries(clickedEmptyTile)) {
         switch (key) {
           case 'bottom':
-            checker = value === this.currentTileEnvironments().bottom;
+            checker = value === tileEnvironments.bottom;
             break;
           case 'top':
-            checker = value === this.currentTileEnvironments().top;
+            checker = value === tileEnvironments.top;
             break;
           case 'right':
-            checker = value === this.currentTileEnvironments().right;
+            checker = value === tileEnvironments.right;
             break;
           case 'left':
-            checker = value === this.currentTileEnvironments().left;
+            checker = value === tileEnvironments.left;
             break;
         }
         if (!checker) break;

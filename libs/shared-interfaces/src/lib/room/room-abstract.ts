@@ -1,5 +1,4 @@
-import { TilesAbstract } from '../tiles/tiles-abstract';
-import { ExtendedTile } from '../tiles/tiles-types';
+import { EmptyTile, ExtendedTile, TilesAbstract } from '../tiles';
 import { BoardMove, Paths, Player, TileAndPlayer } from './room-types';
 
 export abstract class RoomAbstract {
@@ -15,4 +14,5 @@ export abstract class RoomAbstract {
   abstract roomHost: string;
   abstract hostLeftDate: Date | null;
   abstract paths: Paths;
+  abstract emptyTiles: EmptyTile[];
 }

@@ -22,9 +22,11 @@ import {
 import { CheckTilesService } from './check-tiles.service';
 import * as crypto from 'crypto';
 import { PathService } from './path.service';
-import { copy, shuffleArray } from '@shared-functions';
+import { copy } from '@shared-functions';
 import { TilesService } from './tiles.service';
 import { PointCountingService } from './point-counting.service';
+import { EmptyTilesService } from '@nest-backend/src/events/services/empty-tiles.service';
+import { DrawTileService } from '@nest-backend/src/events/services/draw-tile.service';
 
 @Injectable()
 export class GameService extends BasicService {
@@ -35,7 +37,9 @@ export class GameService extends BasicService {
     private pathService: PathService,
     private tilesService: TilesService,
     private pointCountingService: PointCountingService,
-    private followerService: FollowerService
+    private followerService: FollowerService,
+    private emptyTilesService: EmptyTilesService,
+    private drawTileService: DrawTileService
   ) {
     super();
   }
@@ -46,12 +50,12 @@ export class GameService extends BasicService {
     const searchedRoom: RoomDocument | null = await this.roomModel.findOne({
       roomId: roomId,
     });
-    const allTiles: Tiles[] = startingTilesSet?.allTiles || [];
+    const startingAllTiles: Tiles[] = startingTilesSet?.allTiles || [];
 
     if (!searchedRoom) {
       return this.createAnswer(RoomError.ROOM_NOT_FOUND, null);
     }
-    if (!startingTile || allTiles.length === 0) {
+    if (!startingTile || startingAllTiles.length === 0) {
       return this.createAnswer(
         RoomError.NO_STARTING_TILE_FOUND,
         null,
@@ -60,7 +64,12 @@ export class GameService extends BasicService {
     }
 
     //Updating fields.
-    this.drawTileAndUpdate(searchedRoom, username, allTiles);
+    const { allTiles, drawnTile } = this.drawTileService.drawTileAndUpdateLeftTiles(
+      searchedRoom.emptyTiles,
+      startingAllTiles
+    );
+    searchedRoom.lastChosenTile = drawnTile ? { tile: drawnTile, player: username } : null;
+    searchedRoom.tilesLeft = allTiles;
     const extendedStartingTile: ExtendedTile = this.getExtendedStartingTile(startingTile);
     searchedRoom.board.push(extendedStartingTile);
     searchedRoom.boardMoves.push(this.getStartingBoardMove());
@@ -104,17 +113,29 @@ export class GameService extends BasicService {
     //Checks if game is ended
     searchedRoom.gameEnded = searchedRoom.tilesLeft.length === 0;
 
-    // Draw a tile for the next player and update the tilesLeft count
-    if (!searchedRoom.gameEnded) {
-      const nextPlayer: string = this.chooseNextPlayer(searchedRoom.players, username);
-      this.drawTileAndUpdate(searchedRoom, nextPlayer, searchedRoom.tilesLeft);
-    } else {
-      searchedRoom.lastChosenTile = null;
-    }
-
     // Add the placed tile to the board and record the move in boardMoves
     searchedRoom.board.push(extendedTile);
     searchedRoom.boardMoves.push(this.getBoardMove(extendedTile.coordinates, username));
+
+    //Updates empty tiles
+    searchedRoom.emptyTiles = this.emptyTilesService.updateEmptyTiles(
+      extendedTile,
+      searchedRoom.board,
+      searchedRoom.emptyTiles
+    );
+
+    // Draw a tile for the next player and update the tilesLeft count
+    if (!searchedRoom.gameEnded) {
+      const nextPlayer: string = this.chooseNextPlayer(searchedRoom.players, username);
+      const { drawnTile, allTiles } = this.drawTileService.drawTileAndUpdateLeftTiles(
+        searchedRoom.emptyTiles,
+        searchedRoom.tilesLeft
+      );
+      searchedRoom.lastChosenTile = drawnTile ? { tile: drawnTile, player: nextPlayer } : null;
+      searchedRoom.tilesLeft = allTiles;
+    } else {
+      searchedRoom.lastChosenTile = null;
+    }
 
     // If a pawn is placed on the tile, remove one follower from the player
     if (extendedTile.fallowerDetails) {
@@ -187,53 +208,11 @@ export class GameService extends BasicService {
     };
   }
 
-  /**
-   * Draws tile from left tiles and updates field ``lastChosenTile`` and ``tilesLeft``
-   * @param room
-   * @param username
-   * @param tiles
-   */
-  private drawTileAndUpdate(room: RoomDocument, username: string, tiles: Tiles[]): void {
-    const tilesSet: TilesSet = this.drawTile(tiles);
-    room.lastChosenTile = tilesSet.drawnTile
-      ? { tile: tilesSet.drawnTile, player: username }
-      : null;
-    room.tilesLeft = tilesSet.allTiles;
-  }
-
   private chooseNextPlayer(players: Player[], currentPlayer: string): string {
     const indexOfCurrentPlayer: number | undefined = players.findIndex(
       (player) => player.username === currentPlayer
     );
     return players[(indexOfCurrentPlayer + 1) % players.length].username;
-  }
-
-  private drawTile(providedTilesLeft: Tiles[] | null): TilesSet {
-    let tilesLeft: Tiles[] = copy(providedTilesLeft);
-    const pickedTileId: string = this.pickRandomTileId(tilesLeft);
-    const drawnTile = tilesLeft.find((tiles) => tiles.id === pickedTileId)?.tile || null;
-    tilesLeft = this.deletePickedTile(tilesLeft, pickedTileId);
-    return { allTiles: tilesLeft, drawnTile };
-  }
-
-  private pickRandomTileId(tilesLeft: Tiles[]): string {
-    const tilesDispersed: string[] = tilesLeft.flatMap((tiles) => {
-      return Array(tiles.numberOfTiles).fill(tiles.id, 0, tiles.numberOfTiles) as string[];
-    });
-    const randomNumber: number = Math.floor(Math.random() * tilesLeft.length);
-    return shuffleArray(tilesDispersed)[randomNumber];
-  }
-
-  private deletePickedTile(tilesLeft: Tiles[], tilesId: string): Tiles[] {
-    const tilesLeftCopied = copy(tilesLeft);
-    const indexOfElementToDelete: number = tilesLeftCopied.findIndex(
-      (tiles) => tiles.id === tilesId
-    );
-    tilesLeftCopied[indexOfElementToDelete].numberOfTiles -= 1;
-    if (tilesLeftCopied[indexOfElementToDelete].numberOfTiles === 0) {
-      tilesLeftCopied.splice(indexOfElementToDelete, 1);
-    }
-    return tilesLeftCopied;
   }
 
   /**

@@ -15,6 +15,8 @@ import { PathService } from './services/path.service';
 import { TilesService } from './services/tiles.service';
 import { PointCountingService } from './services/point-counting.service';
 import { CustomLoggerModule } from '../custom-logger/custom-logger.module';
+import { EmptyTilesService } from './services/empty-tiles.service';
+import { DrawTileService } from './services/draw-tile.service';
 
 @Module({
   providers: [
@@ -28,6 +30,8 @@ import { CustomLoggerModule } from '../custom-logger/custom-logger.module';
     TilesService,
     PointCountingService,
     FollowerService,
+    EmptyTilesService,
+    DrawTileService,
   ],
   imports: [
     MongooseModule.forFeature([

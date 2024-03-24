@@ -1,16 +1,18 @@
 import { BasicService } from './basic.service';
-import { Tiles, TileDocument } from '../schemas/tiles.schema';
+import { TileDocument, Tiles } from '../schemas/tiles.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Room, RoomDocument } from '../schemas/room.schema';
 import { Model } from 'mongoose';
 import { UsersService } from '@nest-backend/src/users/users.service';
 import {
+  Environment,
   Player,
   PlayerState,
   RoomError,
   ShortenedRoom,
   SocketAnswer,
 } from '@carcasonne-mr/shared-interfaces';
+import { getUUID } from '@shared-functions';
 
 export default class RoomService extends BasicService {
   constructor(
@@ -217,6 +219,28 @@ export default class RoomService extends BasicService {
       lastChosenTile: null,
       hostLeftDate: null,
       paths: { cities: new Map(), roads: new Map() },
+      emptyTiles: [
+        {
+          coordinates: { x: 0, y: 1 },
+          bottom: Environment.ROADS,
+          id: getUUID(),
+        },
+        {
+          coordinates: { x: 1, y: 0 },
+          left: Environment.CITIES,
+          id: getUUID(),
+        },
+        {
+          coordinates: { x: 0, y: -1 },
+          top: Environment.ROADS,
+          id: getUUID(),
+        },
+        {
+          coordinates: { x: -1, y: 0 },
+          right: Environment.FIELD,
+          id: getUUID(),
+        },
+      ],
     };
   }
 }

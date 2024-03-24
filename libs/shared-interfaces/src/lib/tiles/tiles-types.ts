@@ -87,3 +87,12 @@ export interface TranslateValue {
   left: number;
   top: number;
 }
+
+export interface EmptyTile {
+  coordinates: Coordinates;
+  id: string;
+  top?: Environment;
+  right?: Environment;
+  bottom?: Environment;
+  left?: Environment;
+}

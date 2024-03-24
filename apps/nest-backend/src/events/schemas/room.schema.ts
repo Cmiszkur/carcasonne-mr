@@ -9,6 +9,7 @@ import {
   Paths,
   Player,
   TileAndPlayer,
+  EmptyTile,
 } from '@carcasonne-mr/shared-interfaces';
 
 export type RoomDocument = Room & Document;
@@ -77,6 +78,9 @@ export class Room implements RoomAbstract {
     get: deserializeObj,
   })
   paths: Paths;
+
+  @Prop()
+  emptyTiles: EmptyTile[];
 
   constructor(partial: Partial<Room>) {
     Object.assign(this, partial);
