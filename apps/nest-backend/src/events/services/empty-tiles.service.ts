@@ -4,24 +4,18 @@ import {
   EmptyTile,
   Environment,
   ExtendedTile,
-  Position,
   Tile,
-  TileValues,
+  TileEnvironments,
 } from '@carcasonne-mr/shared-interfaces';
-import { getUUID, serializeObj, TileValuesAfterRotation } from '@shared-functions';
-import { TileEnvironments } from '@carcassonne-client/src/app/game/models/Tile';
+import {
+  checkTilePlacement,
+  getUUID,
+  serializeObj,
+  tileValuesToTileEnvironments,
+} from '@shared-functions';
 
 @Injectable()
 export class EmptyTilesService {
-  private get defaultTileEnvironments(): TileEnvironments {
-    return {
-      top: Environment.FIELD,
-      right: Environment.FIELD,
-      bottom: Environment.FIELD,
-      left: Environment.FIELD,
-    };
-  }
-
   public updateEmptyTiles(
     placedTile: ExtendedTile,
     board: ExtendedTile[],
@@ -33,7 +27,7 @@ export class EmptyTilesService {
     const emptyTilesMap = new Map<string, EmptyTile>(
       emptyTiles.map((emptyTile) => [serializeObj(emptyTile.coordinates), emptyTile])
     );
-    const tileEnvironments = this.tileValuesToTileEnvironments(tileValues, tileRotation);
+    const tileEnvironments = tileValuesToTileEnvironments(tileValues, tileRotation);
     const topCoordinate = { x: coordinates.x, y: coordinates.y + 1 };
     const bottomCoordinate = { x: coordinates.x, y: coordinates.y - 1 };
     const rightCoordinate = { x: coordinates.x + 1, y: coordinates.y };
@@ -41,19 +35,39 @@ export class EmptyTilesService {
 
     emptyTilesMap.set(
       JSON.stringify(rightCoordinate),
-      this.generateEmptyTile(rightCoordinate, 'left', tileEnvironments.right)
+      this.generateEmptyTile(
+        rightCoordinate,
+        'left',
+        tileEnvironments.right,
+        emptyTilesMap.get(serializeObj(rightCoordinate))
+      )
     );
     emptyTilesMap.set(
       JSON.stringify(leftCoordinate),
-      this.generateEmptyTile(leftCoordinate, 'right', tileEnvironments.left)
+      this.generateEmptyTile(
+        leftCoordinate,
+        'right',
+        tileEnvironments.left,
+        emptyTilesMap.get(serializeObj(leftCoordinate))
+      )
     );
     emptyTilesMap.set(
       JSON.stringify(topCoordinate),
-      this.generateEmptyTile(topCoordinate, 'bottom', tileEnvironments.top)
+      this.generateEmptyTile(
+        topCoordinate,
+        'bottom',
+        tileEnvironments.top,
+        emptyTilesMap.get(serializeObj(topCoordinate))
+      )
     );
     emptyTilesMap.set(
       JSON.stringify(bottomCoordinate),
-      this.generateEmptyTile(bottomCoordinate, 'top', tileEnvironments.bottom)
+      this.generateEmptyTile(
+        bottomCoordinate,
+        'top',
+        tileEnvironments.bottom,
+        emptyTilesMap.get(serializeObj(bottomCoordinate))
+      )
     );
 
     board.forEach((tile) => {
@@ -66,7 +80,7 @@ export class EmptyTilesService {
 
   public checkIfTileIsPlayable(drawnTile: Tile, emptyTiles: EmptyTile[]): boolean {
     let checker = false;
-    let tile: TileEnvironments = this.tileValuesToTileEnvironments(drawnTile.tileValues, 0);
+    let tile: TileEnvironments = tileValuesToTileEnvironments(drawnTile.tileValues, 0);
 
     for (const emptyTile of emptyTiles) {
       let rotateCounter = 0;
@@ -74,7 +88,7 @@ export class EmptyTilesService {
         break;
       } else {
         while (rotateCounter < 3 && !checker) {
-          checker = this.checkTilePlacement(emptyTile, tile);
+          checker = checkTilePlacement(emptyTile, tile);
           tile = this.rotate90Degree(tile);
           rotateCounter++;
         }
@@ -106,68 +120,5 @@ export class EmptyTilesService {
 
     // @ts-ignore
     return emptyTile ? { ...emptyTile, ...partialEmptyTile } : { coordinates, ...partialEmptyTile };
-  }
-
-  private tileValuesToTileEnvironments(
-    tileValues: TileValues | null,
-    tileRotation: number
-  ): TileEnvironments {
-    const tileEnvironments: TileEnvironments = this.defaultTileEnvironments;
-
-    const tileValuesAfterRotation = TileValuesAfterRotation(tileValues, tileRotation);
-
-    if (!tileValuesAfterRotation) {
-      return tileEnvironments;
-    }
-
-    for (const [environment, positions] of Object.entries(tileValuesAfterRotation) as [
-      Environment,
-      [Position[]]
-    ][]) {
-      positions.flat().forEach((position) => {
-        switch (position) {
-          case 'TOP':
-            tileEnvironments.top = environment;
-            break;
-          case 'RIGHT':
-            tileEnvironments.right = environment;
-            break;
-          case 'BOTTOM':
-            tileEnvironments.bottom = environment;
-            break;
-          case 'LEFT':
-            tileEnvironments.left = environment;
-            break;
-        }
-      });
-    }
-
-    return tileEnvironments;
-  }
-
-  private checkTilePlacement(
-    clickedEmptyTile: EmptyTile,
-    tileEnvironments: TileEnvironments
-  ): boolean {
-    let checker = true;
-
-    for (const [key, value] of Object.entries(clickedEmptyTile)) {
-      switch (key) {
-        case 'bottom':
-          checker = value === tileEnvironments.bottom;
-          break;
-        case 'top':
-          checker = value === tileEnvironments.top;
-          break;
-        case 'right':
-          checker = value === tileEnvironments.right;
-          break;
-        case 'left':
-          checker = value === tileEnvironments.left;
-          break;
-      }
-      if (!checker) break;
-    }
-    return checker;
   }
 }

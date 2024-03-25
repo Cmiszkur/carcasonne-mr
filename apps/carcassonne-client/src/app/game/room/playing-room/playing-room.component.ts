@@ -1,7 +1,5 @@
 import { TileService } from './tile/services/tile.service';
 import { ConfirmationButtonData } from '@carcassonne-client/src/app/game/models/confirmationButtonData';
-import { TileEnvironments } from './../../models/Tile';
-import { Emptytile } from '@carcassonne-client/src/app/game/models/emptytile';
 import {
   Component,
   OnInit,
@@ -20,14 +18,17 @@ import { BaseComponent } from '@carcassonne-client/src/app/commons/components/ba
 import {
   Coordinates,
   CurrentTile,
+  EmptyTile,
+  ExtendedEmptyTile,
   ExtendedTile,
   ExtendedTranslatedTile,
   RoomAbstract,
   TileAndPlayer,
+  TileEnvironments,
 } from '@carcasonne-mr/shared-interfaces';
 import { SocketService } from '@carcassonne-client/src/app/commons/services/socket.service';
 import { BoardTilesService } from '../../services/board-tiles.service';
-import { serializeObj } from '@shared-functions';
+import { checkTilePlacement, serializeObj } from '@shared-functions';
 import { EmptyTilesService } from './services/empty-tiles.service';
 import { BoardService } from './services/board.service';
 
@@ -49,7 +50,7 @@ export class PlayingRoomComponent
   public tiles: Signal<ExtendedTranslatedTile[]> = this.boardService.tiles;
   public currentTileEnvironments: Signal<TileEnvironments> =
     this.emptyTilesService.currentTileEnvironments;
-  public emptyTiles: Signal<Emptytile[]> = this.emptyTilesService.emptyTiles;
+  public emptyTiles: Signal<ExtendedEmptyTile[]> = this.emptyTilesService.emptyTiles;
   public isTilePlacedCorrectly = signal<boolean>(false);
   public username: string | null = this.authService.user?.username || null;
   public clickedEmptyTileColor = signal<{ emptyTileId: string; borderColor: string } | null>(null);
@@ -124,7 +125,7 @@ export class PlayingRoomComponent
    * Makes translate string that is used to position the tile in DOM, saves empty tile state and updates tile fields.
    * @param clickedEmptyTile - contains coordinates as string and empty tile information.
    */
-  public emptyTileSelected(clickedEmptyTile: Emptytile): void {
+  public emptyTileSelected(clickedEmptyTile: ExtendedEmptyTile): void {
     if (this.tilePlacementConfirmed()) return;
 
     const coordinates = clickedEmptyTile.coordinates;
@@ -136,8 +137,10 @@ export class PlayingRoomComponent
       this.boardService.updateCurrentTileCoordinates(coordinates);
     }
 
-    const isTilePlacedCorrectly =
-      this.emptyTilesService.checkCurrentTilePlacement(clickedEmptyTile);
+    const isTilePlacedCorrectly = checkTilePlacement(
+      clickedEmptyTile,
+      this.currentTileEnvironments()
+    );
 
     this.setClickedEmptyTileBorderColor(
       clickedEmptyTile.id,
@@ -176,8 +179,8 @@ export class PlayingRoomComponent
 
   /**
    * Sets current tile.
-   * @param tile
    * @private
+   * @param lastChosenTile
    */
   private setCurrentTile(lastChosenTile?: TileAndPlayer | null): void {
     const isUsersTurn: boolean = this.username === lastChosenTile?.player;
@@ -187,9 +190,9 @@ export class PlayingRoomComponent
     this.emptyTilesService.setCurrentTileEnvironments(this.currentTile());
   }
 
-  private setTiles(tiles: ExtendedTile[]): void {
+  private setTiles(tiles: ExtendedTile[], emptyTiles: EmptyTile[]): void {
     this.boardService.setTiles(tiles);
-    this.emptyTilesService.setEmptyTiles(tiles);
+    this.emptyTilesService.setEmptyTiles(emptyTiles);
     this.cancelChoice();
     this.resetTilePlacement();
   }
@@ -219,8 +222,9 @@ export class PlayingRoomComponent
   private updatePlayingRoom(room?: RoomAbstract | null): void {
     const lastChosenTile = room?.lastChosenTile;
     const tiles = room?.board;
+    const emptyTiles = room?.emptyTiles;
 
-    if (tiles) this.setTiles(tiles);
+    if (tiles && emptyTiles) this.setTiles(tiles, emptyTiles);
     this.setCurrentTile(lastChosenTile);
   }
 

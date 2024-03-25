@@ -96,3 +96,14 @@ export interface EmptyTile {
   bottom?: Environment;
   left?: Environment;
 }
+
+export type ExtendedEmptyTile = EmptyTile & {
+  position: TranslateValue | null;
+};
+
+export interface TileEnvironments {
+  top: Environment;
+  right: Environment;
+  bottom: Environment;
+  left: Environment;
+}
