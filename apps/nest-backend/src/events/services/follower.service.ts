@@ -19,8 +19,12 @@ export class FollowerService {
         if (isString(v)) {
           return v === tile.id;
         } else {
+          const followerPositions = tile.fallowerDetails?.position || [];
           return (
-            v.id === tile.id && compareArrays(v.positions, tile.fallowerDetails?.position || [])
+            v.id === tile.id &&
+            (followerPositions.length === 1
+              ? v.positions.some((position) => position === followerPositions[0])
+              : compareArrays(v.positions, followerPositions))
           );
         }
       });

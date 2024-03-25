@@ -22,13 +22,11 @@ import {
   Environment,
 } from '@carcasonne-mr/shared-interfaces';
 import { PointCountingService } from './point-counting.service';
-import { CustomLoggerService } from '@nest-backend/src/custom-logger/custom-logger.service';
 
 @Injectable()
 export class PathService {
   constructor(
-    private pointCountingService: PointCountingService,
-    private customLoggerService: CustomLoggerService
+    private pointCountingService: PointCountingService
   ) {}
 
   private get emptyPathData(): PathData {
@@ -53,6 +51,7 @@ export class PathService {
     const coordinates: Coordinates = copiedPlacedTile.coordinates;
     const placedTileId = copiedPlacedTile.id;
     const newOrUpdatedPathIds: Set<string> = new Set();
+    const deletedPathIds: Set<string> = new Set();
 
     if (roads) {
       this.checkAndMergeNearestPaths(
@@ -62,6 +61,7 @@ export class PathService {
         placedTileId,
         Environment.ROADS,
         newOrUpdatedPathIds,
+        deletedPathIds,
         copiedPlacedTile.tile.extraPoints,
         placedFallower
       );
@@ -75,6 +75,7 @@ export class PathService {
         placedTileId,
         Environment.CITIES,
         newOrUpdatedPathIds,
+        deletedPathIds,
         copiedPlacedTile.tile.extraPoints,
         placedFallower
       );
@@ -83,12 +84,15 @@ export class PathService {
     this.checkPathCompletion(uncompletedRoadsPathDataMap, board, newOrUpdatedPathIds);
     this.checkPathCompletion(uncompletedCitiesPathDataMap, board, newOrUpdatedPathIds);
 
+    deletedPathIds.forEach((pathId) => {
+      paths.roads.delete(pathId);
+      paths.cities.delete(pathId);
+    });
+
     const mergedPaths = {
       cities: new Map([...paths.cities, ...uncompletedCitiesPathDataMap]),
       roads: new Map([...paths.roads, ...uncompletedRoadsPathDataMap]),
     };
-
-    this.customLoggerService.logPaths(mergedPaths.roads, mergedPaths.cities);
 
     return {
       paths: mergedPaths,
@@ -106,9 +110,11 @@ export class PathService {
     tileId: string,
     tileValuesKey: keyof TileValues,
     newOrUpdatedPathIds: Set<string>,
+    deletedPathIds: Set<string>,
     extraPoints?: boolean,
     placedFallower?: FollowerDetails
   ): void {
+    console.log('positionSets', positionSets);
     positionSets.forEach((positionSet) => {
       const pathDataMapRecordArray: [string, PathData][] = [];
       let pathId: string;
@@ -131,7 +137,7 @@ export class PathService {
       });
 
       if (pathDataMapRecordArray.length >= 2) {
-        pathId = this.mergePaths(pathDataMapRecordArray, pathDataMap, placedFallower);
+        pathId = this.mergePaths(pathDataMapRecordArray, pathDataMap, deletedPathIds);
       } else {
         pathId = pathDataMapRecordArray[0]
           ? pathDataMapRecordArray[0][0]
@@ -155,7 +161,7 @@ export class PathService {
   private mergePaths(
     pathDataMapRecordArray: [string, PathData][],
     pathDataMap: PathDataMap,
-    placedFallower?: FollowerDetails
+    deletedPathIds: Set<string>
   ): string {
     const mergedCountedTiles: CountedTiles = new Map<string, CountedTile>();
     let mergedOwners: string[] = [];
@@ -163,14 +169,20 @@ export class PathService {
     pathDataMapRecordArray.forEach(([pathId, pathData]) => {
       //Deleting merged paths
       pathDataMap.delete(pathId);
+      deletedPathIds.add(pathId);
       //Merging owners
-      mergedOwners = placedFallower?.username
-        ? [...pathData.pathOwners, placedFallower.username]
-        : pathData.pathOwners;
+      mergedOwners.push(...pathData.pathOwners);
       //Merging tiles
-      pathData.countedTiles.forEach((countedTile, tileId) =>
-        mergedCountedTiles.set(tileId, countedTile)
-      );
+      pathData.countedTiles.forEach((countedTile, tileId) => {
+        const countedMergedTile = mergedCountedTiles.get(tileId);
+        if (countedMergedTile) {
+          countedTile.checkedPositions.forEach((position) =>
+            countedMergedTile.checkedPositions.add(position)
+          );
+        } else {
+          mergedCountedTiles.set(tileId, countedTile);
+        }
+      });
       //Merging points
       mergedPoints += pathData.points || 0;
     });
@@ -180,6 +192,7 @@ export class PathService {
       countedTiles: mergedCountedTiles,
       completed: false,
     };
+
     //Setting new merged path
     const newPathId = crypto.randomUUID();
     pathDataMap.set(newPathId, mergedPathData);
