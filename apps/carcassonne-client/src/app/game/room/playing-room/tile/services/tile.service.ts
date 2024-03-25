@@ -109,6 +109,10 @@ export class TileService {
     this.setPlacedPawn(pawn);
   }
 
+  public clearPossiblePawnPlacements(): void {
+    this._possiblePawnPlacements.set([]);
+  }
+
   private filterValues(
     positionClusters: [Position[]],
     coordinates: Coordinates,

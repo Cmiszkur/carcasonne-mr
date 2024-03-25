@@ -65,8 +65,12 @@ export class TileComponent extends BaseComponent implements OnChanges, OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['isTilePlacementConfirmed'] && this.shouldFillPossiblePawnPlacements()) {
-      this.tileService.fillPossiblePawnPlacements(this.extendedTile);
+    if (changes['isTilePlacementConfirmed']) {
+      if (this.shouldFillPossiblePawnPlacements()) {
+        this.tileService.fillPossiblePawnPlacements(this.extendedTile);
+      } else {
+        this.tileService.clearPossiblePawnPlacements();
+      }
     }
   }
 
