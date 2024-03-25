@@ -9,7 +9,7 @@
     </app-tile>
 
     <app-tile *ngIf="currentTile() as currentTile"
-              [extendedTile]="currentTile"  
+              [extendedTile]="currentTile"
               [translate]="currentTile.translateValue"
               [rotation]="currentTile.rotation"
               [isCurrentTile]="true"
@@ -24,17 +24,18 @@
                        (click)="emptyTileSelected(emptyTile)">
       </app-empty-tiles>
     </ng-container>
-  </div>  
+  </div>
 </div>
-  
+
 <div class="button-area">
-  <button *ngIf="tilePlacementConfirmed()" 
-          mat-icon-button 
+  <button *ngIf="tilePlacementConfirmed()"
+          mat-button
           (click)="cancelChoice()">
+    Cancel tile placement
     <mat-icon>close</mat-icon>
   </button>
-  <app-tile-and-pawn-confirmation-button  [isTilePlacedCorrectly]="isTilePlacedCorrectly()" 
-                                          [tilePlacementConfirmed]="tilePlacementConfirmed()" 
+  <app-tile-and-pawn-confirmation-button  [isTilePlacedCorrectly]="isTilePlacedCorrectly()"
+                                          [tilePlacementConfirmed]="tilePlacementConfirmed()"
                                           (confirmation)="confirmChoice($event)">
   </app-tile-and-pawn-confirmation-button>
 </div>

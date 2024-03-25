@@ -1,13 +1,26 @@
 \:host
   display: block
-  height: 100%
+  height: calc(100% - 100px)
+
+  ::-webkit-scrollbar-track
+    background-color: #F5F5F5
+    border-radius: 10px
+
+  ::-webkit-scrollbar
+    width: 6px
+    height: 6px
+    background-color: #F5F5F5
+
+  ::-webkit-scrollbar-thumb
+    border-radius: 10px
+    background-color: #B4CD5A
 
   .tiles
     position: relative
     height: calc(100% - 5em)
     overflow: scroll
 
-  .blank 
+  .blank
     position: absolute
     height: 100%
     width: 100%
@@ -19,14 +32,7 @@
     justify-content: center
 
     button
-      width: 4em
-      height: 4em
-      &:first-child
-        margin-right: 3em
-
-      mat-icon
-        font-size: 5em
-        margin-left: -0.65em
+      height: 100%
 
   .end-game-banner
     text-align: center

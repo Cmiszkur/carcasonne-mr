@@ -1,4 +1,6 @@
-<button mat-icon-button 
+<button mat-button
+        [disabled]="!isTilePlacedCorrectly"
         (click)="confirmChoice()">
+    Confirm {{tilePlacementConfirmed ? 'pawn' : 'tile'}} placement
     <mat-icon>done</mat-icon>
 </button>
