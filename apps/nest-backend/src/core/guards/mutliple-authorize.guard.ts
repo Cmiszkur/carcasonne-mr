@@ -13,13 +13,19 @@ export class MultipleAuthorizeGuard implements CanActivate {
   constructor(private readonly reflector: Reflector, private readonly moduleRef: ModuleRef) {}
 
   public canActivate(context: ExecutionContext): Observable<boolean> {
+    console.log('context', context);
+
     const allowedGuards =
       this.reflector.get<Type<CanActivate>[]>('multipleGuardsReferences', context.getHandler()) ||
       [];
 
+    console.log('allowedGuards', allowedGuards);
+
     const guards = allowedGuards.map((guardReference) =>
       this.moduleRef.get<CanActivate>(guardReference, { strict: false })
     );
+
+    console.log(guards);
 
     if (guards.length === 0) {
       return of(true);

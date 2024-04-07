@@ -10,6 +10,7 @@ import { EventsModule } from '../events/events.module';
 import { RoomModule } from '../room/room.module';
 import { RoomController } from '../room/room.controller';
 import { environment } from '../environments/environment';
+import { ThrottlerModule } from '@nestjs/throttler';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -17,6 +18,12 @@ import { environment } from '../environments/environment';
       isGlobal: true,
     }),
     MongooseModule.forRoot(process.env.NX_MONGO_URI || ''),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]), //Rate limiting can be set via RateLimiter decorator
     AuthModule,
     UsersModule,
     EventsModule,

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MultipleAuthorizeGuard } from './guards/mutliple-authorize.guard';
+import { MultipleAuthorizeGuard } from '@nest-backend/core/guards';
 
 @Module({
   providers: [MultipleAuthorizeGuard],

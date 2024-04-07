@@ -21,6 +21,7 @@ import {
   SafeUser,
   RegistrationResponse,
 } from '@carcasonne-mr/shared-interfaces';
+import { RateLimiter } from '@nest-backend/core/decorators';
 
 @Controller('users')
 export class UsersController {
@@ -32,6 +33,7 @@ export class UsersController {
     return { message: req.user };
   }
 
+  @RateLimiter(90000, 10)
   @UseInterceptors(ClassSerializerInterceptor)
   @Post('/register')
   register(@Body() newUser: User): Promise<RegistrationResponse> {
