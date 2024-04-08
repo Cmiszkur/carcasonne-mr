@@ -2,7 +2,7 @@ import { Constants } from '../../constants/httpOptions';
 import { LoginUser, UnauthorizedExceptionGUI } from '../../interfaces/responseInterfaces';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, of, Observable } from 'rxjs';
+import { BehaviorSubject, of, Observable, EMPTY } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import {
   AccessToken,
@@ -90,7 +90,10 @@ export class AuthService {
     return this.http
       .post<AppResponse<AccessToken>>(this.guestLoginUrl, { username }, Constants.httpOptions)
       .pipe(
-        catchError(this.handleError<AppResponse<AccessToken>>()),
+        catchError((err: HttpErrorResponse) => {
+          this.alert.openNewAlert(err.error.message);
+          return EMPTY;
+        }),
         tap((answer) => {
           this.jwtService.setToken(answer.message.access_token);
           this.saveUser(answer.message.user);

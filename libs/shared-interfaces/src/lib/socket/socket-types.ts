@@ -32,6 +32,7 @@ export interface ExtendedIncomingMessage extends IncomingMessage {
 
 export interface RequestUser {
   _id?: string;
+  randomizationId?: string;
   /**
    * token issue date
    */

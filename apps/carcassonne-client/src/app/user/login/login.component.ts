@@ -18,7 +18,10 @@ import { AlertService } from '@carcassonne-client/src/app/commons/services/alert
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
-  public usernameFormControl = new FormControl<string>('', [Validators.required]);
+  public usernameFormControl = new FormControl<string>('', [
+    Validators.required,
+    Validators.maxLength(15),
+  ]);
   public passwordFormControl = new FormControl<string>('', [Validators.required]);
   public loginForm = new FormGroup<FormInit<LoginForm>>({
     username: this.usernameFormControl,

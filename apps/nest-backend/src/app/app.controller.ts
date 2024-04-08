@@ -34,7 +34,7 @@ export class AppController {
 
   @Post('/logout')
   async logout(@Request() req: ExtendedRequest): Promise<AppResponse<null>> {
-    await req.logout(undefined, (err) => {
+    req.logout(undefined, (err) => {
       if (err) return new InternalServerErrorException(err);
     });
     return { message: null };

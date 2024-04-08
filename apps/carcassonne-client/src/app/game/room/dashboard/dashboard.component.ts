@@ -3,6 +3,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RoomService } from '../../services/room.service';
 import { Player } from '@carcasonne-mr/shared-interfaces';
+import { Players } from '@carcassonne-client/src/app/game/models/Players';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,17 +12,9 @@ import { Player } from '@carcasonne-mr/shared-interfaces';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
-  /**
-   * Currently logged in user.
-   */
-  public player = computed<Player | null>(() => {
-    return this.roomService.players()?.loggedPlayer || null;
-  });
-  /**
-   * All players beside logged in user.
-   */
-  public restOfThePlayers = computed<Player[]>(() => {
-    return this.roomService.players()?.otherPlayers || [];
+  public players = computed<Player[]>(() => {
+    const players: Players | null = this.roomService.players();
+    return [players?.loggedPlayer, ...(players?.otherPlayers || [])].filter(Boolean) as Player[];
   });
 
   constructor(

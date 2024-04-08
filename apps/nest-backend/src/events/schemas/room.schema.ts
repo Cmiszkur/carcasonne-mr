@@ -92,7 +92,7 @@ export const RoomSchema = SchemaFactory.createForClass(Room);
 RoomSchema.set('toObject', { getters: true });
 
 RoomSchema.path('players').validate((players: []) => {
-  if (players.length > 3) {
+  if (players.length > 4) {
     throw new Error('Maximum number of players is 4');
   }
   return true;
