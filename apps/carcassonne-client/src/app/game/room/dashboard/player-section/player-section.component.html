@@ -1,7 +1,10 @@
 <ng-container *ngIf='player'>
   <div class="player-section">
     <div class="username-area">
-      <span>{{player.username}}: {{player.points}}</span>
+      <span>{{player.username}}: {{player.points}} </span>
+      @if (player.state === 'disconnnected') {
+        <mat-icon class="disconnected-icon">error</mat-icon>
+      }
     </div>
     <div class="followers-area">
       <mat-icon [style.fill]="player.color"

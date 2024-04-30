@@ -15,6 +15,9 @@
         "polyfills": "apps/carcassonne-client/src/polyfills.ts",
         "tsConfig": "apps/carcassonne-client/tsconfig.app.json",
         "inlineStyleLanguage": "sass",
+        "stylePreprocessorOptions": {
+          "includePaths": ["apps/carcassonne-client/src"]
+        },
         "assets": ["apps/carcassonne-client/src/favicon.ico", "apps/carcassonne-client/src/assets"],
         "styles": [
           {
@@ -68,7 +71,7 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "git pull", 
+          "git pull",
           "nx run carcassonne-client:build:production",
           "nx run carcassonne-client:docker-build"
         ],

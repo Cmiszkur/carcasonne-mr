@@ -1,6 +1,8 @@
 <div class="player-section-wrapper">
 <!--  <div class="divider"></div>-->
-  <app-player-section *ngFor="let player of players()" [player]="player">
+  <app-player-section *ngFor="let player of players()"
+                      [class.disconnected]="player.state === 'disconnnected'"
+                      [player]="player">
   </app-player-section>
 </div>
 <div class="divider-horizontal"></div>

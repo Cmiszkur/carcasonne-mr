@@ -4,11 +4,18 @@
   @media screen and (max-width: 767px)
     width: 100%
 
+  display: flex
+  align-items: center
+
+  .disconnected-icon
+    padding-left: 0.5em
+
   .player-section
     display: flex
     @media screen and (min-width: 767px)
       flex-direction: column
     @media screen and (max-width: 767px)
+      width: 100%
       justify-content: space-between
 
     .username-area
