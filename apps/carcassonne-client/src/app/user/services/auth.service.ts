@@ -49,7 +49,10 @@ export class AuthService {
     return this.user
       ? of(this.user)
       : this.http.get<AppResponse<RequestUser>>(this.authUrl, Constants.httpOptions).pipe(
-          catchError(() => of(null)),
+          catchError(() => {
+            this.jwtService.removeToken();
+            return of(null);
+          }),
           map((res) => res?.message || null),
           tap((response) => this.saveUser(response))
         );
