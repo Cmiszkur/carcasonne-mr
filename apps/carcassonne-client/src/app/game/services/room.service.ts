@@ -1,9 +1,9 @@
 import { PlayersColors } from '../models/Room';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
-import { map, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { RoomError } from '../models/socket';
 import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHandler';
 import { SocketService } from '../../commons/services/socket.service';
@@ -23,6 +23,7 @@ import {
   StartGamePayload,
 } from '@carcasonne-mr/shared-interfaces';
 import { JwtService } from '../../user/services/jwt.service';
+import { AlertService } from '@carcassonne-client/src/app/commons/services/alert.service';
 
 @Injectable({
   providedIn: 'root',
@@ -60,8 +61,13 @@ export class RoomService extends SocketService {
   private _gameEnded = signal<boolean>(false);
   public gameEnded = this._gameEnded.asReadonly();
 
-  constructor(private http: HttpClient, private authService: AuthService, jwtService: JwtService) {
-    super(jwtService);
+  constructor(
+    protected override jwtService: JwtService,
+    protected override alert: AlertService,
+    private http: HttpClient,
+    private authService: AuthService
+  ) {
+    super(jwtService, alert);
     this.baseUrl = Constants.baseUrl;
     this.availableRooms$ = new BehaviorSubject<ShortenedRoom[] | null>(null);
     this.selectedRoomId$ = new BehaviorSubject<string | null>(null);

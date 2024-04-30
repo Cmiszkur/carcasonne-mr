@@ -2,8 +2,10 @@ import { JwtService } from './../../user/services/jwt.service';
 import { environment } from './../../../environments/environment';
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { take, tap } from 'rxjs/operators';
+import { AlertService } from '@carcassonne-client/src/app/commons/services/alert.service';
+import { DisconnectDescription } from 'socket.io-client/build/esm-debug/socket';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +16,7 @@ export class SocketService {
    */
   protected socket: Socket;
 
-  constructor(protected jwtService: JwtService) {
+  constructor(protected jwtService: JwtService, protected alert: AlertService) {
     this.socket = io(`${environment.socketURL}`, {
       withCredentials: true,
       autoConnect: false,
@@ -23,12 +25,8 @@ export class SocketService {
       secure: environment.production,
     });
 
-    //TODO: Add better error handling
-    this.socket.on('connect_error', (err) => {
-      console.error(err);
-    });
-    this.socket.on('connect_failed', (err) => console.error(err));
-    this.socket.on('disconnect', (err) => console.error(err));
+    this.socket.on('connect_error', (err) => this.catchError(err));
+    this.socket.on('connect_failed', (err) => this.catchError(err));
   }
 
   /**
@@ -88,5 +86,12 @@ export class SocketService {
       take(1),
       tap(() => this.removeListener(eventName))
     );
+  }
+
+  private catchError(err: Error | Socket.DisconnectReason, description?: DisconnectDescription) {
+    const descriptionMsg =
+      description instanceof Error ? description?.message : description?.description;
+    this.alert.openNewAlert(err instanceof Error ? err.message : descriptionMsg || err);
+    this.socket.disconnect();
   }
 }

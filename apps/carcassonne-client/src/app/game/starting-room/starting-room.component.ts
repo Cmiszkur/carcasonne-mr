@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PlayerOptions } from '../models/Room';
 import { RoomService } from '../services/room.service';
 import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
+import { AuthService } from '@carcassonne-client/src/app/user/services/auth.service';
 
 @Component({
   selector: 'app-starting-room',
@@ -19,7 +20,8 @@ export class StartingRoomComponent implements OnInit {
   constructor(
     private roomService: RoomService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthService
   ) {
     this.availableRooms = [];
   }
@@ -49,6 +51,10 @@ export class StartingRoomComponent implements OnInit {
    * @param options
    */
   public createRoom(options: PlayerOptions): void {
+    if (!this.authService.user) {
+      return this.navigateToLoginPage();
+    }
+
     this.roomService.createRoom(options?.color).subscribe((createdRoom) => {
       const roomID: string | null = createdRoom.answer?.room?.roomId || null;
       this.navigateToWaitingRoom(roomID, options);
@@ -66,6 +72,12 @@ export class StartingRoomComponent implements OnInit {
 
     this.router.navigate(['./room/waiting-room'], {
       queryParams: { roomID: roomID, ...options },
+      relativeTo: this.route,
+    });
+  }
+
+  private navigateToLoginPage(): void {
+    this.router.navigate(['../login'], {
       relativeTo: this.route,
     });
   }
