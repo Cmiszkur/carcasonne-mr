@@ -1,4 +1,3 @@
-import { RoomError } from './socket';
 import { Tile } from '@carcasonne-mr/shared-interfaces';
 
 export interface TileAndPlayer {
@@ -8,6 +7,7 @@ export interface TileAndPlayer {
 
 export interface PlayerOptions {
   color: PlayersColors | null;
+  confirmed: boolean;
 }
 
 export enum PlayersColors {

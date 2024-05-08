@@ -4,6 +4,7 @@ import { PlayerOptions } from '../models/Room';
 import { RoomService } from '../services/room.service';
 import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 import { AuthService } from '@carcassonne-client/src/app/user/services/auth.service';
+import { generateRandomString } from '@shared-functions';
 
 @Component({
   selector: 'app-starting-room',
@@ -28,6 +29,7 @@ export class StartingRoomComponent implements OnInit {
 
   ngOnInit(): void {
     this.availableRooms = this.roomService.availableRooms || [];
+    this.createGameAfterRedirect();
   }
 
   /**
@@ -51,7 +53,14 @@ export class StartingRoomComponent implements OnInit {
    * @param options
    */
   public createRoom(options: PlayerOptions): void {
+    if (!options.confirmed) {
+      return;
+    }
+
     if (!this.authService.user) {
+      const redirectId: string = generateRandomString();
+      this.authService.redirectId = redirectId;
+      this.authService.redirectUrl = `${location.pathname}?color=${options.color}&redirect_id=${redirectId}`;
       return this.navigateToLoginPage();
     }
 
@@ -59,6 +68,14 @@ export class StartingRoomComponent implements OnInit {
       const roomID: string | null = createdRoom.answer?.room?.roomId || null;
       this.navigateToWaitingRoom(roomID, options);
     });
+  }
+
+  private createGameAfterRedirect(): void {
+    const redirectId = this.route.snapshot.queryParams['redirect_id'];
+    if (redirectId && redirectId === this.authService.redirectId) {
+      const color = this.route.snapshot.queryParams['color'];
+      this.createRoom({ color, confirmed: true });
+    }
   }
 
   /**

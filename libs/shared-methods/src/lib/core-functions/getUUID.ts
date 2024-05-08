@@ -14,3 +14,21 @@ export function getUUID(parts: number = 4): string {
   }
   return stringArr.join('-');
 }
+
+/**
+ * Generates a random string of the specified length.
+ *
+ * @param length (optional) The desired length of the random string. Defaults to 16.
+ * @returns A random string containing letters and digits.
+ */
+export function generateRandomString(length: number = 16): string {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  let result = '';
+
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+
+  return result;
+}

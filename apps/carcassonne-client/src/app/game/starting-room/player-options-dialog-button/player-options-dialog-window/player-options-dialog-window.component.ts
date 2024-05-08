@@ -14,10 +14,12 @@ export class PlayerOptionsDialogWindowComponent {
   constructor(
     public dialogRef: MatDialogRef<PlayerOptionsDialogWindowComponent, PlayerOptionsData>,
     @Inject(MAT_DIALOG_DATA) public data: PlayerOptionsData
-  ) {}
+  ) {
+    this.data = this.getDataWithConfirmation(true);
+  }
 
   onNoClick(): void {
-    this.dialogRef.close();
+    this.dialogRef.close(this.getDataWithConfirmation());
   }
 
   public get colors(): string[] {
@@ -33,5 +35,9 @@ export class PlayerOptionsDialogWindowComponent {
     if (shortenedRoom === null) return this.colors;
     const takenColors: string[] = shortenedRoom.players.map((player) => player.color);
     return this.colors.filter((color) => takenColors.indexOf(color) === -1);
+  }
+
+  public getDataWithConfirmation(confirmed: boolean = false): PlayerOptionsData {
+    return { ...this.data, playerOptions: { ...this.data.playerOptions, confirmed } };
   }
 }

@@ -9,7 +9,6 @@ import {
   AppResponse,
   RegistrationResponse,
   RequestUser,
-  SafeUser,
   UserAbstract,
   UserTypes,
 } from '@carcasonne-mr/shared-interfaces';
@@ -30,6 +29,11 @@ export class AuthService {
    * It's later used to redirect back.
    */
   public redirectUrl: string | null;
+  /**
+   * Is used to confirm that query params used in redirection after logging when
+   * unauthorized user is trying to create room, are legit.
+   */
+  public redirectId?: string;
   private authUrl: string = Constants.baseUrl + 'restricted';
   private loginUrl: string = Constants.baseUrl + 'users/login';
   private logoutUrl: string = Constants.baseUrl + 'logout';

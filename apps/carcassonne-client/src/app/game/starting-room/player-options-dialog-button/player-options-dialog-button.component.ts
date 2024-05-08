@@ -1,9 +1,18 @@
 import { PlayerOptions } from '@carcassonne-client/src/app/game/models/Room';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+} from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PlayerOptionsDialogWindowComponent } from './player-options-dialog-window/player-options-dialog-window.component';
 import { PlayerOptionsData } from '../../models/dialogWindowData';
 import { RoomService } from '../../services/room.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-player-options-dialog-button',
@@ -12,6 +21,7 @@ import { RoomService } from '../../services/room.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayerOptionsDialogButtonComponent {
+  private destroyRef = inject(DestroyRef);
   /**
    * Text inside a button.
    */
@@ -37,6 +47,9 @@ export class PlayerOptionsDialogButtonComponent {
   private listenForDialogClosing(
     dialogRef: MatDialogRef<PlayerOptionsDialogWindowComponent, PlayerOptionsData>
   ): void {
-    dialogRef.afterClosed().subscribe((result) => this.playerOptions.emit(result?.playerOptions));
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => this.playerOptions.emit(result?.playerOptions));
   }
 }
