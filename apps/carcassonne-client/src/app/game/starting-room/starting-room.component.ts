@@ -45,6 +45,10 @@ export class StartingRoomComponent implements OnInit {
    * @param options - ``{ color: string }``
    */
   public joinRoom(options: PlayerOptions): void {
+    if (!options.confirmed) {
+      return;
+    }
+
     this.navigateToWaitingRoom(this.roomService.selectedRoomId, options);
   }
 

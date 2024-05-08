@@ -32,8 +32,11 @@ export class PlayerOptionsDialogWindowComponent {
    */
   public get availableColors(): string[] {
     const shortenedRoom: ShortenedRoom | null = this.data.shortenedRoom;
+
     if (shortenedRoom === null) return this.colors;
+
     const takenColors: string[] = shortenedRoom.players.map((player) => player.color);
+
     return this.colors.filter((color) => takenColors.indexOf(color) === -1);
   }
 
