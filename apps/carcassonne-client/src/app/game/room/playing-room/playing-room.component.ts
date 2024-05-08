@@ -126,7 +126,7 @@ export class PlayingRoomComponent
    * @param clickedEmptyTile - contains coordinates as string and empty tile information.
    */
   public emptyTileSelected(clickedEmptyTile: ExtendedEmptyTile): void {
-    if (this.tilePlacementConfirmed()) return;
+    if (this.tilePlacementConfirmed() || !this.currentTile()) return;
 
     const coordinates = clickedEmptyTile.coordinates;
 
