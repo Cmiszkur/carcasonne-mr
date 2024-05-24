@@ -1,5 +1,4 @@
 import { FormControl } from '@angular/forms';
-import { RoomError } from '@carcassonne-client/src/app/game/models/socket';
 
 export type FormInit<T extends object> = {
   [P in keyof T]: FormControl<T[P] | null>;
