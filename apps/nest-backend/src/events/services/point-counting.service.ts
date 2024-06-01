@@ -10,6 +10,8 @@ import { copy, extractUncompletedPathData } from '@shared-functions';
 import { TilesService } from './tiles.service';
 import { ChurchCounting } from '../interfaces';
 
+type ExtendedPathData = PathData & { isCities?: boolean };
+
 @Injectable()
 export class PointCountingService {
   constructor(private tilesService: TilesService) {}
@@ -72,14 +74,17 @@ export class PointCountingService {
     players: Player[]
   ): Player[] {
     const pathDataArr = completedPaths.map((v) => v[1]);
-    return this.updatePlayerPoints(pathDataArr, players, true);
+    return this.updatePlayerPoints(pathDataArr, players, false);
   }
 
   public updatePlayersPointsFromPaths(paths: Paths, players: Player[]): Player[] {
-    const cities = extractUncompletedPathData(paths.cities);
+    const cities = extractUncompletedPathData(paths.cities).map((path) => ({
+      ...path,
+      isCities: true,
+    }));
     const roads = extractUncompletedPathData(paths.roads);
 
-    return this.updatePlayerPoints([...cities, ...roads], players, false);
+    return this.updatePlayerPoints([...cities, ...roads], players, true);
   }
 
   public countPoints(
@@ -123,9 +128,9 @@ export class PointCountingService {
   }
 
   private updatePlayerPoints(
-    pathDataArr: PathData[],
+    pathDataArr: ExtendedPathData[],
     players: Player[],
-    restoreFollowers: boolean
+    gameEnded: boolean
   ): Player[] {
     let copiedPlayers = copy(players);
 
@@ -143,8 +148,11 @@ export class PointCountingService {
 
         return {
           ...player,
-          points: playerDominantOrEqual ? player.points + checkedPath.points : player.points,
-          followers: restoreFollowers ? player.followers + playerFallowers : player.followers,
+          points: playerDominantOrEqual
+            ? player.points +
+              (gameEnded && checkedPath.isCities ? checkedPath.points / 2 : checkedPath.points)
+            : player.points,
+          followers: gameEnded ? player.followers : player.followers + playerFallowers,
         };
       });
     });
