@@ -10,6 +10,7 @@ import {
   signal,
   AfterViewInit,
   ViewChild,
+  computed,
 } from '@angular/core';
 import { RoomService } from '../../services/room.service';
 import { AuthService } from '../../../user/services/auth.service';
@@ -31,6 +32,7 @@ import { BoardTilesService } from '../../services/board-tiles.service';
 import { checkTilePlacement, serializeObj } from '@shared-functions';
 import { EmptyTilesService } from './services/empty-tiles.service';
 import { BoardService } from './services/board.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-playing-room',
@@ -55,6 +57,14 @@ export class PlayingRoomComponent
   public username: string | null = this.authService.user?.username || null;
   public clickedEmptyTileColor = signal<{ emptyTileId: string; borderColor: string } | null>(null);
   public gameEnded = this.roomService.gameEnded;
+  public latestBoardMove = computed(
+    () =>
+      this.roomService
+        .currentRoomSignal()
+        ?.boardMoves.reduce((latestItem, currentItem) =>
+          currentItem.placedAt > latestItem.placedAt ? currentItem : latestItem
+        ) || null
+  );
   @ViewChild('board', { read: ElementRef }) private boardDivElRef?: ElementRef;
   @ViewChild('blank', { read: ElementRef }) private blankDivElRef?: ElementRef;
   private previouslyClickedTileCoordinates: string = '';

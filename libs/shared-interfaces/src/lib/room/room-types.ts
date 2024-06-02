@@ -10,6 +10,8 @@ export interface TilesSet {
 export interface BoardMove {
   player: string | null;
   coordinates: Coordinates | null;
+  completedPaths: string[];
+  placedAt: Date;
 }
 
 export interface Player {

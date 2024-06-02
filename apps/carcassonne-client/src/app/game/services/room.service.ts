@@ -1,6 +1,6 @@
 import { PlayersColors } from '../models/Room';
 import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
-import { Injectable, signal } from '@angular/core';
+import { Injectable, Signal, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
 import { catchError, map, tap } from 'rxjs/operators';
@@ -24,6 +24,7 @@ import {
 } from '@carcasonne-mr/shared-interfaces';
 import { JwtService } from '../../user/services/jwt.service';
 import { AlertService } from '@carcassonne-client/src/app/commons/services/alert.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -61,6 +62,8 @@ export class RoomService extends SocketService {
   private _gameEnded = signal<boolean>(false);
   public gameEnded = this._gameEnded.asReadonly();
 
+  public currentRoomSignal: Signal<Room | null | undefined>;
+
   constructor(
     protected override jwtService: JwtService,
     protected override alert: AlertService,
@@ -73,6 +76,7 @@ export class RoomService extends SocketService {
     this.selectedRoomId$ = new BehaviorSubject<string | null>(null);
     this.currentRoom$ = new BehaviorSubject<Room | null>(null);
     this.selectedRoom$ = new BehaviorSubject<ShortenedRoom | null>(null);
+    this.currentRoomSignal = toSignal(this.currentRoom);
   }
 
   public get availableRooms(): ShortenedRoom[] | null {

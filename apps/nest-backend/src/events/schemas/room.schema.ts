@@ -39,7 +39,8 @@ export class Room implements RoomAbstract {
     type: [
       {
         player: String || null,
-        moveState: String,
+        completedPaths: [String],
+        placedAt: Date,
         coordinates: { x: Number, y: Number } || null,
       },
     ],

@@ -10,7 +10,6 @@ import { ConfirmEmailComponent } from './confirm-email/confirm-email.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RegistrationSuccessComponent } from './registration-success/registration-success.component';
 import { SuccessSvgComponent } from '@carcassonne-client/src/app/commons/components/svg/success-svg.component';
-import { CountdownPipe } from '@carcassonne-client/src/app/commons/pipes/countdown.pipe';
 
 @NgModule({
   declarations: [
@@ -27,7 +26,6 @@ import { CountdownPipe } from '@carcassonne-client/src/app/commons/pipes/countdo
     FormsModule,
     MatProgressSpinnerModule,
     SuccessSvgComponent,
-    CountdownPipe,
   ],
 })
 export class UserModule {}

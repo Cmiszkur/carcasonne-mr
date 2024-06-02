@@ -4,3 +4,4 @@ export * from './compareArrays';
 export * from './isString';
 export * from './shuffleArray';
 export * from './addToDate';
+export * from './isNotNullish';

@@ -13,6 +13,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BaseComponent } from './components/base/base.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { CountdownPipe } from '@carcassonne-client/src/app/commons/pipes/countdown.pipe';
+import { TileBorderColorPipe } from '@carcassonne-client/src/app/commons/pipes/tile-border-color.pipe';
 
 const allModules = [
   MatButtonModule,
@@ -32,9 +34,11 @@ const allModules = [
   MatMenuModule,
 ];
 
+const pipes = [CountdownPipe, TileBorderColorPipe];
+
 @NgModule({
   declarations: [BaseComponent],
-  imports: [...allModules],
-  exports: [...allModules, BaseComponent],
+  imports: [...allModules, ...pipes],
+  exports: [...allModules, BaseComponent, ...pipes],
 })
 export class CommonsModule {}

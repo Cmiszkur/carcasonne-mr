@@ -1,3 +1,18 @@
+@mixin pulsating-border($duration: 2s, $color1: transparent)
+  $shadowWidth: 15px
+  box-shadow: 0 0 $shadowWidth $color1 // Initial border color
+  animation: pulseBorder#{$color1} $duration infinite
+
+  @keyframes pulseBorder#{$color1}
+    0%
+      box-shadow: 0 0 $shadowWidth $color1
+    50%
+      box-shadow: 0 0 $shadowWidth transparent
+    100%
+      box-shadow: 0 0 $shadowWidth $color1
+
+$colors: red, blue, green, yellow
+
 body, html, app-root
   margin: 0
   padding: 0
@@ -16,20 +31,20 @@ body, html, app-root
   .draggable
     z-index: 2
 
-  .error-snackbar.mat-mdc-snack-bar-container 
-    .mdc-snackbar__surface 
+  .error-snackbar.mat-mdc-snack-bar-container
+    .mdc-snackbar__surface
       background: red
 
-      .mat-mdc-button 
+      .mat-mdc-button
         color: white !important
-      
-    
 
-    .mat-mdc-snack-bar-label.mdc-snackbar__label 
+
+
+    .mat-mdc-snack-bar-label.mdc-snackbar__label
       color: white
       font-weight: 500
       white-space: pre-wrap
-  
+
 
 
   .form-wrapper
@@ -46,7 +61,7 @@ body, html, app-root
       display: flex
       flex-direction: row
       align-items: center
-    
+
     form
       display: flex
       flex-direction: column
@@ -69,6 +84,13 @@ body, html, app-root
           font-weight: 600
           letter-spacing: 1px
           display: inline-block
+
+  app-tile
+    @each $color in $colors
+      &.pulsating-color-#{$color}
+        .tile
+          img
+            +pulsating-border(2s, $color)
 
 
 *

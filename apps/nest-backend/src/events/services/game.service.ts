@@ -115,7 +115,6 @@ export class GameService extends BasicService {
 
     // Add the placed tile to the board and record the move in boardMoves
     searchedRoom.board.push(extendedTile);
-    searchedRoom.boardMoves.push(this.getBoardMove(extendedTile.coordinates, username));
 
     //Updates empty tiles
     searchedRoom.emptyTiles = this.emptyTilesService.updateEmptyTiles(
@@ -146,7 +145,7 @@ export class GameService extends BasicService {
     }
 
     // Check the point scoring for the new tile and update the paths accordingly
-    Object.assign(searchedRoom, this.checkPathsAndUpdate(searchedRoom, extendedTile));
+    Object.assign(searchedRoom, this.checkPathsAndUpdate(searchedRoom, extendedTile, username));
 
     //Updates players points from uncompleted paths when game is ended
     if (searchedRoom.gameEnded) {
@@ -188,11 +187,18 @@ export class GameService extends BasicService {
     };
   }
 
-  private checkPathsAndUpdate(room: RoomDocument, extendedTile: ExtendedTile): Partial<Room> {
+  private checkPathsAndUpdate(
+    room: RoomDocument,
+    extendedTile: ExtendedTile,
+    username: string
+  ): Partial<Room> {
     const copiedRoom: Room = copy(room.toObject());
     const pointCheckingAnswer: PointCheckingAnswer = this.pathService.checkNewTile(
       copiedRoom,
       extendedTile
+    );
+    const recentlyCompletedPathsIds = pointCheckingAnswer.recentlyCompletedPaths.map(
+      (pathData) => pathData[0]
     );
 
     return {
@@ -205,6 +211,10 @@ export class GameService extends BasicService {
         pointCheckingAnswer.recentlyCompletedPaths,
         copiedRoom.board
       ),
+      boardMoves: [
+        ...copiedRoom.boardMoves,
+        this.getBoardMove(extendedTile.coordinates, username, recentlyCompletedPathsIds),
+      ],
     };
   }
 
@@ -242,13 +252,19 @@ export class GameService extends BasicService {
   }
 
   private getStartingBoardMove(): BoardMove {
-    return this.getBoardMove({ x: 0, y: 0 }, null);
+    return this.getBoardMove({ x: 0, y: 0 }, null, []);
   }
 
-  private getBoardMove(coordinates: Coordinates | null, player: string | null): BoardMove {
+  private getBoardMove(
+    coordinates: Coordinates | null,
+    player: string | null,
+    completedPaths: string[]
+  ): BoardMove {
     return {
       coordinates: coordinates,
       player: player,
+      placedAt: new Date(),
+      completedPaths,
     };
   }
 

@@ -4,6 +4,7 @@
 
     <app-tile *ngFor="let tile of tiles()"
               [extendedTile]="tile"
+              [class]="'pulsating-color-' + (tile | tileBorderColor : latestBoardMove())"
               [rotation]="tile.rotation"
               [translate]="tile.translateValue">
     </app-tile>
