@@ -1,0 +1,12 @@
+<h3>Board moves</h3>
+@for (move of boardMoves(); track move.message; let last = $last) {
+  <div class="board-move"
+       [style.box-shadow]="last ? '0 0 5px 3px ' + latestMoveColor() : null"
+       [class.selectable]="!last"
+       [class.selected]="movesChatService.highlightSelectedBoardMoveCords()?.x === move.coords?.x
+       && movesChatService.highlightSelectedBoardMoveCords()?.y === move.coords?.y"
+       (click)="!last ? highlightSelectedBoardMove(move.coords) : null">
+    <span>{{move.placedAt | date : 'mediumTime'}}: </span>
+    <span>{{move.message}}</span>
+  </div>
+}

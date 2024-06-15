@@ -1,5 +1,5 @@
 import { inject, Pipe, PipeTransform } from '@angular/core';
-import { BoardMove, ExtendedTranslatedTile, Paths, Player } from '@carcasonne-mr/shared-interfaces';
+import { BoardMove, ExtendedTranslatedTile } from '@carcasonne-mr/shared-interfaces';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
 import { checkCoordinates, isNotNullish } from '@shared-functions';
 
@@ -15,16 +15,6 @@ export class TileBorderColorPipe implements PipeTransform {
 
     const latestBoardMovePlayer = latestBoardMove.player;
     const latestBoardMoveCoordinates = latestBoardMove.coordinates;
-
-    console.log(
-      latestBoardMovePlayer,
-      this.getPlayerColor(latestBoardMovePlayer || ''),
-      tile.coordinates === latestBoardMove.coordinates
-        ? latestBoardMovePlayer
-          ? this.getPlayerColor(latestBoardMovePlayer)
-          : null
-        : null
-    );
 
     return latestBoardMoveCoordinates &&
       checkCoordinates(tile.coordinates, latestBoardMoveCoordinates)

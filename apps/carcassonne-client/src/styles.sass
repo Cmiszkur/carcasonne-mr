@@ -1,15 +1,15 @@
+$shadowWidth: 15px
 @mixin pulsating-border($duration: 2s, $color1: transparent)
-  $shadowWidth: 15px
-  box-shadow: 0 0 $shadowWidth $color1 // Initial border color
+  box-shadow: 0 0 10px 6px $color1 // Initial border color
   animation: pulseBorder#{$color1} $duration infinite
 
   @keyframes pulseBorder#{$color1}
     0%
-      box-shadow: 0 0 $shadowWidth $color1
+      box-shadow: 0 0 10px 6px $color1
     50%
-      box-shadow: 0 0 $shadowWidth transparent
+      box-shadow: 0 0 10px 6px transparent
     100%
-      box-shadow: 0 0 $shadowWidth $color1
+      box-shadow: 0 0 10px 6px $color1
 
 $colors: red, blue, green, yellow
 
@@ -89,8 +89,18 @@ body, html, app-root
     @each $color in $colors
       &.pulsating-color-#{$color}
         .tile
-          img
+          img:not(.emblem)
             +pulsating-border(2s, $color)
+
+    &.selected-board-move
+      .tile
+        img:not(.emblem)
+          box-shadow: 0 0 10px 6px orangered
+
+    &:not(.pulsating-color-red, .pulsating-color-yellow, .pulsating-color-green, .pulsating-color-blue)
+      .tile
+        img:not(.emblem)
+          transition: box-shadow 0.3s ease-in-out
 
 
 *

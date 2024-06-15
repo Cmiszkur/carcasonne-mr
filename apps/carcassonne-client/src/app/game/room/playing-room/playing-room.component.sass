@@ -1,6 +1,9 @@
 \:host
   display: block
-  height: calc(100% - 100px)
+  width: 100%
+
+  @media screen and (max-width: 767px)
+    height: calc(100% - 100px)
 
   ::-webkit-scrollbar-track
     background-color: #F5F5F5

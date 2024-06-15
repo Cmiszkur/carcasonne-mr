@@ -1,3 +1,35 @@
 \:host
-  height: 100%
+  height: calc(100vh - 64px)
   display: block
+
+  .room-section-wrapper
+    display: flex
+    width: 100%
+    @media screen and (max-width: 767px)
+      flex-direction: column
+      height: 100%
+      carcasonne-mr-moves-chat
+        height: 20%
+      app-playing-room, app-waiting-room
+        height: 80%
+    @media screen and (min-width: 767px)
+      flex-direction: row
+      height: calc(100% - 100px)
+      carcasonne-mr-moves-chat
+        width: 20%
+        overflow-y: scroll
+      app-playing-room, app-waiting-room
+        width: 80%
+
+    ::-webkit-scrollbar-track
+      background-color: #F5F5F5
+      border-radius: 10px
+
+    ::-webkit-scrollbar
+      width: 6px
+      height: 6px
+      background-color: #F5F5F5
+
+    ::-webkit-scrollbar-thumb
+      border-radius: 10px
+      background-color: #B4CD5A

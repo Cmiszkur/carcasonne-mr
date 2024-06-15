@@ -13,6 +13,7 @@ import { EmptyTileComponent } from './playing-room/empty-tile/empty-tile.compone
 import { PawnComponent } from './playing-room/tile/pawn/pawn.component';
 import { TileAndPawnConfirmationButtonComponent } from './playing-room/no-pawn-confirmation/tile-and-pawn-confirmation-button';
 import { NoPawnConfirmationDialogWindowComponent } from './playing-room/no-pawn-confirmation/no-pawn-confirmation-dialog-window/no-pawn-confirmation-dialog-window.component';
+import { MovesChatComponent } from './moves-chat/moves-chat.component';
 
 @NgModule({
   declarations: [
@@ -27,6 +28,7 @@ import { NoPawnConfirmationDialogWindowComponent } from './playing-room/no-pawn-
     PawnComponent,
     TileAndPawnConfirmationButtonComponent,
     NoPawnConfirmationDialogWindowComponent,
+    MovesChatComponent,
   ],
   imports: [CommonModule, RoomRoutingModule, CommonsModule],
 })

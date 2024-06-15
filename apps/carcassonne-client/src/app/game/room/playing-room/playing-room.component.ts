@@ -32,7 +32,7 @@ import { BoardTilesService } from '../../services/board-tiles.service';
 import { checkTilePlacement, serializeObj } from '@shared-functions';
 import { EmptyTilesService } from './services/empty-tiles.service';
 import { BoardService } from './services/board.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { MovesChatService } from '@carcassonne-client/src/app/game/room/moves-chat/service/moves-chat.service';
 
 @Component({
   selector: 'app-playing-room',
@@ -57,6 +57,8 @@ export class PlayingRoomComponent
   public username: string | null = this.authService.user?.username || null;
   public clickedEmptyTileColor = signal<{ emptyTileId: string; borderColor: string } | null>(null);
   public gameEnded = this.roomService.gameEnded;
+  public highlightSelectedBoardMoveCords: Signal<Coordinates | null> =
+    this.movesChatService.highlightSelectedBoardMoveCords;
   public latestBoardMove = computed(
     () =>
       this.roomService
@@ -77,7 +79,8 @@ export class PlayingRoomComponent
     private boardTileService: BoardTilesService,
     private emptyTilesService: EmptyTilesService,
     private boardService: BoardService,
-    private tileService: TileService
+    private tileService: TileService,
+    private movesChatService: MovesChatService
   ) {
     super();
   }
@@ -125,7 +128,7 @@ export class PlayingRoomComponent
     this.tilePlacementConfirmed.set(data.tilePlaced);
 
     if (this.tilePlacementConfirmed() && data.pawnPlaced !== undefined) {
-      this.boardService.sendPlacedTileToServer(!!data.pawnPlaced);
+      this.boardService.sendPlacedTileToServer(data.pawnPlaced);
     }
   }
 
