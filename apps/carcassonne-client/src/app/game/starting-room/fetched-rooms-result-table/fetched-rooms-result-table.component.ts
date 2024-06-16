@@ -1,4 +1,3 @@
-import { SelectionModel } from '@angular/cdk/collections';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -10,6 +9,7 @@ import {
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
+import { PlayerOptionsData } from '@carcassonne-client/src/app/game/models/dialogWindowData';
 
 @Component({
   selector: 'app-fetched-rooms-result-table',
@@ -19,17 +19,15 @@ import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 })
 export class FetchedRoomsResultTableComponent implements OnChanges {
   public displayedColumns: string[];
-  public selection: SelectionModel<ShortenedRoom>;
   public dataSource: MatTableDataSource<ShortenedRoom>;
   @Input() public availableRooms: ShortenedRoom[] | null;
-  @Output() public selectedRoom: EventEmitter<ShortenedRoom>;
+  @Output() public selectedRoom: EventEmitter<PlayerOptionsData>;
 
   constructor() {
     this.displayedColumns = ['select', 'roomId', 'players', 'roomHost', 'numberOfPlayers'];
     this.dataSource = new MatTableDataSource<ShortenedRoom>([]);
-    this.selection = new SelectionModel<ShortenedRoom>(false, []);
     this.availableRooms = null;
-    this.selectedRoom = new EventEmitter<ShortenedRoom>();
+    this.selectedRoom = new EventEmitter<PlayerOptionsData>();
   }
 
   public ngOnChanges(changes: SimpleChanges) {
@@ -40,8 +38,7 @@ export class FetchedRoomsResultTableComponent implements OnChanges {
     }
   }
 
-  public selectAndEmitRoom(selectedRoom: ShortenedRoom): void {
-    this.selection.toggle(selectedRoom);
-    this.selectedRoom.emit(selectedRoom);
+  public selectAndEmitRoom(playerOptionsData: PlayerOptionsData): void {
+    this.selectedRoom.emit(playerOptionsData);
   }
 }

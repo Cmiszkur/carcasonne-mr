@@ -1,9 +1,9 @@
 import { PlayersColors } from '../models/Room';
-import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable, Signal, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Constants } from '../../constants/httpOptions';
-import { catchError, map, tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { RoomError } from '../models/socket';
 import { CustomError } from '@carcassonne-client/src/app/commons/customErrorHandler';
 import { SocketService } from '../../commons/services/socket.service';
@@ -41,17 +41,6 @@ export class RoomService extends SocketService {
   private availableRooms$: BehaviorSubject<ShortenedRoom[] | null>;
 
   /**
-   * Id of room selected, later to bo joined by player.
-   */
-  private selectedRoomId$: BehaviorSubject<string | null>;
-
-  /**
-   * Selected room, later to be joined by player.
-   * @private
-   */
-  private selectedRoom$: BehaviorSubject<ShortenedRoom | null>;
-
-  /**
    * Room which player joined to.
    */
   private currentRoom$: BehaviorSubject<Room | null>;
@@ -73,22 +62,12 @@ export class RoomService extends SocketService {
     super(jwtService, alert);
     this.baseUrl = Constants.baseUrl;
     this.availableRooms$ = new BehaviorSubject<ShortenedRoom[] | null>(null);
-    this.selectedRoomId$ = new BehaviorSubject<string | null>(null);
     this.currentRoom$ = new BehaviorSubject<Room | null>(null);
-    this.selectedRoom$ = new BehaviorSubject<ShortenedRoom | null>(null);
     this.currentRoomSignal = toSignal(this.currentRoom);
   }
 
   public get availableRooms(): ShortenedRoom[] | null {
     return this.availableRooms$.value;
-  }
-
-  public get selectedRoomId(): string | null {
-    return this.selectedRoomId$.value;
-  }
-
-  public get selectedRoom(): ShortenedRoom | null {
-    return this.selectedRoom$.value;
   }
 
   public get currentRoomValue(): Room | null {
@@ -104,19 +83,6 @@ export class RoomService extends SocketService {
       loggedPlayer: this.findPlayer(players),
       otherPlayers: this.getRestOfThePlayers(players),
     });
-  }
-
-  public setSelectedRoomId(roomId: string) {
-    this.selectedRoomId$.next(roomId);
-  }
-
-  /**
-   * Sets selected room and selected room id.
-   * @param room
-   */
-  public setSelectedRoom(room: ShortenedRoom) {
-    this.setSelectedRoomId(room.roomId);
-    this.selectedRoom$.next(room);
   }
 
   public setCurrentRoom(room: RoomAbstract) {
@@ -148,13 +114,11 @@ export class RoomService extends SocketService {
    * @param roomID - id of room to join
    */
   public joinRoom(color?: string, roomID?: string): Observable<SocketAnswer> {
-    const _roomID: string | undefined = this.selectedRoomId || roomID;
-
-    if (!_roomID) {
+    if (!roomID) {
       throw new CustomError(RoomError.ROOM_ID_NOT_SPECIFIED, 'Choose room which you want to join');
     }
 
-    const joinRoomPayload: JoinRoomPayload = { roomID: _roomID, color };
+    const joinRoomPayload: JoinRoomPayload = { roomID: roomID, color };
     this.connect();
     this.socket.emit('join_room', joinRoomPayload);
     return this.receiveOneResponseAndUpdateRoom('joined_room');
@@ -279,8 +243,8 @@ export class RoomService extends SocketService {
 
   /**
    * Returns all players but the one logged in.
-   * @param players
    * @private
+   * @param _players
    */
   private getRestOfThePlayers(_players: Player[]): Player[] {
     const players: Player[] = copy<Player[]>(_players);

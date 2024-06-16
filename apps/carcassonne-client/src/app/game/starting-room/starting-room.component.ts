@@ -5,6 +5,7 @@ import { RoomService } from '../services/room.service';
 import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
 import { AuthService } from '@carcassonne-client/src/app/user/services/auth.service';
 import { generateRandomString } from '@shared-functions';
+import { PlayerOptionsData } from '@carcassonne-client/src/app/game/models/dialogWindowData';
 
 @Component({
   selector: 'app-starting-room',
@@ -33,44 +34,36 @@ export class StartingRoomComponent implements OnInit {
   }
 
   /**
-   * Saves selected room and it's id that is later used to join room.
-   * @param selectedRoom - room selected from results table.
-   */
-  public saveSelectedRoom(selectedRoom: ShortenedRoom): void {
-    this.roomService.setSelectedRoom(selectedRoom);
-  }
-
-  /**
    * Navigates to waiting room and sets query params.
    * @param options - ``{ color: string }``
    */
-  public joinRoom(options: PlayerOptions): void {
-    if (!options.confirmed) {
+  public joinRoom(options: PlayerOptionsData): void {
+    if (!options.playerOptions.confirmed) {
       return;
     }
 
-    this.navigateToWaitingRoom(this.roomService.selectedRoomId, options);
+    this.navigateToWaitingRoom(options.shortenedRoom?.roomId ?? null, options.playerOptions);
   }
 
   /**
    * Creates room and on success navigates to waiting room.
    * @param options
    */
-  public createRoom(options: PlayerOptions): void {
-    if (!options.confirmed) {
+  public createRoom(options: PlayerOptionsData): void {
+    if (!options.playerOptions.confirmed) {
       return;
     }
 
     if (!this.authService.user) {
       const redirectId: string = generateRandomString();
       this.authService.redirectId = redirectId;
-      this.authService.redirectUrl = `${location.pathname}?color=${options.color}&redirect_id=${redirectId}`;
+      this.authService.redirectUrl = `${location.pathname}?color=${options.playerOptions.color}&redirect_id=${redirectId}`;
       return this.navigateToLoginPage();
     }
 
-    this.roomService.createRoom(options?.color).subscribe((createdRoom) => {
+    this.roomService.createRoom(options.playerOptions?.color).subscribe((createdRoom) => {
       const roomID: string | null = createdRoom.answer?.room?.roomId || null;
-      this.navigateToWaitingRoom(roomID, options);
+      this.navigateToWaitingRoom(roomID, options.playerOptions);
     });
   }
 
@@ -78,7 +71,7 @@ export class StartingRoomComponent implements OnInit {
     const redirectId = this.route.snapshot.queryParams['redirect_id'];
     if (redirectId && redirectId === this.authService.redirectId) {
       const color = this.route.snapshot.queryParams['color'];
-      this.createRoom({ color, confirmed: true });
+      this.createRoom({ playerOptions: { color, confirmed: true }, shortenedRoom: null });
     }
   }
 

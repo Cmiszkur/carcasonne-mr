@@ -1,7 +1,7 @@
 import { Component, computed, Signal } from '@angular/core';
 import { RoomService } from '@carcassonne-client/src/app/game/services/room.service';
 import { BoardMove, Coordinates, Paths, Player } from '@carcasonne-mr/shared-interfaces';
-import { isNotNullish } from '@shared-functions';
+import { checkIfMostFrequentOrEqualElement, isNotNullish } from '@shared-functions';
 import { MovesChatService } from '@carcassonne-client/src/app/game/room/moves-chat/service/moves-chat.service';
 
 export interface BoardMoveChat {
@@ -22,14 +22,16 @@ export class MovesChatComponent {
   public paths: Signal<Paths | null> = computed(
     () => this.roomService.currentRoomSignal()?.paths || null
   );
+  public players: Signal<Player[]> = computed(
+    () => this.roomService.currentRoomSignal()?.players || []
+  );
   public latestMoveColor: Signal<string | null> = computed(() => {
     const currentRoomSignal = this.roomService.currentRoomSignal();
     const boardMoves = currentRoomSignal?.boardMoves;
     if (!boardMoves) return null;
-    const players = currentRoomSignal.players;
     const latestMovePlayer = boardMoves[boardMoves.length - 1].player;
     if (!latestMovePlayer) return null;
-    return this.getPlayerColor(players, latestMovePlayer);
+    return this.getPlayerColor(this.players(), latestMovePlayer);
   });
 
   constructor(private roomService: RoomService, public movesChatService: MovesChatService) {}
@@ -43,6 +45,7 @@ export class MovesChatComponent {
   private mapBoardMoves(boardMoves: BoardMove[]): BoardMoveChat[] {
     return boardMoves.flatMap((move) => {
       const player = move.player;
+
       if (!player) return [];
       if (!move.completedPaths.length) {
         return {
@@ -61,24 +64,30 @@ export class MovesChatComponent {
     const messages: string[] = [];
     const pathsData = completedPaths
       .map((pathId: string) => {
-        return this.paths()?.cities?.get(pathId) || this.paths()?.cities?.get(pathId);
+        return this.paths()?.cities?.get(pathId) || this.paths()?.roads?.get(pathId);
       })
       .filter(isNotNullish);
-    if (pathsData.length > 1) {
-      // return void;
-    }
 
-    if (pathsData.length === 1) {
-      const pathData = pathsData[0];
-      messages.push(`${player} placed new tile and scored ${pathData.points} points`);
+    pathsData.forEach((pathData) => {
+      const otherPlayers = this.players().filter((playerr) => playerr.username !== player);
 
-      if (pathData.pathOwners.length > 1) {
-        const otherPathOwners = pathData.pathOwners.filter((owner) => owner !== player);
-        otherPathOwners.forEach((owner) =>
-          messages.push(`${owner} scored ${pathData.points} points`)
-        );
-      }
-    }
+      const isPlayerDominantOrEqual = checkIfMostFrequentOrEqualElement(
+        pathData.pathOwners,
+        player
+      );
+
+      messages.push(
+        `${player} placed new tile${
+          isPlayerDominantOrEqual ? ` and scored ${pathData.points} points` : ''
+        }`
+      );
+
+      otherPlayers.forEach((owner) => {
+        if (checkIfMostFrequentOrEqualElement(pathData.pathOwners, owner.username)) {
+          messages.push(`${owner.username} scored ${pathData.points} points`);
+        }
+      });
+    });
 
     return messages;
   }

@@ -1,4 +1,3 @@
-import { PlayerOptions } from '@carcassonne-client/src/app/game/models/Room';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,8 +10,10 @@ import {
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PlayerOptionsDialogWindowComponent } from './player-options-dialog-window/player-options-dialog-window.component';
 import { PlayerOptionsData } from '../../models/dialogWindowData';
-import { RoomService } from '../../services/room.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
+import { filter, tap } from 'rxjs/operators';
+import { isNotNullish } from '@shared-functions';
 
 @Component({
   selector: 'app-player-options-dialog-button',
@@ -26,10 +27,11 @@ export class PlayerOptionsDialogButtonComponent {
    * Text inside a button.
    */
   @Input() public text: string;
-  @Output() public playerOptions: EventEmitter<PlayerOptions>;
+  @Input() public selectedRoom: ShortenedRoom | null = null;
+  @Output() public playerOptions: EventEmitter<PlayerOptionsData>;
 
-  constructor(public dialog: MatDialog, private roomService: RoomService) {
-    this.playerOptions = new EventEmitter<PlayerOptions>();
+  constructor(public dialog: MatDialog) {
+    this.playerOptions = new EventEmitter<PlayerOptionsData>();
     this.text = '';
   }
 
@@ -38,9 +40,10 @@ export class PlayerOptionsDialogButtonComponent {
       this.dialog.open(PlayerOptionsDialogWindowComponent, {
         data: {
           playerOptions: { color: null },
-          shortenedRoom: this.roomService.selectedRoom,
+          shortenedRoom: this.selectedRoom,
         },
       });
+    console.log('this.selectedRoom', this.selectedRoom);
     this.listenForDialogClosing(dialogRef);
   }
 
@@ -49,7 +52,7 @@ export class PlayerOptionsDialogButtonComponent {
   ): void {
     dialogRef
       .afterClosed()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((result) => this.playerOptions.emit(result?.playerOptions));
+      .pipe(filter(isNotNullish), tap(console.log), takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => this.playerOptions.emit(result));
   }
 }
