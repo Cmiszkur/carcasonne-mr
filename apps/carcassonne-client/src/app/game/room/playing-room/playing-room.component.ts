@@ -250,7 +250,6 @@ export class PlayingRoomComponent
   }
 
   private initFirstTilePosition(): void {
-    console.log(this.el.nativeElement.offsetWidth, this.el);
     const hostWidth = this.el.nativeElement.offsetWidth;
     const hostHeight = this.el.nativeElement.offsetHeight;
 
