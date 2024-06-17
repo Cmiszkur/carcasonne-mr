@@ -25,9 +25,7 @@ import { PointCountingService } from './point-counting.service';
 
 @Injectable()
 export class PathService {
-  constructor(
-    private pointCountingService: PointCountingService
-  ) {}
+  constructor(private pointCountingService: PointCountingService) {}
 
   private get emptyPathData(): PathData {
     return {
@@ -114,9 +112,8 @@ export class PathService {
     extraPoints?: boolean,
     placedFallower?: FollowerDetails
   ): void {
-    console.log('positionSets', positionSets);
     positionSets.forEach((positionSet) => {
-      const pathDataMapRecordArray: [string, PathData][] = [];
+      const pathDataMapRecordArray: PathDataMap = new Map();
       let pathId: string;
 
       positionSet.forEach((position) => {
@@ -132,15 +129,18 @@ export class PathService {
             position
           );
 
-          if (pathDataMapRecord) pathDataMapRecordArray.push(pathDataMapRecord);
+          if (pathDataMapRecord)
+            pathDataMapRecordArray.set(pathDataMapRecord[0], pathDataMapRecord[1]);
         }
       });
 
-      if (pathDataMapRecordArray.length >= 2) {
-        pathId = this.mergePaths(pathDataMapRecordArray, pathDataMap, deletedPathIds);
+      const filteredPathDataMapRecordArray = [...pathDataMapRecordArray];
+
+      if (filteredPathDataMapRecordArray.length >= 2) {
+        pathId = this.mergePaths(filteredPathDataMapRecordArray, pathDataMap, deletedPathIds);
       } else {
-        pathId = pathDataMapRecordArray[0]
-          ? pathDataMapRecordArray[0][0]
+        pathId = filteredPathDataMapRecordArray[0]
+          ? filteredPathDataMapRecordArray[0][0]
           : this.initializePath(pathDataMap);
       }
 
@@ -319,7 +319,7 @@ export class PathService {
   }
 
   private filterCompletedPathDataMap(pathDataMap: PathDataMap): PathDataMap {
-    return new Map(Array.from(pathDataMap).filter(([key, value]) => !value.completed));
+    return new Map(Array.from(pathDataMap).filter(([_key, value]) => !value.completed));
   }
 
   private checkPathCompletion(

@@ -12,7 +12,7 @@ import { PlayerOptionsDialogWindowComponent } from './player-options-dialog-wind
 import { PlayerOptionsData } from '../../models/dialogWindowData';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ShortenedRoom } from '@carcasonne-mr/shared-interfaces';
-import { filter, tap } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { isNotNullish } from '@shared-functions';
 
 @Component({
@@ -43,7 +43,6 @@ export class PlayerOptionsDialogButtonComponent {
           shortenedRoom: this.selectedRoom,
         },
       });
-    console.log('this.selectedRoom', this.selectedRoom);
     this.listenForDialogClosing(dialogRef);
   }
 
@@ -52,7 +51,7 @@ export class PlayerOptionsDialogButtonComponent {
   ): void {
     dialogRef
       .afterClosed()
-      .pipe(filter(isNotNullish), tap(console.log), takeUntilDestroyed(this.destroyRef))
+      .pipe(filter(isNotNullish), takeUntilDestroyed(this.destroyRef))
       .subscribe((result) => this.playerOptions.emit(result));
   }
 }
