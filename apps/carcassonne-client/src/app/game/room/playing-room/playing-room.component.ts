@@ -34,6 +34,7 @@ import { checkTilePlacement, serializeObj } from '@shared-functions';
 import { EmptyTilesService } from './services/empty-tiles.service';
 import { BoardService } from './services/board.service';
 import { MovesChatService } from '@carcassonne-client/src/app/game/room/moves-chat/service/moves-chat.service';
+import { SoundService } from '@carcassonne-client/src/app/commons/services/sound.service';
 
 @Component({
   selector: 'app-playing-room',
@@ -73,6 +74,7 @@ export class PlayingRoomComponent
   private previouslyClickedTileCoordinates: string = '';
 
   constructor(
+    public soundService: SoundService,
     private roomService: RoomService,
     private authService: AuthService,
     private socketService: SocketService,
@@ -168,6 +170,7 @@ export class PlayingRoomComponent
       isTilePlacedCorrectly ? 'green' : 'red'
     );
     this.setTilePlacementRelatedFields(coordinates, isTilePlacedCorrectly);
+    void this.soundService.playClickTileSound();
   }
 
   private addSpaceYAxis(boardOffset: number): void {
@@ -237,6 +240,7 @@ export class PlayingRoomComponent
 
         this.tileService.clearPlacedTile();
         this.updatePlayingRoom(this.roomService.currentRoomValue);
+        void this.soundService.playPlacedTileSound();
       });
   }
 

@@ -1,6 +1,10 @@
 <div *ngIf="gameEnded()" class="end-game-banner">GAME HAS ENDED</div>
 <div *ngIf="tiles" #board class="tiles" id="tiles-area">
   <div class="blank" #blank>
+    <mat-icon class="volume"
+              (click)="soundService.toggleMuteSound()">
+      {{soundService.muteSound() ? 'volume_off' : 'volume_up' }}
+    </mat-icon>
 
     <app-tile *ngFor="let tile of tiles()"
               [extendedTile]="tile"
