@@ -90,7 +90,9 @@ export class PlayingRoomComponent
 
   @HostListener('window:resize')
   onResize() {
-    //TODO: Obsłużyć zmianę rozmiaru okna i położenie kafelków
+    this.initFirstTilePosition();
+    this.boardService.setTiles(this.tiles());
+    this.emptyTilesService.setEmptyTiles(this.emptyTiles());
   }
 
   ngOnInit(): void {

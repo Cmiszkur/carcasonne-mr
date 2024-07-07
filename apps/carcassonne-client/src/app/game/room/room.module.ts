@@ -4,7 +4,6 @@ import { RoomRoutingModule } from './room-routing.module';
 import { RoomComponent } from './room.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PlayingRoomComponent } from './playing-room/playing-room.component';
-import { EmptyTileClickDirective } from './playing-room/directives/empty-tile-click.directive';
 import { CommonsModule } from '../../commons/commons.module';
 import { WaitingRoomComponent } from './waiting-room/waiting-room.component';
 import { PlayerSectionComponent } from './dashboard/player-section/player-section.component';
@@ -22,7 +21,6 @@ import { MovesChatComponent } from './moves-chat/moves-chat.component';
     PlayingRoomComponent,
     TileComponent,
     EmptyTileComponent,
-    EmptyTileClickDirective,
     WaitingRoomComponent,
     PlayerSectionComponent,
     PawnComponent,
